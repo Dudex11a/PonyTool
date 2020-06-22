@@ -1,4 +1,4 @@
-var PONYINFO = {
+var PONYPARAMS = {
     "sex": [
         "Male",
         "Female"
@@ -14,13 +14,16 @@ var PONYINFO = {
     ],
     "marking": [
         "Appaloosa",
-        "Wildcard (Streamline)"
+        "Streamline",
+        "Crazy",
+        "scoob",
+        "Splat Tomato"
     ],
     "mutation": [
         "Albino"
     ],
     "trait": [
-        "Wildcard",
+        "Babaloo",
         "Devil Tail"
     ]
 }

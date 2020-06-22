@@ -6,14 +6,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Pony Roller</title>
     </head>
-    <body onload="BodyLoad()">
+    <body>
         <h1>Pony Roller</h1>
-        <button onclick="Test()">Roll</button>
-
+        <button onclick="Roll()">Roll</button>
+        <div id="result">Result</div>
         <script src="bootstrap/js/jquery-3.5.1.min.js"></script>
         <script src="bootstrap/js/popper.min.js"></script>
         <script src="bootstrap/js/bootstrap.min.js"></script>
-        <script src="ponyinfo.js"></script>
+        <script src="PONYPARAMS.js"></script>
         <script src="js/main.js"></script>
+        <script src="https://spreadsheets.google.com/feeds/cells/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/od6/public/values?alt=json-in-script&callback=ParseSpreadsheet"></script>
     </body>
 </html>

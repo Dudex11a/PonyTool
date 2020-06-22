@@ -1,26 +1,49 @@
 
-function BodyLoad() {
-    
+function ParseSpreadsheet(data) {
+    PONYPARAMS = {}
+    console.log(data.feed)
+    $(data.feed.entry).each((index, entry) => {
+        console.log(entry.content.$t)
+    })
 }
 
-function Test() {
-    console.log(roll_pony());
+function Roll() {
+    $("#result")[0].innerText = JSON.stringify(roll_pony())
 }
 
 function roll_pony() {
     let pony = {}
-    pony.sex = random_in_array(PONYINFO.sex)
-    pony.species = random_in_array(PONYINFO.species)
-    pony.body = random_in_array(PONYINFO.palette)
-    pony.haircolor = random_in_array(PONYINFO.palette)
-    pony.haircolor2 = random_in_array(PONYINFO.palette)
-    pony.markingcolor = random_in_array(PONYINFO.palette)
-    pony.markingcolor2 = random_in_array(PONYINFO.palette)
-    pony.trait = random_in_array(PONYINFO.trait)
+    pony.sex = random_in_array(PONYPARAMS.sex)
+    pony.species = random_in_array(PONYPARAMS.species)
+    pony.body = random_in_array(PONYPARAMS.palette)
+    pony.haircolor = random_in_array(PONYPARAMS.palette)
+    pony.haircolor2 = random_in_array(PONYPARAMS.palette)
+    pony.markingcolor = random_in_array(PONYPARAMS.palette)
+    pony.markingcolor2 = random_in_array(PONYPARAMS.palette)
+    pony.trait = random_in_array(PONYPARAMS.trait)
 
-    pony.markings = random_in_array(PONYINFO.marking)
-    pony.mutations = random_in_array(PONYINFO.palette)
+    pony.markings = []
+    pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+    if (chance(80)) {
+        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+    }
+    if (chance(65)) {
+        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+    }
+    if (chance(30)) {
+        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+    }
+    if (chance(15)) {
+        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+    }
+    pony.mutations = random_in_array(PONYPARAMS.palette)
     return pony
+}
+
+function wildcard_roll(data, exceptions) {
+    let result = random_in_array(data, exceptions)
+    if (chance(5)) {result = "Wildcard"}
+    return result
 }
 
 function random_in_array(array, exceptions = []) {
@@ -30,4 +53,8 @@ function random_in_array(array, exceptions = []) {
     })
     let item = array[Math.floor(Math.random()*array.length)]
     return item
+}
+
+function chance(percent) {
+    return (Math.floor(Math.random() * 100) + 1 <= percent)
 }
