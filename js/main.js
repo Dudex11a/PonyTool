@@ -23,10 +23,35 @@ function html_loaded() {
             alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup.");
         }
     });
+    parse_pony_params();
 }
 
-function process_pony_params() {
-    
+function parse_pony_params() {
+    parse_sheet(PONYPARAMS.sheets[0])
+}
+
+function parse_sheet(sheet) {
+    let parsed_sheet = {
+        "title": "",
+        "data": []
+    };
+    parsed_sheet.title = sheet.properties.title
+    // Create columns for data
+    for(let i = 0; i < sheet.data[0].rowData[0].values.length; i++) {
+        parsed_sheet.data.push([]);
+    }
+    for(let r = 0; r < sheet.data[0].rowData.length; r++) {
+        let row = sheet.data[0].rowData[r];
+        for(let v = 0; v < row.values.length; v++) {
+            let value = row.values[v];
+            if (value != {}) {
+                parsed_sheet.data[r].push(value.formattedValue)
+            }
+        }
+    }
+    console.log(sheet);
+    console.log(parsed_sheet);
+    return parsed_sheet;
 }
 
 function Roll() {
