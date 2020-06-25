@@ -105,8 +105,24 @@ function roll_pony() {
     pony.Hair2 = wildcard_roll(species_params.Palette)
     pony.Marking = wildcard_roll(species_params.Palette)
     pony.Marking2 = wildcard_roll(species_params.Palette)
-    pony.Trait = wildcard_roll(species_params.Trait)
 
+    // Traits
+    pony.Traits = []
+    pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    if (chance(80)) {
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    }
+    if (chance(65)) {
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    }
+    if (chance(30)) {
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    }
+    if (chance(15)) {
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    }
+
+    // Markings
     pony.Markings = []
     pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     if (chance(80)) {
@@ -122,7 +138,19 @@ function roll_pony() {
         pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     }
 
-    pony.Mutation = wildcard_roll(species_params.Mutation)
+    pony.Mutations = []
+    if (chance(15)) {
+        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+    }
+    if (chance(10)) {
+        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+    }
+    if (chance(5)) {
+        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+    }
+    if (pony.Mutations.length <= 0) {
+        delete pony.Mutations;
+    }
 
     return pony
 }

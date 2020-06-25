@@ -7,7 +7,7 @@
         <title>Pony Roller</title>
     </head>
     <body>
-        <p>Version 0.1</p>
+        <p>Version 0.1.1</p>
         <main role="main">
             <div class="jumbotron text-center">
                 <h1 class="jumbotron-heading">Pony Roller</h1>
@@ -15,6 +15,14 @@
             <div class="container">
                 <button onclick="roll()">Roll</button>
                 <div id="result">Result</div>
+            </div>
+            <div>
+                <h2>Change Log</h2>
+                <div>
+                    0.1.1<br>
+                    - Only rolls one trait (traits have same percentages as markings)<br>
+                    - Always rolls a mutation (mutations have a 15%, 10%, and 5% chance of showing up, capping at a max of 3 mutations)
+                </div>
             </div>
         </main>
         <script src="bootstrap/js/jquery-3.5.1.min.js"></script>
