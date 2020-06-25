@@ -16,41 +16,50 @@ function html_loaded() {
         dataType:'json',
         success : function(data) {              
             PONYPARAMS = data;
+            parse_pony_params();
         },
         error : function(request,error)
         {
             console.log(JSON.stringify(request));
-            alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup.");
+            alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup of Pony Parameters.");
         }
     });
-    parse_pony_params();
 }
 
 function parse_pony_params() {
-    parse_sheet(PONYPARAMS.sheets[0])
+    let new_params = parse_sheet(PONYPARAMS.sheets[0]).data
+    new_params.Species = {}
+    for(let i = 1; i < PONYPARAMS.sheets.length; i++) {
+        let sheet = parse_sheet(PONYPARAMS.sheets[i])
+        let species = sheet.title
+        new_params.Species[species] = parse_sheet(PONYPARAMS.sheets[i]).data
+    }
+    PONYPARAMS = new_params
 }
 
 function parse_sheet(sheet) {
     let parsed_sheet = {
         "title": "",
-        "data": []
+        "data": {}
     };
     parsed_sheet.title = sheet.properties.title
-    // Create columns for data
-    for(let i = 0; i < sheet.data[0].rowData[0].values.length; i++) {
-        parsed_sheet.data.push([]);
+    // Create keys for the data
+    for(let v = 0; v < sheet.data[0].rowData[0].values.length; v++) {
+        let value = sheet.data[0].rowData[0].values[v];
+        parsed_sheet.data[value.formattedValue] = []
     }
     for(let r = 0; r < sheet.data[0].rowData.length; r++) {
         let row = sheet.data[0].rowData[r];
-        for(let v = 0; v < row.values.length; v++) {
-            let value = row.values[v];
-            if (value != {}) {
-                parsed_sheet.data[r].push(value.formattedValue)
+        if (r != 0) {
+            for(let v = 0; v < row.values.length; v++) {
+                let value = row.values[v];
+                let key = sheet.data[0].rowData[0].values[v].formattedValue;
+                if (value.formattedValue) {
+                    parsed_sheet.data[key].push(value.formattedValue)
+                }
             }
         }
     }
-    console.log(sheet);
-    console.log(parsed_sheet);
     return parsed_sheet;
 }
 
