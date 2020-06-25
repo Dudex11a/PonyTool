@@ -1,11 +1,5 @@
-
-function ParseSpreadsheet(data) {
-    PONYPARAMS = {}
-    console.log(data)
-    $(data.feed.entry).each((index, entry) => {
-        console.log(entry.content.$t)
-    })
-}
+var PONYPARAMS = {}
+var CURRENTPONY = {}
 
 function html_loaded() {
     // Get Pony Parameters Spreadsheet data
@@ -14,29 +8,32 @@ function html_loaded() {
         url : 'https://sheets.googleapis.com/v4/spreadsheets/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true',
         type : 'GET',
         dataType:'json',
-        success : function(data) {              
-            PONYPARAMS = data;
+        success : function(data) {
+            PONYSHEET = data;
+            console.log("Google Sheet succesfully obtained")  
             parse_pony_params();
         },
         error : function(request,error)
         {
             console.log(JSON.stringify(request));
             alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup of Pony Parameters.");
+            parse_pony_params();
         }
     });
 }
 
 function parse_pony_params() {
-    let new_params = parse_sheet(PONYPARAMS.sheets[0]).data
+    let new_params = parse_sheet(PONYSHEET.sheets[0]).data
     new_params.Species = {}
-    for(let i = 1; i < PONYPARAMS.sheets.length; i++) {
-        let sheet = parse_sheet(PONYPARAMS.sheets[i])
+    for(let i = 1; i < PONYSHEET.sheets.length; i++) {
+        let sheet = parse_sheet(PONYSHEET.sheets[i])
         let species = sheet.title
-        new_params.Species[species] = parse_sheet(PONYPARAMS.sheets[i]).data
+        new_params.Species[species] = parse_sheet(PONYSHEET.sheets[i]).data
     }
     PONYPARAMS = new_params
 }
 
+// Parse the Google Spreadsheet data into something more ledgable
 function parse_sheet(sheet) {
     let parsed_sheet = {
         "title": "",
@@ -63,41 +60,83 @@ function parse_sheet(sheet) {
     return parsed_sheet;
 }
 
-function Roll() {
-    // $("#result").innerText = JSON.stringify(roll_pony())
+function roll() {
+    CURRENTPONY = roll_pony()
+    let result = $("#result")[0]
+    result.innerHTML = ""
+    let param_keys = Object.keys(CURRENTPONY)
+    $(param_keys).each((index, key) => {
+        let value = CURRENTPONY[key];
+        $("<tr>").append(
+            $('<td>').text(key + ":"),
+            $('<td>').text(value)
+        ).appendTo(result);
+    });
 }
 
 function roll_pony() {
     let pony = {}
-    pony.sex = random_in_array(PONYPARAMS.sex)
-    pony.species = random_in_array(PONYPARAMS.species)
-    pony.body = random_in_array(PONYPARAMS.palette)
-    pony.haircolor = random_in_array(PONYPARAMS.palette)
-    pony.haircolor2 = random_in_array(PONYPARAMS.palette)
-    pony.markingcolor = random_in_array(PONYPARAMS.palette)
-    pony.markingcolor2 = random_in_array(PONYPARAMS.palette)
-    pony.trait = random_in_array(PONYPARAMS.trait)
 
-    pony.markings = []
-    pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+
+    pony.Species = random_in_array(Object.keys(PONYPARAMS.Species))
+    // Combine all the regular params and species specific params for randomizing
+    let species_params = {};
+    // Get keys to loop through
+    let pony_keys = Object.keys(PONYPARAMS);
+    for (let i in pony_keys) {
+        let key = pony_keys[i];
+        let species_param = PONYPARAMS.Species[pony.Species][key]
+        // Initialize the species params with the default values
+        species_params[key] = PONYPARAMS[key]
+        // If the parameter exists in the species combine that with the default parameters
+        if (species_param != undefined) {
+            species_params[key] = species_params[key].concat(species_param)
+        }
+    }
+    // Delete the species parameter because we don't need that as a parameter to randomize
+    if (species_params.Species) {
+        delete species_params.Species
+    }
+
+    pony.Sex = random_in_array(species_params.Sex)
+
+    pony.Body = wildcard_roll(species_params.Palette)
+    pony.Hair = wildcard_roll(species_params.Palette)
+    pony.Hair2 = wildcard_roll(species_params.Palette)
+    pony.Marking = wildcard_roll(species_params.Palette)
+    pony.Marking2 = wildcard_roll(species_params.Palette)
+    pony.Trait = wildcard_roll(species_params.Trait)
+
+    pony.Markings = []
+    pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     if (chance(80)) {
-        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     }
     if (chance(65)) {
-        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     }
     if (chance(30)) {
-        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     }
     if (chance(15)) {
-        pony.markings.push(wildcard_roll(PONYPARAMS.marking, pony.markings))
+        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     }
-    pony.mutations = random_in_array(PONYPARAMS.palette)
+
+    pony.Mutation = wildcard_roll(species_params.Mutation)
+
     return pony
 }
 
-function wildcard_roll(data, exceptions) {
-    let result = random_in_array(data, exceptions)
+function combine_species_params(species) {
+    let species_param
+    if (species_param) {
+
+    }
+    return PONYSHEET[parameter].concat(PONYSHEET.Species[species][parameter])
+}
+
+function wildcard_roll(array, exceptions = []) {
+    let result = random_in_array(array, exceptions)
     if (chance(5)) {result = "Wildcard"}
     return result
 }

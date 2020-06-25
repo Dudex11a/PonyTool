@@ -1,4 +1,4 @@
-var PONYPARAMS = {
+var PONYSHEET = {
     "spreadsheetId": "17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA",
     "properties": {
       "title": "Pony Parameters",
