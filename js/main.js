@@ -100,30 +100,35 @@ function roll_pony() {
 
     pony.Sex = random_in_array(species_params.Sex)
 
-    pony.Body = wildcard_roll(species_params.Palette)
-    pony.Hair = wildcard_roll(species_params.Palette)
-    pony.Hair2 = wildcard_roll(species_params.Palette)
-    pony.Marking = wildcard_roll(species_params.Palette)
-    pony.Marking2 = wildcard_roll(species_params.Palette)
+    // Palettes
+    for(let i in species_params["Palette Place"]) {
+        let place = species_params["Palette Place"][i]
+        pony[place] = wildcard_roll(species_params.Palette)
+    }
 
     // Traits
     pony.Traits = []
     pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    let exceptions = find_matches(species_params.Trait, pony.Traits)
     if (chance(80)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(65)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(30)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(15)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
     }
 
     // Markings
     pony.Markings = []
+    exceptions = []
     pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
     if (chance(80)) {
         pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
@@ -152,7 +157,33 @@ function roll_pony() {
         delete pony.Mutations;
     }
 
-    return pony
+    return pony;
+}
+
+function find_matches(params, values) {
+    let exceptions = []
+    for (let v in values) {
+        let value = values[v];
+        // Regex for finding something in brackets
+        let id_finder = /\[[\S]*\]/g;
+        // Id for the value exception (i.e. "[W]")
+        let v_id = id_finder.exec(value);
+        if (v_id) {
+            for (let p in params) {
+                let param = params[p];
+                // Reinitizalize Regex
+                id_finder = /\[[\S]*\]/g;
+                let p_id = id_finder.exec(param);
+                if (p_id) {
+                    // If Ids match add the exception
+                    if (v_id[0] == p_id[0]) {
+                        exceptions.push(param);
+                    }
+                }
+            }
+        }
+    }
+    return exceptions;
 }
 
 function combine_species_params(species) {
