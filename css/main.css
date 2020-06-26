@@ -1,4 +1,9 @@
-#result td {
+.result {
+    margin: 10px;
+
+}
+
+.result td {
     padding: 3px;
 
     border-style: solid;

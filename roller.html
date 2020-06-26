@@ -8,7 +8,7 @@
         <title>Pony Roller</title>
     </head>
     <body>
-        <p>Version 0.1.3</p>
+        <p>Version 0.9.0</p>
         <main role="main">
             <div class="jumbotron text-center">
                 <h1 class="jumbotron-heading">Pony Roller</h1>
@@ -16,10 +16,17 @@
             </div>
             <div class="container">
                 <button onclick="roll()">Roll</button>
-                <div id="result">Result</div>
+                <input type="number" id="pony_amount" name="pony_amount" value=1 min="1">
+                <div id="results">Result</div>
             </div>
             <div>
                 <h2>Change Log</h2>
+                <div>
+                    0.9.0<br>
+                    - Updated offline Google Sheet data<br>
+                    - Currently working on clipboard copy<br>
+                    - Multiple Ponies
+                </div>
                 <div>
                     0.1.3<br>
                     - Fixed Traits so they don't overlap

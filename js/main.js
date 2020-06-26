@@ -1,5 +1,5 @@
 var PONYPARAMS = {}
-var CURRENTPONY = {}
+var CURRENTPONIES = []
 
 function html_loaded() {
     // Get Pony Parameters Spreadsheet data
@@ -61,17 +61,38 @@ function parse_sheet(sheet) {
 }
 
 function roll() {
-    CURRENTPONY = roll_pony()
-    let result = $("#result")[0]
-    result.innerHTML = ""
-    let param_keys = Object.keys(CURRENTPONY)
-    $(param_keys).each((index, key) => {
-        let value = CURRENTPONY[key];
-        $("<tr>").append(
-            $('<td>').text(key + ":"),
-            $('<td>').text(value)
-        ).appendTo(result);
-    });
+    CURRENTPONIES = []
+    let results = $("#results")[0]
+    results.innerHTML = ""
+    let amount = $("#pony_amount")[0].value
+    for(let a = 0; a < amount; a++) {
+        CURRENTPONIES.push(roll_pony())
+        let pony = CURRENTPONIES[a]
+        let param_keys = Object.keys(pony)
+        let result = $("<div class='result'>")
+        $(param_keys).each((index, key) => {
+            let value = pony[key];
+            if (key != "Clipboard") {
+                if (Array.isArray(value)) {
+                    let formatted_value = "";
+                    for (let i in value) {
+                        let item = value[i];
+                        formatted_value += item;
+                        // If it's not the last value
+                        if (i < value.length - 1) {
+                            formatted_value += ", ";
+                        }
+                    }
+                    value = formatted_value
+                }
+                $("<tr>").append(
+                    $('<td>').html(key + ":"),
+                    $('<td>').html(value)
+                ).appendTo(result);
+            }
+        });
+        result.appendTo(results);
+    }
 }
 
 function roll_pony() {
@@ -157,6 +178,19 @@ function roll_pony() {
         delete pony.Mutations;
     }
 
+    // Clipboard text
+    let clipboard_text = "";
+    for (let i in Object.keys(pony)) {
+        let key = Object.keys(pony)[i];
+        let param = pony[key];
+        if (Array.isArray(param)) {
+            // Parse param
+        }
+        clipboard_text += key + ": " + param + "\n"
+    }
+    pony.Clipboard = clipboard_text
+    copy_to_clipboard(pony.Clipboard)
+
     return pony;
 }
 
@@ -184,6 +218,10 @@ function find_matches(params, values) {
         }
     }
     return exceptions;
+}
+
+function copy_to_clipboard(text) {
+    navigator.clipboard.writeText(text);
 }
 
 function combine_species_params(species) {
