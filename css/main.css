@@ -1,12 +1,54 @@
 .result {
     margin: 10px;
-
+    padding: 10px;
+    padding-bottom: 40px;
+    border-style: solid;
+    border-width: 3px;
+    border-radius: 3px;
 }
 
 .result td {
     padding: 3px;
-
     border-style: solid;
     border-width: 1px;
     border-radius: 3px;
+}
+
+.table_key {
+    width: 100px;
+}
+
+.table_value {
+    width: 250px;
+}
+
+#roll_container {
+    background-color: #f8f9fa;
+    border: 3px solid #f8f9fa;
+    border-bottom: 0;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+#roll_container * {
+    margin: 2px;
+}
+
+#change_log {
+    width: 600px;
+    height: 200px;
+    margin: 20px auto 20px auto;
+    padding: 10px;
+    overflow: scroll;
+    background-color: #f8f9fa;
+}
+
+.copy_button {
+    width: 350px;
+    position: absolute;
+    bottom: 10px;
+}
+
+.copy_all_button {
+    visibility: hidden;
 }

@@ -2,25 +2,34 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <title>Pony Roller</title>
     </head>
     <body>
-        <p>Version 0.9.0</p>
+        <p>Version 0.9.1</p>
         <main role="main">
             <div class="jumbotron text-center">
                 <h1 class="jumbotron-heading">Pony Roller</h1>
                 <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" target="_blank">Google Spreadsheet</a>
             </div>
-            <div class="container">
-                <button onclick="roll()">Roll</button>
+            <div class="container d-flex justify-content-center" id="roll_container">
+                <button onclick="roll()" class="btn-primary">Roll</button>
                 <input type="number" id="pony_amount" name="pony_amount" value=1 min="1">
-                <div id="results">Result</div>
             </div>
-            <div>
+            <div class="container album py-5 bg-light" id="results_container">
+                <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button" onclick="copy_all()">Copy All</button></div>
+                <div class="row justify-content-md-center" id="results"></div>
+                <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button" onclick="copy_all()">Copy All</button></div>
+            </div>
+            <div id="change_log">
                 <h2>Change Log</h2>
+                <div>
+                    0.9.1<br>
+                    - Style Changes<br>
+                    - Copy Buttons
+                </div>
                 <div>
                     0.9.0<br>
                     - Updated offline Google Sheet data<br>
