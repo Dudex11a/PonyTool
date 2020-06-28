@@ -10,16 +10,22 @@ function html_loaded() {
         dataType:'json',
         success : function(data) {
             PONYSHEET = data;
-            console.log("Google Sheet succesfully obtained")  
-            parse_pony_params();
+            console.log("Google Sheet succesfully obtained");
+            finish_request();
         },
         error : function(request,error)
         {
             console.log(JSON.stringify(request));
             alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup of Pony Parameters.");
-            parse_pony_params();
+            finish_request();
         }
     });
+}
+
+function finish_request() {
+    parse_pony_params();
+    // Remove loading screen
+    $("#loading")[0].remove()
 }
 
 function parse_pony_params() {
@@ -45,12 +51,15 @@ function parse_sheet(sheet) {
         let value = sheet.data[0].rowData[0].values[v];
         parsed_sheet.data[value.formattedValue] = []
     }
+    // For each row
     for(let r = 0; r < sheet.data[0].rowData.length; r++) {
         let row = sheet.data[0].rowData[r];
         if (r != 0) {
+            // For each value
             for(let v = 0; v < row.values.length; v++) {
                 let value = row.values[v];
                 let key = sheet.data[0].rowData[0].values[v].formattedValue;
+                // If there is a value in the spot add the data to the sheet
                 if (value.formattedValue) {
                     parsed_sheet.data[key].push(value.formattedValue)
                 }
@@ -61,22 +70,23 @@ function parse_sheet(sheet) {
 }
 
 function roll() {
+    document.execCommand('copy');
     CURRENTPONIES = []
     let results = $("#results")[0]
     results.innerHTML = "";
     let amount = $("#pony_amount")[0].value
-    if (amount > 1) {
-        $(".copy_all_button").each((index, value) => {
-            value.style.visibility = "visible";
-        });
-    } else {
-        $(".copy_all_button").each((index, value) => {
-            value.style.visibility = "hidden";
-        });
-    }
+    // Copy all button visiblity
+    $(".copy_all_button").each((index, value) => {
+        if (amount > 1) {
+            $(value).removeClass("hidden");
+        } else {
+            $(value).addClass("hidden");
+        }
+    });
     for(let a = 0; a < amount; a++) {
         CURRENTPONIES.push(roll_pony())
         let pony = CURRENTPONIES[a]
+        remove_details(pony)
         let param_keys = Object.keys(pony)
         let result = $("<div>")
         $(param_keys).each((index, key) => {
@@ -124,6 +134,26 @@ function copy_all() {
         ponies_text += pony.Clipboard + "\n";
     }
     copy_to_clipboard(ponies_text);
+}
+
+function remove_details(pony) {
+    let param_keys = Object.keys(pony)
+    $(param_keys).each((index, key) => {
+        let value = pony[key];
+        if (Array.isArray(value)) {
+            for (let i in value) {
+                pony[key][i] = remove_detail(pony[key][i]);
+            }
+        } else {
+            pony[key] = remove_detail(pony[key]);
+        }
+    });
+    return pony
+}
+
+function remove_detail(text) {
+    let all_details = /(\s*?\[\S*\])|(\s*?\<\S*\>)|(\s*?\(\S*\))/g;
+    return text.toString().replace(all_details, "");
 }
 
 function roll_pony() {
