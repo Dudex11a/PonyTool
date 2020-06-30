@@ -34,7 +34,7 @@ function parse_pony_params() {
     for(let i = 1; i < PONYSHEET.sheets.length; i++) {
         let sheet = parse_sheet(PONYSHEET.sheets[i])
         let species = sheet.title
-        new_params.Species[species] = parse_sheet(PONYSHEET.sheets[i]).data
+        new_params.Species[species] = sheet.data
     }
     PONYPARAMS = new_params
 }
@@ -46,6 +46,10 @@ function parse_sheet(sheet) {
         "data": {}
     };
     parsed_sheet.title = sheet.properties.title
+    // If no data return and end here
+    if (!sheet.data[0].rowData) {
+        return parsed_sheet;
+    }
     // Create keys for the data
     for(let v = 0; v < sheet.data[0].rowData[0].values.length; v++) {
         let value = sheet.data[0].rowData[0].values[v];
@@ -84,11 +88,11 @@ function roll() {
         }
     });
     for(let a = 0; a < amount; a++) {
-        CURRENTPONIES.push(roll_pony())
-        let pony = CURRENTPONIES[a]
-        remove_details(pony)
-        let param_keys = Object.keys(pony)
-        let result = $("<div>")
+        CURRENTPONIES.push(roll_pony());
+        let pony = CURRENTPONIES[a];
+        remove_details(pony);
+        let param_keys = Object.keys(pony);
+        let result = $("<div>");
         $(param_keys).each((index, key) => {
             let value = pony[key];
             if (key != "Clipboard") {
@@ -159,8 +163,33 @@ function remove_detail(text) {
 function roll_pony() {
     let pony = {}
 
-
-    pony.Species = random_in_array(Object.keys(PONYPARAMS.Species))
+    // Determine Species Allowed
+    let species = Object.keys(PONYPARAMS.Species);
+    let available_species = [];
+    $(species).each((index, value) => {
+        let detail = value.match(/\(\S*\)/g);
+        if (detail) {
+            if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
+                available_species.push(value);
+            }
+            if (detail[0] == "(R)" && $('#rare_species').is(":checked")) {
+                available_species.push(value);
+            }
+        } else {
+            if ($('#common_species').is(":checked")) {
+                available_species.push(value);
+            }
+        }
+    });
+    if (available_species.length <= 0) {
+        alert("There are no Species with these settings.\nSetting all Species on.");
+        available_species = species;
+        // Check the boxes
+        $( "#common_species" ).prop( "checked", true );
+        $( "#uncommon_species" ).prop( "checked", true );
+        $( "#rare_species" ).prop( "checked", true );
+    }
+    pony.Species = special_random(available_species, [], false);
     // Combine all the regular params and species specific params for randomizing
     let species_params = {};
     // Get keys to loop through
@@ -171,7 +200,7 @@ function roll_pony() {
         // Initialize the species params with the default values
         species_params[key] = PONYPARAMS[key]
         // If the parameter exists in the species combine that with the default parameters
-        if (species_param != undefined) {
+        if (species_param) {
             species_params[key] = species_params[key].concat(species_param)
         }
     }
@@ -180,60 +209,68 @@ function roll_pony() {
         delete species_params.Species
     }
 
-    pony.Sex = random_in_array(species_params.Sex)
+    pony.Sex = special_random(species_params.Sex, [], false)
 
     // Palettes
     for(let i in species_params["Palette Place"]) {
         let place = species_params["Palette Place"][i]
-        pony[place] = wildcard_roll(species_params.Palette)
+        pony[place] = special_random(species_params.Palette)
     }
 
     // Traits
     pony.Traits = []
-    pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits))
+    pony.Traits.push(special_random(species_params.Trait, pony.Traits))
     let exceptions = find_matches(species_params.Trait, pony.Traits)
     if (chance(80)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
         exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(65)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
         exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(30)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
         exceptions = find_matches(species_params.Trait, pony.Traits)
     }
     if (chance(15)) {
-        pony.Traits.push(wildcard_roll(species_params.Trait, pony.Traits.concat(exceptions)))
+        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
     }
-
+    // If a Trait is undefined delete it
+    // I have to have this here because if a species doesn't have enough triats
+    // the traits will start coming back undefined and mess other processes up.
+    // I also need to iterate through it backwords to not mess up order while going along.
+    for (let t = pony.Traits.length - 1; t >= 0; t--) {
+        if (!pony.Traits[t]) {
+            pony.Traits.splice(t);
+        }
+    }
     // Markings
     pony.Markings = []
     exceptions = []
-    pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
+    pony.Markings.push(special_random(species_params.Marking, pony.Markings))
     if (chance(80)) {
-        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
     }
     if (chance(65)) {
-        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
     }
     if (chance(30)) {
-        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
     }
     if (chance(15)) {
-        pony.Markings.push(wildcard_roll(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
     }
 
     pony.Mutations = []
     if (chance(15)) {
-        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
     }
     if (chance(10)) {
-        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
     }
     if (chance(5)) {
-        pony.Mutations.push(wildcard_roll(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
     }
     if (pony.Mutations.length <= 0) {
         delete pony.Mutations;
@@ -300,21 +337,93 @@ function combine_species_params(species) {
     return PONYSHEET[parameter].concat(PONYSHEET.Species[species][parameter])
 }
 
-function wildcard_roll(array, exceptions = []) {
-    let result = random_in_array(array, exceptions)
-    if (chance(5)) {result = "Wildcard"}
-    return result
-}
+// function special_random(array, exceptions = []) {
+//     let result = special_random(array, exceptions);
+//     if (chance(5)) {result = "Wildcard"};
+//     return result;
+// }
 
-function random_in_array(array, exceptions = []) {
+function special_random(array, exceptions = [], wildcard = true) {
     $(exceptions).each((index, exception) => {
         // Filter the exceptions out of the array
         array = array.filter(item => item != exception)
-    })
-    let item = array[Math.floor(Math.random()*array.length)]
-    return item
+    });
+    let item;
+    // If it's an array of Strings (I only check the first value
+    if (typeof array[0] == "string") {
+        let common = array;
+        let uncommon = [];
+        let rare = [];
+        // To remove from the common array later on
+        let to_remove = [];
+        // Sort by rarity into different arrays
+        $(common).each((index, value) => {
+            let detail = value.match(/\(\S*\)/g);
+            if (detail) {
+                if (detail[0] == "(U)") {
+                    uncommon.push(value);
+                    to_remove.push(value);
+                }
+                if (detail[0] == "(R)") {
+                    rare.push(value);
+                    to_remove.push(value);
+                }
+            }
+        });
+        for (let ri in to_remove) {
+            let remove = to_remove[ri];
+            // Filter out the uncommon and rares
+            common = common.filter(item => item != remove);
+        }
+
+        // Rolling rarity
+        let rarities = []
+        if (uncommon.length > 0) {
+            push_into_array(rarities, "uncommon", 20);
+        }
+        if (rare.length > 0) {
+            push_into_array(rarities, "rare", 5);
+        }
+        if (wildcard) {
+            push_into_array(rarities, "wildcard", 5);
+        }
+        if (common.length > 0) {
+            push_into_array(rarities, "common", Math.abs(rarities.length - 100));
+        }
+        let rarity = random_in_array(rarities);
+        // Match / Switch rarity
+        let rarity_array = array;
+        switch(rarity) {
+            case "common":
+                rarity_array = common;
+                break;
+            case "uncommon":
+                rarity_array = uncommon;
+                break;
+            case "rare":
+                rarity_array = rare;
+                break;
+            case "wildcard":
+                rarity_array = ["Wildcard"];
+        }
+        item = random_in_array(rarity_array);
+    } else {
+        item = random_in_array(array);
+    }
+    return item;
+}
+
+function push_into_array(array, item, amount = 1) {
+    for (let i = 0; i < amount; i++) {
+        array.push(item);
+    }
+    return array;
+}
+
+function random_in_array(array) {
+    return array[Math.floor(Math.random()*array.length)];
 }
 
 function chance(percent) {
-    return (Math.floor(Math.random() * 100) + 1 <= percent)
+    return (Math.floor(Math.random() * 100) + 1 <= percent);
 }

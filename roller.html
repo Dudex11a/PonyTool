@@ -12,12 +12,23 @@
         <main role="main">
             <header class="text-center">
                 <h1 class="jumbotron-heading">Pony Roller</h1>
-                <p>0.9.2</p>
+                <p>1.0.0</p>
                 <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" target="_blank">Google Spreadsheet</a>
             </header>
             <div class="container d-flex justify-content-center" id="roll_container">
                 <button onclick="roll()" class="btn-primary">Roll</button>
                 <input type="number" id="pony_amount" name="pony_amount" value=1 min="1">
+            </div>
+            <div class="container d-flex justify-content-center bg-light">
+                <div style="width: 300px">
+                    <h4>Species Included</h4>
+                    <input type="checkbox" id="common_species" value="common" checked>
+                    <label for="common_species"> Common</label><br>
+                    <input type="checkbox" id="uncommon_species" value="uncommon" checked>
+                    <label for="uncommon_species"> Uncommon</label><br>
+                    <input type="checkbox" id="rare_species" value="rare" checked>
+                    <label for="rare_species"> Rare</label>
+                </div>
             </div>
             <div class="container album bg-light" id="results_container">
                 <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button></div>
@@ -26,6 +37,10 @@
             </div>
             <div id="change_log">
                 <h2>Change Log</h2>
+                <div>
+                    1.0.0<br>
+                    - Added Rarities
+                </div>
                 <div>
                     0.9.2<br>
                     - Loading Screen<br>

@@ -43,22 +43,22 @@ var PONYSHEET = {
       "primaryFontFamily": "Arial",
       "themeColors": [
         {
-          "colorType": "ACCENT1",
+          "colorType": "BACKGROUND",
           "color": {
             "rgbColor": {
-              "red": 0.25882354,
-              "green": 0.52156866,
-              "blue": 0.95686275
+              "red": 1,
+              "green": 1,
+              "blue": 1
             }
           }
         },
         {
-          "colorType": "ACCENT6",
+          "colorType": "ACCENT3",
           "color": {
             "rgbColor": {
-              "red": 0.27450982,
-              "green": 0.7411765,
-              "blue": 0.7764706
+              "red": 0.9843137,
+              "green": 0.7372549,
+              "blue": 0.015686275
             }
           }
         },
@@ -73,39 +73,9 @@ var PONYSHEET = {
           }
         },
         {
-          "colorType": "ACCENT2",
-          "color": {
-            "rgbColor": {
-              "red": 0.91764706,
-              "green": 0.2627451,
-              "blue": 0.20784314
-            }
-          }
-        },
-        {
-          "colorType": "BACKGROUND",
-          "color": {
-            "rgbColor": {
-              "red": 1,
-              "green": 1,
-              "blue": 1
-            }
-          }
-        },
-        {
           "colorType": "TEXT",
           "color": {
             "rgbColor": {}
-          }
-        },
-        {
-          "colorType": "ACCENT3",
-          "color": {
-            "rgbColor": {
-              "red": 0.9843137,
-              "green": 0.7372549,
-              "blue": 0.015686275
-            }
           }
         },
         {
@@ -125,6 +95,36 @@ var PONYSHEET = {
               "red": 1,
               "green": 0.42745098,
               "blue": 0.003921569
+            }
+          }
+        },
+        {
+          "colorType": "ACCENT6",
+          "color": {
+            "rgbColor": {
+              "red": 0.27450982,
+              "green": 0.7411765,
+              "blue": 0.7764706
+            }
+          }
+        },
+        {
+          "colorType": "ACCENT1",
+          "color": {
+            "rgbColor": {
+              "red": 0.25882354,
+              "green": 0.52156866,
+              "blue": 0.95686275
+            }
+          }
+        },
+        {
+          "colorType": "ACCENT2",
+          "color": {
+            "rgbColor": {
+              "red": 0.91764706,
+              "green": 0.2627451,
+              "blue": 0.20784314
             }
           }
         }
@@ -651,12 +651,12 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Non-Magical Horns [H]"
+                    "stringValue": "Non-Magical Horns [H] (R)"
                   },
                   "effectiveValue": {
-                    "stringValue": "Non-Magical Horns [H]"
+                    "stringValue": "Non-Magical Horns [H] (R)"
                   },
-                  "formattedValue": "Non-Magical Horns [H]",
+                  "formattedValue": "Non-Magical Horns [H] (R)",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -696,12 +696,12 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Agama"
+                    "stringValue": "Agama (U)"
                   },
                   "effectiveValue": {
-                    "stringValue": "Agama"
+                    "stringValue": "Agama (U)"
                   },
-                  "formattedValue": "Agama",
+                  "formattedValue": "Agama (U)",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1006,12 +1006,12 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Melanism"
+                    "stringValue": "Chimerism"
                   },
                   "effectiveValue": {
-                    "stringValue": "Melanism"
+                    "stringValue": "Chimerism"
                   },
-                  "formattedValue": "Melanism",
+                  "formattedValue": "Chimerism",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1192,12 +1192,12 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Two Tails"
+                    "stringValue": "Crystalization"
                   },
                   "effectiveValue": {
-                    "stringValue": "Two Tails"
+                    "stringValue": "Crystalization"
                   },
-                  "formattedValue": "Two Tails",
+                  "formattedValue": "Crystalization",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1333,12 +1333,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Body Splotches"
+                    "stringValue": "Body Splotches (R)"
                   },
                   "effectiveValue": {
-                    "stringValue": "Body Splotches"
+                    "stringValue": "Body Splotches (R)"
                   },
-                  "formattedValue": "Body Splotches",
+                  "formattedValue": "Body Splotches (R)",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1659,12 +1659,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Coffee Shop"
+                    "stringValue": "Caterpillar"
                   },
                   "effectiveValue": {
-                    "stringValue": "Coffee Shop"
+                    "stringValue": "Caterpillar"
                   },
-                  "formattedValue": "Coffee Shop",
+                  "formattedValue": "Caterpillar",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1750,12 +1750,12 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Multi-Leg"
+                    "stringValue": "Melanism"
                   },
                   "effectiveValue": {
-                    "stringValue": "Multi-Leg"
+                    "stringValue": "Melanism"
                   },
-                  "formattedValue": "Multi-Leg",
+                  "formattedValue": "Melanism",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1800,12 +1800,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Cotton Candy"
+                    "stringValue": "Coffee Shop"
                   },
                   "effectiveValue": {
-                    "stringValue": "Cotton Candy"
+                    "stringValue": "Coffee Shop"
                   },
-                  "formattedValue": "Cotton Candy",
+                  "formattedValue": "Coffee Shop",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -1941,12 +1941,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Darling Dangers"
+                    "stringValue": "Cotton Candy"
                   },
                   "effectiveValue": {
-                    "stringValue": "Darling Dangers"
+                    "stringValue": "Cotton Candy"
                   },
-                  "formattedValue": "Darling Dangers",
+                  "formattedValue": "Cotton Candy",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2032,12 +2032,153 @@ var PONYSHEET = {
                 },
                 {
                   "userEnteredValue": {
-                    "stringValue": "Crystalization"
+                    "stringValue": "Multi-Leg"
                   },
                   "effectiveValue": {
-                    "stringValue": "Crystalization"
+                    "stringValue": "Multi-Leg"
                   },
-                  "formattedValue": "Crystalization",
+                  "formattedValue": "Multi-Leg",
+                  "effectiveFormat": {
+                    "backgroundColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    },
+                    "padding": {
+                      "top": 2,
+                      "right": 3,
+                      "bottom": 2,
+                      "left": 3
+                    },
+                    "horizontalAlignment": "LEFT",
+                    "verticalAlignment": "BOTTOM",
+                    "wrapStrategy": "OVERFLOW_CELL",
+                    "textFormat": {
+                      "foregroundColor": {},
+                      "fontFamily": "Arial",
+                      "fontSize": 10,
+                      "bold": false,
+                      "italic": false,
+                      "strikethrough": false,
+                      "underline": false,
+                      "foregroundColorStyle": {
+                        "rgbColor": {}
+                      }
+                    },
+                    "hyperlinkDisplayType": "PLAIN_TEXT",
+                    "backgroundColorStyle": {
+                      "rgbColor": {
+                        "red": 1,
+                        "green": 1,
+                        "blue": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "values": [
+                {},
+                {
+                  "userEnteredValue": {
+                    "stringValue": "Darling Dangers"
+                  },
+                  "effectiveValue": {
+                    "stringValue": "Darling Dangers"
+                  },
+                  "formattedValue": "Darling Dangers",
+                  "effectiveFormat": {
+                    "backgroundColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    },
+                    "padding": {
+                      "top": 2,
+                      "right": 3,
+                      "bottom": 2,
+                      "left": 3
+                    },
+                    "horizontalAlignment": "LEFT",
+                    "verticalAlignment": "BOTTOM",
+                    "wrapStrategy": "OVERFLOW_CELL",
+                    "textFormat": {
+                      "foregroundColor": {},
+                      "fontFamily": "Arial",
+                      "fontSize": 10,
+                      "bold": false,
+                      "italic": false,
+                      "strikethrough": false,
+                      "underline": false,
+                      "foregroundColorStyle": {
+                        "rgbColor": {}
+                      }
+                    },
+                    "hyperlinkDisplayType": "PLAIN_TEXT",
+                    "backgroundColorStyle": {
+                      "rgbColor": {
+                        "red": 1,
+                        "green": 1,
+                        "blue": 1
+                      }
+                    }
+                  }
+                },
+                {},
+                {
+                  "userEnteredValue": {
+                    "stringValue": "Elegant"
+                  },
+                  "effectiveValue": {
+                    "stringValue": "Elegant"
+                  },
+                  "formattedValue": "Elegant",
+                  "effectiveFormat": {
+                    "backgroundColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    },
+                    "padding": {
+                      "top": 2,
+                      "right": 3,
+                      "bottom": 2,
+                      "left": 3
+                    },
+                    "horizontalAlignment": "LEFT",
+                    "verticalAlignment": "BOTTOM",
+                    "wrapStrategy": "OVERFLOW_CELL",
+                    "textFormat": {
+                      "foregroundColor": {},
+                      "fontFamily": "Arial",
+                      "fontSize": 10,
+                      "bold": false,
+                      "italic": false,
+                      "strikethrough": false,
+                      "underline": false,
+                      "foregroundColorStyle": {
+                        "rgbColor": {}
+                      }
+                    },
+                    "hyperlinkDisplayType": "PLAIN_TEXT",
+                    "backgroundColorStyle": {
+                      "rgbColor": {
+                        "red": 1,
+                        "green": 1,
+                        "blue": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "userEnteredValue": {
+                    "stringValue": "Tusks"
+                  },
+                  "effectiveValue": {
+                    "stringValue": "Tusks"
+                  },
+                  "formattedValue": "Tusks",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2128,12 +2269,57 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Elegant"
+                    "stringValue": "Facemask"
                   },
                   "effectiveValue": {
-                    "stringValue": "Elegant"
+                    "stringValue": "Facemask"
                   },
-                  "formattedValue": "Elegant",
+                  "formattedValue": "Facemask",
+                  "effectiveFormat": {
+                    "backgroundColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    },
+                    "padding": {
+                      "top": 2,
+                      "right": 3,
+                      "bottom": 2,
+                      "left": 3
+                    },
+                    "horizontalAlignment": "LEFT",
+                    "verticalAlignment": "BOTTOM",
+                    "wrapStrategy": "OVERFLOW_CELL",
+                    "textFormat": {
+                      "foregroundColor": {},
+                      "fontFamily": "Arial",
+                      "fontSize": 10,
+                      "bold": false,
+                      "italic": false,
+                      "strikethrough": false,
+                      "underline": false,
+                      "foregroundColorStyle": {
+                        "rgbColor": {}
+                      }
+                    },
+                    "hyperlinkDisplayType": "PLAIN_TEXT",
+                    "backgroundColorStyle": {
+                      "rgbColor": {
+                        "red": 1,
+                        "green": 1,
+                        "blue": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "userEnteredValue": {
+                    "stringValue": "Two Tails"
+                  },
+                  "effectiveValue": {
+                    "stringValue": "Two Tails"
+                  },
+                  "formattedValue": "Two Tails",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2224,12 +2410,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Facemask"
+                    "stringValue": "Fawn"
                   },
                   "effectiveValue": {
-                    "stringValue": "Facemask"
+                    "stringValue": "Fawn"
                   },
-                  "formattedValue": "Facemask",
+                  "formattedValue": "Fawn",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2320,12 +2506,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Fawn"
+                    "stringValue": "Okapi"
                   },
                   "effectiveValue": {
-                    "stringValue": "Fawn"
+                    "stringValue": "Okapi"
                   },
-                  "formattedValue": "Fawn",
+                  "formattedValue": "Okapi",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2416,12 +2602,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Okapi"
+                    "stringValue": "Piebald"
                   },
                   "effectiveValue": {
-                    "stringValue": "Okapi"
+                    "stringValue": "Piebald"
                   },
-                  "formattedValue": "Okapi",
+                  "formattedValue": "Piebald",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2512,12 +2698,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Piebald"
+                    "stringValue": "Reverse Dapple"
                   },
                   "effectiveValue": {
-                    "stringValue": "Piebald"
+                    "stringValue": "Reverse Dapple"
                   },
-                  "formattedValue": "Piebald",
+                  "formattedValue": "Reverse Dapple",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2608,12 +2794,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Reverse Dapple"
+                    "stringValue": "Saddle"
                   },
                   "effectiveValue": {
-                    "stringValue": "Reverse Dapple"
+                    "stringValue": "Saddle"
                   },
-                  "formattedValue": "Reverse Dapple",
+                  "formattedValue": "Saddle",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2704,12 +2890,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Saddle"
+                    "stringValue": "Socks"
                   },
                   "effectiveValue": {
-                    "stringValue": "Saddle"
+                    "stringValue": "Socks"
                   },
-                  "formattedValue": "Saddle",
+                  "formattedValue": "Socks",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2800,12 +2986,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Socks"
+                    "stringValue": "Spotty"
                   },
                   "effectiveValue": {
-                    "stringValue": "Socks"
+                    "stringValue": "Spotty"
                   },
-                  "formattedValue": "Socks",
+                  "formattedValue": "Spotty",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2896,12 +3082,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Spotty"
+                    "stringValue": "Streamline"
                   },
                   "effectiveValue": {
-                    "stringValue": "Spotty"
+                    "stringValue": "Streamline"
                   },
-                  "formattedValue": "Spotty",
+                  "formattedValue": "Streamline",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -2992,12 +3178,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Streamline"
+                    "stringValue": "Striped"
                   },
                   "effectiveValue": {
-                    "stringValue": "Streamline"
+                    "stringValue": "Striped"
                   },
-                  "formattedValue": "Streamline",
+                  "formattedValue": "Striped",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -3088,12 +3274,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Striped"
+                    "stringValue": "Tear"
                   },
                   "effectiveValue": {
-                    "stringValue": "Striped"
+                    "stringValue": "Tear"
                   },
-                  "formattedValue": "Striped",
+                  "formattedValue": "Tear",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -3184,12 +3370,12 @@ var PONYSHEET = {
                 {},
                 {
                   "userEnteredValue": {
-                    "stringValue": "Tear"
+                    "stringValue": "Underbelly"
                   },
                   "effectiveValue": {
-                    "stringValue": "Tear"
+                    "stringValue": "Underbelly"
                   },
-                  "formattedValue": "Tear",
+                  "formattedValue": "Underbelly",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -3240,52 +3426,6 @@ var PONYSHEET = {
                     "stringValue": "Neapolitan"
                   },
                   "formattedValue": "Neapolitan",
-                  "effectiveFormat": {
-                    "backgroundColor": {
-                      "red": 1,
-                      "green": 1,
-                      "blue": 1
-                    },
-                    "padding": {
-                      "top": 2,
-                      "right": 3,
-                      "bottom": 2,
-                      "left": 3
-                    },
-                    "horizontalAlignment": "LEFT",
-                    "verticalAlignment": "BOTTOM",
-                    "wrapStrategy": "OVERFLOW_CELL",
-                    "textFormat": {
-                      "foregroundColor": {},
-                      "fontFamily": "Arial",
-                      "fontSize": 10,
-                      "bold": false,
-                      "italic": false,
-                      "strikethrough": false,
-                      "underline": false,
-                      "foregroundColorStyle": {
-                        "rgbColor": {}
-                      }
-                    },
-                    "hyperlinkDisplayType": "PLAIN_TEXT",
-                    "backgroundColorStyle": {
-                      "rgbColor": {
-                        "red": 1,
-                        "green": 1,
-                        "blue": 1
-                      }
-                    }
-                  }
-                },
-                {},
-                {
-                  "userEnteredValue": {
-                    "stringValue": "Underbelly"
-                  },
-                  "effectiveValue": {
-                    "stringValue": "Underbelly"
-                  },
-                  "formattedValue": "Underbelly",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
@@ -3536,6 +3676,56 @@ var PONYSHEET = {
                     "stringValue": "Rough"
                   },
                   "formattedValue": "Rough",
+                  "effectiveFormat": {
+                    "backgroundColor": {
+                      "red": 1,
+                      "green": 1,
+                      "blue": 1
+                    },
+                    "padding": {
+                      "top": 2,
+                      "right": 3,
+                      "bottom": 2,
+                      "left": 3
+                    },
+                    "horizontalAlignment": "LEFT",
+                    "verticalAlignment": "BOTTOM",
+                    "wrapStrategy": "OVERFLOW_CELL",
+                    "textFormat": {
+                      "foregroundColor": {},
+                      "fontFamily": "Arial",
+                      "fontSize": 10,
+                      "bold": false,
+                      "italic": false,
+                      "strikethrough": false,
+                      "underline": false,
+                      "foregroundColorStyle": {
+                        "rgbColor": {}
+                      }
+                    },
+                    "hyperlinkDisplayType": "PLAIN_TEXT",
+                    "backgroundColorStyle": {
+                      "rgbColor": {
+                        "red": 1,
+                        "green": 1,
+                        "blue": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "values": [
+                {},
+                {
+                  "userEnteredValue": {
+                    "stringValue": "Seaside"
+                  },
+                  "effectiveValue": {
+                    "stringValue": "Seaside"
+                  },
+                  "formattedValue": "Seaside",
                   "effectiveFormat": {
                     "backgroundColor": {
                       "red": 1,
