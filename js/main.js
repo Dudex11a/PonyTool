@@ -1,7 +1,10 @@
 var PONYPARAMS = {}
 var CURRENTPONIES = []
 
-function html_loaded() {
+function init() {
+    // Initialize mode
+    change_mode(MODES[0]);
+
     // Get Pony Parameters Spreadsheet data
     $.ajax({
 
@@ -74,7 +77,6 @@ function parse_sheet(sheet) {
 }
 
 function roll() {
-    document.execCommand('copy');
     CURRENTPONIES = []
     let results = $("#results")[0]
     results.innerHTML = "";
@@ -189,6 +191,9 @@ function roll_pony() {
         $( "#uncommon_species" ).prop( "checked", true );
         $( "#rare_species" ).prop( "checked", true );
     }
+
+    // else PONYPARAMS.Species random
+
     pony.Species = special_random(available_species, [], false);
     // Combine all the regular params and species specific params for randomizing
     let species_params = {};
@@ -426,4 +431,35 @@ function random_in_array(array) {
 
 function chance(percent) {
     return (Math.floor(Math.random() * 100) + 1 <= percent);
+}
+
+const MODES = [
+    "adopt",
+    "breed"
+]
+
+var MODE = MODES[0];
+
+function change_mode(mode) {
+    // Set mode
+    MODE = mode
+
+    // Hide all mode based elements
+    // For each mode
+    for (i in MODES) {
+        // Current mode in loop
+        let m = MODES[i];
+        $("." + m).addClass(["hidden"]);
+    }
+    // Unhide all elements of the mode
+    $("." + mode).removeClass(["hidden"]);
+
+    // Default navigiation button styles
+    let buttons = $("nav button");
+    buttons.removeClass("btn-primary");
+    buttons.addClass("btn-secondary");
+    // Add button style to current mode
+    let active_button = $("#" + mode);
+    active_button.removeClass("btn-secondary");
+    buttons.addClass("btn-primary");
 }

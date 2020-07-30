@@ -15,11 +15,11 @@
                 <p>1.0.0</p>
                 <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" target="_blank">Google Spreadsheet</a>
             </header>
-            <div class="container d-flex justify-content-center" id="roll_container">
-                <button onclick="roll()" class="btn-primary">Roll</button>
-                <input type="number" id="pony_amount" name="pony_amount" value=1 min="1">
-            </div>
-            <div class="container d-flex justify-content-center bg-light">
+            <nav class="d-flex justify-content-center bg-light">
+                <button class="btn-primary" onclick="change_mode('adopt')" id="adopt">Adopt</button>
+                <button class="btn-primary" onclick="change_mode('breed')"  id="breed">Breed</button>
+            </nav>
+            <div class="container d-flex justify-content-center bg-light adopt">
                 <div style="width: 300px">
                     <h4>Species Included</h4>
                     <input type="checkbox" id="common_species" value="common" checked>
@@ -29,6 +29,10 @@
                     <input type="checkbox" id="rare_species" value="rare" checked>
                     <label for="rare_species"> Rare</label>
                 </div>
+            </div>
+            <div class="container d-flex justify-content-center" id="roll_container">
+                <button onclick="roll()" class="btn-primary">Roll</button>
+                <input type="number" id="pony_amount" name="pony_amount" value=1 min="1">
             </div>
             <div class="container album bg-light" id="results_container">
                 <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button></div>
@@ -82,7 +86,7 @@
         <script src="js/ponysheet.js"></script>
         <script src="js/main.js"></script>
         <script>
-            html_loaded()
+            init();
         </script>
     </body>
 </html>
