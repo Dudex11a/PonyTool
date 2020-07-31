@@ -32,14 +32,14 @@ function finish_request() {
 }
 
 function parse_pony_params() {
-    let new_params = parse_sheet(PONYSHEET.sheets[0]).data
-    new_params.Species = {}
+    let new_params = parse_sheet(PONYSHEET.sheets[0]).data;
+    new_params.Species = {};
     for(let i = 1; i < PONYSHEET.sheets.length; i++) {
-        let sheet = parse_sheet(PONYSHEET.sheets[i])
-        let species = sheet.title
-        new_params.Species[species] = sheet.data
+        let sheet = parse_sheet(PONYSHEET.sheets[i]);
+        let species = sheet.title;
+        new_params.Species[species] = sheet.data;
     }
-    PONYPARAMS = new_params
+    PONYPARAMS = new_params;
 }
 
 // Parse the Google Spreadsheet data into something more ledgable
@@ -56,7 +56,10 @@ function parse_sheet(sheet) {
     // Create keys for the data
     for(let v = 0; v < sheet.data[0].rowData[0].values.length; v++) {
         let value = sheet.data[0].rowData[0].values[v];
-        parsed_sheet.data[value.formattedValue] = []
+        // If the value is valid, initialize the key
+        if (value.formattedValue) {
+            parsed_sheet.data[value.formattedValue] = [];
+        }
     }
     // For each row
     for(let r = 0; r < sheet.data[0].rowData.length; r++) {
@@ -192,27 +195,11 @@ function roll_pony() {
         $( "#rare_species" ).prop( "checked", true );
     }
 
-    // else PONYPARAMS.Species random
+    // else PONYPARAMS.Species adopt
 
     pony.Species = special_random(available_species, [], false);
     // Combine all the regular params and species specific params for randomizing
-    let species_params = {};
-    // Get keys to loop through
-    let pony_keys = Object.keys(PONYPARAMS);
-    for (let i in pony_keys) {
-        let key = pony_keys[i];
-        let species_param = PONYPARAMS.Species[pony.Species][key]
-        // Initialize the species params with the default values
-        species_params[key] = PONYPARAMS[key]
-        // If the parameter exists in the species combine that with the default parameters
-        if (species_param) {
-            species_params[key] = species_params[key].concat(species_param)
-        }
-    }
-    // Delete the species parameter because we don't need that as a parameter to randomize
-    if (species_params.Species) {
-        delete species_params.Species
-    }
+    let species_params = get_species_params(pony.Species);
 
     pony.Sex = special_random(species_params.Sex, [], false)
 
@@ -302,6 +289,38 @@ function roll_pony() {
     pony.Clipboard = clipboard_text
 
     return pony;
+}
+
+function get_species_params(species) {
+    let species_params = {};
+    // Get keys to loop through
+    let species_keys = Object.keys(PONYPARAMS.Species[species]);
+    for (i in species_keys) {
+        let key = species_keys[i];
+        let value = PONYPARAMS.Species[species][key];
+        // Set the values exclusive to the species
+        species_params[key] = value;
+    }
+    // Get the default keys so I know what Params to add to the species_params later
+    let default_keys = Object.keys(PONYPARAMS);
+    // Remove unwanted keys
+    default_keys = default_keys.filter((value) => {
+        return value != "Species";
+    });
+    // Combine species and default parameters
+    for (i in default_keys) {
+        let key = default_keys[i];
+        let value = PONYPARAMS[key];
+        // If key exists combine the default and species parameter
+        if (species_params[key]) {
+            species_params[key] = species_params[key].concat(value);
+        // If the key does not exist, set it to the default value
+        } else {
+            species_params[key] = value;
+        }
+    }
+
+    return species_params;
 }
 
 function find_matches(params, values) {
@@ -462,4 +481,22 @@ function change_mode(mode) {
     let active_button = $("#" + mode);
     active_button.removeClass("btn-secondary");
     buttons.addClass("btn-primary");
+}
+
+// Create a HTML element for Pony Input
+function create_pony_input(title) {
+    let element = $("<div>")
+    element.append($("<h2>").text(title));
+    // Create Species Element
+    let select = $("<select>")
+    let keys = Object.keys(PONYPARAMS.Species);
+    // Add each Species
+    for (i in keys) {
+        let species = keys[i];
+        let species_ele = $("<option>").text(remove_detail(species));
+        species_ele.addClass(species);
+        select.append(species_ele);
+    }
+    element.append(select);
+    return element;
 }
