@@ -1,5 +1,6 @@
 var PONYPARAMS = {}
-var CURRENTPONIES = []
+var CURRENTPONIES = [];
+var PONYPARENTS = [];
 
 function init() {
     // Initialize mode
@@ -29,6 +30,13 @@ function finish_request() {
     parse_pony_params();
     // Remove loading screen
     $("#loading")[0].remove()
+    // Add Pony Input Elements for parents
+    PONYPARENTS = [
+        new PonyInput("Parent 1"),
+        new PonyInput("Parent 2")
+    ];
+    $("#breed_container").append(PONYPARENTS[0].element);
+    $("#breed_container").append(PONYPARENTS[1].element);
 }
 
 function parse_pony_params() {
@@ -291,6 +299,35 @@ function roll_pony() {
     return pony;
 }
 
+function combine_objects_w_arrays(object1, object2) {
+    // Copy Object1
+    let object = {};
+    object = Object.assign(object, object1);
+    let object2_keys = Object.keys(object2);
+    // Combine species and default parameters
+    for (i in object2_keys) {
+        let key = object2_keys[i];
+        let obj2_value = object2[key];
+        // If key exists combine the default and species parameter
+        if (object[key]) {
+            object[key] = object[key].concat(obj2_value);
+        // If the key does not exist set the value to object2's
+        } else {
+            object[key] = obj2_value;
+        }
+    }
+    // Delete duplicate values from object arrays and sort
+    let object_keys = Object.keys(object);
+    for (i in object_keys) {
+        let key = object_keys[i];
+        object[key] = [...new Set(object[key])];
+        // Taken from https://stackoverflow.com/a/1129270
+        // Sorts alphabetically
+        object[key].sort((a,b) => (a > b) ? 1 : ((b > a) ? -1 : 0));
+    }
+    return object;
+}
+
 function get_species_params(species) {
     let species_params = {};
     // Get keys to loop through
@@ -321,6 +358,22 @@ function get_species_params(species) {
     }
 
     return species_params;
+}
+
+function get_all_params() {
+    // Copy PONYPARAMS
+    let params = {};
+    params = Object.assign(params, PONYPARAMS);
+    delete params.Species;
+
+    let species = Object.keys(PONYPARAMS.Species);
+    for (i in species) {
+        let key = species[i];
+        let species_params = PONYPARAMS.Species[key];
+        params = combine_objects_w_arrays(params, species_params);
+    }
+
+    return params;
 }
 
 function find_matches(params, values) {
@@ -483,20 +536,127 @@ function change_mode(mode) {
     buttons.addClass("btn-primary");
 }
 
-// Create a HTML element for Pony Input
-function create_pony_input(title) {
-    let element = $("<div>")
-    element.append($("<h2>").text(title));
-    // Create Species Element
-    let select = $("<select>")
-    let keys = Object.keys(PONYPARAMS.Species);
-    // Add each Species
-    for (i in keys) {
-        let species = keys[i];
-        let species_ele = $("<option>").text(remove_detail(species));
-        species_ele.addClass(species);
-        select.append(species_ele);
+function create_select_element(options, id = "") {
+    let select = $("<select>");
+    for (i in options) {
+        select.append($("<option>").text(options[i]));
     }
-    element.append(select);
-    return element;
+    if (id != "") {
+        select.addClass(id);
+    }
+    return select;
+}
+
+class PonyInput {
+
+    constructor(title) {
+        // Create a HTML element for Pony Input
+        this.element = $("<div>")
+        this.element.append($("<h2>").text(title));
+
+        this.param_container = $("<div>");
+
+        this.param_eles = [];
+
+        // Create species select element
+        let keys = Object.keys(PONYPARAMS.Species);
+        this.species_select = this.create_param("Species", keys, this.element, () => {
+            // When the species select is changed, update the species params
+            this.update_species_parameters();
+        });
+    
+        this.element.append(this.param_container);
+        this.update_species_parameters()
+    }
+
+    get_species() {
+        return this.species_select.val();
+    }
+
+    create_param(name, options, parent = this.param_container, on_change = null) {
+        let container = $("<div>");
+        // Title
+        container.append($("<h4>").text(name));
+
+        // Select
+        let select = create_select_element(options, name);
+        if (on_change) {
+            select.change(() => {
+                on_change();
+            });
+        }
+
+        container.append(select);
+        parent.append(container);
+        return select;
+    }
+
+    update_species_parameters() {
+        // Remove old parameters
+        this.param_container.children().each((index, value) => {
+            value.remove();
+        });
+        // I used this for params when I didn't remember Hybrids existed
+        // let params = get_species_params(this.get_species());
+        let params = get_all_params();
+        // delete params.Species;
+
+        // Sex select
+        this.create_param("Sex", params.Sex);
+
+        // Add palettes
+        let pps = params["Palette Place"];
+        let ps = params["Palette"];
+        for (i in pps) {
+            let place = pps[i];
+            // Create elements for each Palette Place
+            let select = create_select_element(ps, place);
+            this.param_container.append($("<p>").text(place));
+            this.param_container.append(select);
+        }
+
+        let select_multis = [
+            new SelectMulti("Traits", params.Trait),
+            new SelectMulti("Markings", params.Marking),
+            new SelectMulti("Mutations", params.Mutation)
+        ];
+        // Add each select_multi element to the container
+        for (i in select_multis) {
+            let select = select_multis[i];
+            this.param_container.append(select.element);
+        }
+    }
+}
+
+class SelectMulti {
+    constructor(name, options) {
+        this.name = name;
+        this.options = options;
+        this.element = $("<div>");
+        // Button to add select element to self
+        this.add_button = $("<button>").text("Add");
+        this.add_button.addClass("btn-primary");
+        this.add_button.click(() => {
+            this.create_select();
+        });
+        // Select container for all the selects created
+        this.select_container = $("<div>");
+        this.element.append($("<h4>").text(name));
+        this.element.append(this.add_button);
+        this.element.append(this.select_container);
+    }
+
+    create_select() {
+        let container = $("<div>");
+        let select = create_select_element(this.options, this.name);
+        let remove_button = $("<button>").text("Remove");
+        remove_button.addClass("btn-warning");
+        remove_button.click((value) => {
+            container.remove();
+        });
+
+        container.append(select);
+        container.append(remove_button);
+        this.select_container.append(container);
+    }
 }
