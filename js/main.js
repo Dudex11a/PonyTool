@@ -103,45 +103,50 @@ function roll() {
     for(let a = 0; a < amount; a++) {
         CURRENTPONIES.push(roll_pony());
         let pony = CURRENTPONIES[a];
-        remove_details(pony);
-        let param_keys = Object.keys(pony);
-        let result = $("<div>");
-        $(param_keys).each((index, key) => {
-            let value = pony[key];
-            if (key != "Clipboard") {
-                if (Array.isArray(value)) {
-                    let formatted_value = "";
-                    for (let i in value) {
-                        let item = value[i];
-                        formatted_value += item;
-                        // If it's not the last value
-                        if (i < value.length - 1) {
-                            formatted_value += ", ";
-                        }
-                    }
-                    value = formatted_value
-                }
-                let table_key = $('<td>').html(key + ":");
-                table_key.addClass("table_key");
-                let table_value = $('<td>').html(value);
-                table_value.addClass("table_value");
-                let table_row = $("<tr>").append(
-                    table_key,
-                    table_value
-                );
-                table_row.appendTo(result);
-            }
-        });
-        let copy_button = $("<button>");
-        copy_button.text("Copy");
-        copy_button.addClass(["copy_button", "btn-primary"]);
-        copy_button.click(() => {
-            copy_to_clipboard(CURRENTPONIES[a].Clipboard)
-        });
-        copy_button.appendTo(result);
-        result.addClass(["card", "result"]);
-        result.appendTo(results);
+        let element = pony_to_html(pony);
+        element.appendTo(results);
     }
+}
+
+function pony_to_html(pony) {
+    remove_details(pony);
+    let param_keys = Object.keys(pony);
+    let result = $("<div>");
+    $(param_keys).each((index, key) => {
+        let value = pony[key];
+        if (key != "Clipboard") {
+            if (Array.isArray(value)) {
+                let formatted_value = "";
+                for (let i in value) {
+                    let item = value[i];
+                    formatted_value += item;
+                    // If it's not the last value
+                    if (i < value.length - 1) {
+                        formatted_value += ", ";
+                    }
+                }
+                value = formatted_value
+            }
+            let table_key = $('<td>').html(key + ":");
+            table_key.addClass("table_key");
+            let table_value = $('<td>').html(value);
+            table_value.addClass("table_value");
+            let table_row = $("<tr>").append(
+                table_key,
+                table_value
+            );
+            table_row.appendTo(result);
+        }
+    });
+    let copy_button = $("<button>");
+    copy_button.text("Copy");
+    copy_button.addClass(["copy_button", "btn-primary"]);
+    copy_button.click(() => {
+        copy_to_clipboard(CURRENTPONIES[a].Clipboard)
+    });
+    copy_button.appendTo(result);
+    result.addClass(["card", "result"]);
+    return result;
 }
 
 function copy_all() {
@@ -303,6 +308,7 @@ function combine_objects_w_arrays(object1, object2) {
     // Copy Object1
     let object = {};
     object = Object.assign(object, object1);
+
     let object2_keys = Object.keys(object2);
     // Combine species and default parameters
     for (i in object2_keys) {
@@ -316,64 +322,54 @@ function combine_objects_w_arrays(object1, object2) {
             object[key] = obj2_value;
         }
     }
+    
+    object = clean_object(object);
+    return object;
+}
+
+// Delete duplicate values from object arrays and sort
+function clean_object(object) {
     // Delete duplicate values from object arrays and sort
     let object_keys = Object.keys(object);
     for (i in object_keys) {
-        let key = object_keys[i];
-        object[key] = [...new Set(object[key])];
-        // Taken from https://stackoverflow.com/a/1129270
-        // Sorts alphabetically
-        object[key].sort((a,b) => (a > b) ? 1 : ((b > a) ? -1 : 0));
+        let array = object[object_keys[i]];
+        array = clean_array(array);
     }
     return object;
 }
 
-function get_species_params(species) {
-    let species_params = {};
-    // Get keys to loop through
-    let species_keys = Object.keys(PONYPARAMS.Species[species]);
-    for (i in species_keys) {
-        let key = species_keys[i];
-        let value = PONYPARAMS.Species[species][key];
-        // Set the values exclusive to the species
-        species_params[key] = value;
-    }
-    // Get the default keys so I know what Params to add to the species_params later
-    let default_keys = Object.keys(PONYPARAMS);
-    // Remove unwanted keys
-    default_keys = default_keys.filter((value) => {
-        return value != "Species";
-    });
-    // Combine species and default parameters
-    for (i in default_keys) {
-        let key = default_keys[i];
-        let value = PONYPARAMS[key];
-        // If key exists combine the default and species parameter
-        if (species_params[key]) {
-            species_params[key] = species_params[key].concat(value);
-        // If the key does not exist, set it to the default value
-        } else {
-            species_params[key] = value;
-        }
-    }
+function clean_array(array) {
+    // Remove dupes
+    array = [...new Set(array)];
+    // Taken from https://stackoverflow.com/a/1129270
+    // Sorts alphabetically
+    array.sort((a,b) => (a > b) ? 1 : ((b > a) ? -1 : 0));
+    return array;
+}
 
-    return species_params;
+function get_species_params(species) {
+    // Copy default pony params into object
+    let params = {};
+    params = Object.assign(params, PONYPARAMS);
+    // Remove Species from params
+    delete params.Species;
+
+    // If multiple other species are given, this is used for hybrids
+    // This copies the species specific params over
+    if (Array.isArray(species)) {
+        for (i in species) {
+            let value = species[i];
+            params = combine_objects_w_arrays(params, PONYPARAMS.Species[value]);
+        }
+    } else {
+        params = combine_objects_w_arrays(params, PONYPARAMS.Species[species]);
+    }
+    
+    return params;
 }
 
 function get_all_params() {
-    // Copy PONYPARAMS
-    let params = {};
-    params = Object.assign(params, PONYPARAMS);
-    delete params.Species;
-
-    let species = Object.keys(PONYPARAMS.Species);
-    for (i in species) {
-        let key = species[i];
-        let species_params = PONYPARAMS.Species[key];
-        params = combine_objects_w_arrays(params, species_params);
-    }
-
-    return params;
+    return get_species_params(Object.keys(PONYPARAMS.Species));
 }
 
 function find_matches(params, values) {
@@ -413,12 +409,6 @@ function combine_species_params(species) {
     }
     return PONYSHEET[parameter].concat(PONYSHEET.Species[species][parameter])
 }
-
-// function special_random(array, exceptions = []) {
-//     let result = special_random(array, exceptions);
-//     if (chance(5)) {result = "Wildcard"};
-//     return result;
-// }
 
 function special_random(array, exceptions = [], wildcard = true) {
     $(exceptions).each((index, exception) => {
@@ -547,6 +537,19 @@ function create_select_element(options, id = "") {
     return select;
 }
 
+function get_select_values(element, id) {
+    let values = [];
+    let selects = element.find(id);
+    // Make array if not
+    for (i in selects) {
+        let value = selects[i].value;
+        if (typeof value === "string") {
+            values.push(selects[i].value);
+        }
+    }
+    return values;
+}
+
 class PonyInput {
 
     constructor(title) {
@@ -560,17 +563,50 @@ class PonyInput {
 
         // Create species select element
         let keys = Object.keys(PONYPARAMS.Species);
-        this.species_select = this.create_param("Species", keys, this.element, () => {
+        this.species_select = new SelectMulti("Species", keys, () => {
             // When the species select is changed, update the species params
             this.update_species_parameters();
         });
-    
+        this.element.append(this.species_select.element);
+
         this.element.append(this.param_container);
         this.update_species_parameters()
     }
 
     get_species() {
-        return this.species_select.val();
+        return get_select_values(this.element, ".Species");
+    }
+
+    get_pony() {
+        // ----- Make the keys for the Pony Object -----
+        let keys = Object.keys(PONYPARAMS);
+        let all_species = this.get_species();
+        // Combine the Palette Places into the keys
+        // Default Palette Places
+        keys = keys.concat(PONYPARAMS["Palette Place"]);
+        // Species Palette Places
+        for (i in all_species) {
+            let species = all_species[i];
+            let pp = PONYPARAMS.Species[species]["Palette Place"];
+            if (pp) {
+                keys = keys.concat(pp);
+            }
+        }
+        // Remove unwanted keys from array
+        keys = keys.filter(item => ![
+            "Palette",
+            "Palette Place"
+        ].includes(item));
+        // ----- Done making keys -----
+        // Create Object
+        let pony = {}
+        // Create parameters
+        for (i in keys) {
+            let key = keys[i];
+            // Initialize Param
+            pony[key] = get_select_values(this.element, "." + key);
+        }
+        return pony
     }
 
     create_param(name, options, parent = this.param_container, on_change = null) {
@@ -596,10 +632,9 @@ class PonyInput {
         this.param_container.children().each((index, value) => {
             value.remove();
         });
-        // I used this for params when I didn't remember Hybrids existed
-        // let params = get_species_params(this.get_species());
-        let params = get_all_params();
-        // delete params.Species;
+
+        // Get the params of all the species in the Pony
+        let params = get_species_params(this.get_species());
 
         // Sex select
         this.create_param("Sex", params.Sex);
@@ -629,15 +664,17 @@ class PonyInput {
 }
 
 class SelectMulti {
-    constructor(name, options) {
+    constructor(name, options, on_change = null) {
         this.name = name;
         this.options = options;
+        this.on_change = on_change;
         this.element = $("<div>");
         // Button to add select element to self
         this.add_button = $("<button>").text("Add");
         this.add_button.addClass("btn-primary");
         this.add_button.click(() => {
             this.create_select();
+            this.on_change();
         });
         // Select container for all the selects created
         this.select_container = $("<div>");
@@ -649,12 +686,17 @@ class SelectMulti {
     create_select() {
         let container = $("<div>");
         let select = create_select_element(this.options, this.name);
+        if (this.on_change) {
+            select.change(() => {
+                this.on_change();
+            });
+        }
         let remove_button = $("<button>").text("Remove");
         remove_button.addClass("btn-warning");
+        // Remove this select on click
         remove_button.click((value) => {
             container.remove();
         });
-
         container.append(select);
         container.append(remove_button);
         this.select_container.append(container);
