@@ -1,33 +1,54 @@
 var PONYPARAMS = {}
-var CURRENTPONIES = [];
+var FARMING = {}
+var CURRENTOBJECTS = [];
 var PONYPARENTS = [];
+var SHEETS_COMPLETE = 0;
 
 function init() {
     // Initialize mode
     change_mode(MODES[0]);
 
     // Get Pony Parameters Spreadsheet data
-    $.ajax({
+    get_sheet('https://sheets.googleapis.com/v4/spreadsheets/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
+        // If there is no data use default data
+        if (!data) {
+            data = PONYSHEET
+        }
+        parse_pony_params(data);
+        $("#pony_parameters_title").text(data.properties.title);
+        finish_requests();
+    });
+    get_sheet('https://sheets.googleapis.com/v4/spreadsheets/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
+        FARMING = parse_sheet(data.sheets[0]).data;
+        $("#farming_data_title").text(data.properties.title);
+        finish_requests();
+    });
+}
 
-        url : 'https://sheets.googleapis.com/v4/spreadsheets/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true',
+function get_sheet(url, callback) {
+    $.ajax({
+        url : url,
         type : 'GET',
         dataType:'json',
         success : function(data) {
-            PONYSHEET = data;
-            console.log("Google Sheet succesfully obtained");
-            finish_request();
+            console.log(data.properties.title + " succesfully obtained.");
+            callback(data);
         },
-        error : function(request,error)
+        error : function(request, error)
         {
             console.log(JSON.stringify(request));
             alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup of Pony Parameters.");
-            finish_request();
+            callback(null);
         }
     });
 }
 
-function finish_request() {
-    parse_pony_params();
+function finish_requests() {
+    // Make sure all the sheets to be loaded are complete, otherwise return
+    SHEETS_COMPLETE++;
+    if (SHEETS_COMPLETE < 2) {
+        return;
+    }
     // Remove loading screen
     $("#loading")[0].remove()
     // Add Pony Input Elements for parents
@@ -37,13 +58,16 @@ function finish_request() {
     ];
     $("#breed_container").append(PONYPARENTS[0].element);
     $("#breed_container").append(PONYPARENTS[1].element);
+    // Add Elements for farming
+    let farm_select = create_select_element(Object.keys(FARMING), "farm");
+    $("#farm_container").append(farm_select);
 }
 
-function parse_pony_params() {
-    let new_params = parse_sheet(PONYSHEET.sheets[0]).data;
+function parse_pony_params(data) {
+    let new_params = parse_sheet(data.sheets[0]).data;
     new_params.Species = {};
-    for(let i = 1; i < PONYSHEET.sheets.length; i++) {
-        let sheet = parse_sheet(PONYSHEET.sheets[i]);
+    for(let i = 1; i < data.sheets.length; i++) {
+        let sheet = parse_sheet(data.sheets[i]);
         let species = sheet.title;
         new_params.Species[species] = sheet.data;
     }
@@ -88,16 +112,17 @@ function parse_sheet(sheet) {
 }
 
 function roll() {
-    // Comparing Params to Pony data
-    console.log("Current Pony")
-    console.log(CURRENTPONIES[0])
-    // Empty CURRENTPONIES
-    CURRENTPONIES = []
+    // Empty CURRENTOBJECTS
+    CURRENTOBJECTS = []
     // Clear results
     let results = $("#results")[0]
     results.innerHTML = "";
-
-    let amount = $("#roll_amount")[0].value
+    // If the amount element is not hidden use the amount inside of it
+    let amount = 1;
+    let amount_ele = $("#roll_amount")[0];
+    if (!amount_ele.className.includes("hidden")) {
+        amount = $("#roll_amount")[0].value;
+    }
     // Copy all button visiblity
     $(".copy_all_button").each((index, value) => {
         if (amount > 1) {
@@ -107,27 +132,56 @@ function roll() {
         }
     });
     for(let a = 0; a < amount; a++) {
-        let element
+        let element;
+        let object;
         switch (MODE) {
             case "adopt":
-                CURRENTPONIES.push(roll_adopt());
-                let pony = CURRENTPONIES[a];
-                element = pony_to_html(pony);
+                object = roll_adopt();
+                element = object_to_html(object);
                 break;
             case "breed":
-                element = pony_to_html(PONYPARENTS[0].get_pony());
+                object = PONYPARENTS[0].get_pony();
+                element = object_to_html(object);
+                break;
+            case "farm":
+                object = roll_farm()
+                element = array_to_html(object);
                 break;
         }
+        CURRENTOBJECTS.push(object);
+        element.addClass(["card", "result"]);
         element.appendTo(results);
     }
 }
 
-function pony_to_html(pony) {
-    remove_details(pony);
-    let param_keys = Object.keys(pony);
+function array_to_html(array) {
+    let element = $("<div>");
+    let items_ele = $("<div>");
+    items_ele.value = "";
+    for (i in array) {
+        var item = array[i];
+        // Element text
+        items_ele.append(item)
+        // Copy text
+        items_ele.value += item;
+        // Add line break if not last item
+        if (i < array.length - 1) {
+            items_ele.append("<br>")
+            items_ele.value += ", ";
+        }
+    }
+    let copy_button = make_copy_button(items_ele.value);
+    items_ele.appendTo(element);
+    copy_button.appendTo(element);
+    return element;
+}
+
+function object_to_html(object) {
+    remove_details(object);
+    let param_keys = Object.keys(object);
     let result = $("<div>");
     $(param_keys).each((index, key) => {
-        let value = pony[key];
+        let value = object[key];
         if (Array.isArray(value)) {
             let formatted_value = "";
             for (let i in value) {
@@ -150,22 +204,27 @@ function pony_to_html(pony) {
         );
         table_row.appendTo(result);
     });
-    let copy_button = $("<button>");
-    copy_button.text("Copy");
-    copy_button.addClass(["copy_button", "btn-primary"]);
-    copy_button.click(() => {
-        copy_to_clipboard(pony_to_text(pony));
-    });
+    let copy_button = make_copy_button(object_to_text(object));
     copy_button.appendTo(result);
-    result.addClass(["card", "result"]);
     return result;
 }
 
-function pony_to_text(pony) {
+function make_copy_button(text) {
+    let button = $("<button>");
+    button.text("Copy");
+    button.addClass(["copy_button", "btn-primary"]);
+    button.click(() => {
+        copy_to_clipboard(text);
+    });
+    return button;
+    
+}
+
+function object_to_text(object) {
     let clipboard_text = "";
-    for (let i in Object.keys(pony)) {
-        let key = Object.keys(pony)[i];
-        let param = pony[key];
+    for (let i in Object.keys(object)) {
+        let key = Object.keys(object)[i];
+        let param = object[key];
         if (Array.isArray(param)) {
             let formatted_param = "";
             for (let i in param) {
@@ -184,9 +243,9 @@ function pony_to_text(pony) {
 
 function copy_all() {
     let ponies_text = "";
-    for (let i in CURRENTPONIES) {
-        let pony = CURRENTPONIES[i];
-        ponies_text += pony_to_text(pony) + "\n";
+    for (let i in CURRENTOBJECTS) {
+        let pony = CURRENTOBJECTS[i];
+        ponies_text += object_to_text(pony) + "\n";
     }
     copy_to_clipboard(ponies_text);
 }
@@ -244,9 +303,6 @@ function roll_adopt() {
     pony.Species = special_random(available_species, [], false);
     // Combine all the regular params and species specific params for randomizing
     let species_params = get_species_params(pony.Species);
-    // Comparing Params to Pony data
-    console.log("Species Params")
-    console.log(species_params)
 
     pony.Sex = special_random(species_params.Sex, [], false)
 
@@ -316,6 +372,19 @@ function roll_adopt() {
     }
 
     return pony;
+}
+
+function roll_farm() {
+    let location = $("select.farm").val();
+    let items = [];
+    let item_amount = 3;
+    if (chance(50)) {
+        item_amount = 6;
+    }
+    for (let i = 0; i < item_amount; i++) {
+        items.push(random_in_array(FARMING[location]));
+    }
+    return items;
 }
 
 function combine_objects_w_arrays(object1, object2) {
@@ -511,7 +580,8 @@ function chance(percent) {
 
 const MODES = [
     "adopt",
-    "breed"
+    "breed",
+    "farm"
 ]
 
 var MODE = MODES[0];

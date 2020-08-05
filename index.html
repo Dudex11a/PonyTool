@@ -13,13 +13,15 @@
             <!-- Title -->
             <header class="text-center">
                 <h1 class="jumbotron-heading">Pony Tool</h1>
-                <p>1.0.0</p>
-                <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" target="_blank">Google Spreadsheet</a>
+                <p>1.5.0</p>
+                <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" id="pony_parameters_title" target="_blank">Pony Parameters</a><br>
+                <a href="https://docs.google.com/spreadsheets/d/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/edit?usp=sharing" id="farming_data_title" target="_blank">Farming Data</a>
             </header>
-            <!-- Navigation / Tool Select -->
+            <!-- Tabs / Navigation / Tool Select -->
             <nav class="d-flex justify-content-center bg-light">
                 <button class="btn-primary" onclick="change_mode('adopt')" id="adopt">Adopt</button>
-                <button class="btn-primary" onclick="change_mode('breed')"  id="breed">Breed</button>
+                <!-- <button class="btn-primary" onclick="change_mode('breed')"  id="breed">Breed</button> -->
+                <button class="btn-primary" onclick="change_mode('farm')"  id="farm">Farm</button>
             </nav>
             <!-- Adopt -->
             <div class="container d-flex justify-content-center bg-light adopt">
@@ -37,10 +39,14 @@
             <div class="container d-flex justify-content-center bg-light breed" id="breed_container">
 
             </div>
-            <!-- Pony Amount -->
+            <!-- Farm -->
+            <div class="container d-flex justify-content-center bg-light farm" id="farm_container">
+
+            </div>
+            <!-- Roll Button and Amount -->
             <div class="container d-flex justify-content-center" id="roll_container">
                 <button onclick="roll()" class="btn-primary">Roll</button>
-                <input type="number" id="roll_amount" name="roll_amount" value=1 min="1">
+                <input type="number" class="adopt breed" id="roll_amount" name="roll_amount" value=1 min="1">
             </div>
             <!-- Pony / Result Container -->
             <div class="container album bg-light" id="results_container">
@@ -51,10 +57,11 @@
             <!-- Change Log -->
             <div id="change_log">
                 <h2>Change Log</h2>
-                <!-- <div>
-                    1.0.1<br>
-                    
-                </div> -->
+                <div>
+                    1.5.0<br>
+                    - Added tabs for different tools
+                    - Added Farming Roller
+                </div>
                 <div>
                     1.0.0<br>
                     - Added Rarities
