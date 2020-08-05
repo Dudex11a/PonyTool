@@ -1,12 +1,17 @@
+:root {
+    --margin1: 10px;
+    --padding1: 10px;
+}
+
 header {
     background-color: var(--light);
-    margin: 10px;
+    margin: var(--margin1);
     margin-top: 0;
     padding: 5px;
 }
 
 nav {
-    margin-bottom: 10px;
+    margin-bottom: var(--margin1);
     padding: 5px;
 }
 
@@ -15,7 +20,7 @@ nav button {
 }
 
 .breed, select {
-    margin: 10px;
+    margin: var(--margin1);
 }
 
 #loading {
@@ -46,8 +51,8 @@ nav button {
 .result {
     text-align: center;
     min-width: 200px;
-    margin: 10px;
-    padding: 10px;
+    margin: var(--margin1);
+    padding: var(--padding1);
     padding-bottom: 40px;
     border-style: solid;
     border-width: 3px;
@@ -75,7 +80,7 @@ nav button {
     border: 3px solid var(--light);
     border-bottom: 0;
     border-radius: 3px;
-    padding: 10px;
+    padding: var(--padding1);
 }
 
 #roll_container * {
@@ -86,15 +91,15 @@ nav button {
     width: 600px;
     height: 200px;
     margin: 20px auto 20px auto;
-    padding: 10px;
+    padding: var(--padding1);
     overflow: scroll;
     background-color: var(--light);
 }
 
 .copy_button {
-    width: calc(100% - 20px);
+    width: calc(100% - var(--padding1) - var(--margin1));
     position: absolute;
-    bottom: 10px;
+    bottom: var(--padding1);
 }
 
 .hidden {
