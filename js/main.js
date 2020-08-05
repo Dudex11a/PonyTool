@@ -88,10 +88,16 @@ function parse_sheet(sheet) {
 }
 
 function roll() {
+    // Comparing Params to Pony data
+    console.log("Current Pony")
+    console.log(CURRENTPONIES[0])
+    // Empty CURRENTPONIES
     CURRENTPONIES = []
+    // Clear results
     let results = $("#results")[0]
     results.innerHTML = "";
-    let amount = $("#pony_amount")[0].value
+
+    let amount = $("#roll_amount")[0].value
     // Copy all button visiblity
     $(".copy_all_button").each((index, value) => {
         if (amount > 1) {
@@ -101,9 +107,17 @@ function roll() {
         }
     });
     for(let a = 0; a < amount; a++) {
-        CURRENTPONIES.push(roll_pony());
-        let pony = CURRENTPONIES[a];
-        let element = pony_to_html(pony);
+        let element
+        switch (MODE) {
+            case "adopt":
+                CURRENTPONIES.push(roll_adopt());
+                let pony = CURRENTPONIES[a];
+                element = pony_to_html(pony);
+                break;
+            case "breed":
+                element = pony_to_html(PONYPARENTS[0].get_pony());
+                break;
+        }
         element.appendTo(results);
     }
 }
@@ -114,46 +128,65 @@ function pony_to_html(pony) {
     let result = $("<div>");
     $(param_keys).each((index, key) => {
         let value = pony[key];
-        if (key != "Clipboard") {
-            if (Array.isArray(value)) {
-                let formatted_value = "";
-                for (let i in value) {
-                    let item = value[i];
-                    formatted_value += item;
-                    // If it's not the last value
-                    if (i < value.length - 1) {
-                        formatted_value += ", ";
-                    }
+        if (Array.isArray(value)) {
+            let formatted_value = "";
+            for (let i in value) {
+                let item = value[i];
+                formatted_value += item;
+                // If it's not the last value
+                if (i < value.length - 1) {
+                    formatted_value += ", ";
                 }
-                value = formatted_value
             }
-            let table_key = $('<td>').html(key + ":");
-            table_key.addClass("table_key");
-            let table_value = $('<td>').html(value);
-            table_value.addClass("table_value");
-            let table_row = $("<tr>").append(
-                table_key,
-                table_value
-            );
-            table_row.appendTo(result);
+            value = formatted_value
         }
+        let table_key = $('<td>').html(key + ":");
+        table_key.addClass("table_key");
+        let table_value = $('<td>').html(value);
+        table_value.addClass("table_value");
+        let table_row = $("<tr>").append(
+            table_key,
+            table_value
+        );
+        table_row.appendTo(result);
     });
     let copy_button = $("<button>");
     copy_button.text("Copy");
     copy_button.addClass(["copy_button", "btn-primary"]);
     copy_button.click(() => {
-        copy_to_clipboard(CURRENTPONIES[a].Clipboard)
+        copy_to_clipboard(pony_to_text(pony));
     });
     copy_button.appendTo(result);
     result.addClass(["card", "result"]);
     return result;
 }
 
+function pony_to_text(pony) {
+    let clipboard_text = "";
+    for (let i in Object.keys(pony)) {
+        let key = Object.keys(pony)[i];
+        let param = pony[key];
+        if (Array.isArray(param)) {
+            let formatted_param = "";
+            for (let i in param) {
+                let item = param[i];
+                formatted_param += item
+                if (i < param.length - 1) {
+                    formatted_param += ", ";
+                }
+            }
+            param = formatted_param;
+        }
+        clipboard_text += key + ": " + param + "\n";
+    }
+    return clipboard_text;
+}
+
 function copy_all() {
     let ponies_text = "";
     for (let i in CURRENTPONIES) {
         let pony = CURRENTPONIES[i];
-        ponies_text += pony.Clipboard + "\n";
+        ponies_text += pony_to_text(pony) + "\n";
     }
     copy_to_clipboard(ponies_text);
 }
@@ -178,7 +211,7 @@ function remove_detail(text) {
     return text.toString().replace(all_details, "");
 }
 
-function roll_pony() {
+function roll_adopt() {
     let pony = {}
 
     // Determine Species Allowed
@@ -208,11 +241,12 @@ function roll_pony() {
         $( "#rare_species" ).prop( "checked", true );
     }
 
-    // else PONYPARAMS.Species adopt
-
     pony.Species = special_random(available_species, [], false);
     // Combine all the regular params and species specific params for randomizing
     let species_params = get_species_params(pony.Species);
+    // Comparing Params to Pony data
+    console.log("Species Params")
+    console.log(species_params)
 
     pony.Sex = special_random(species_params.Sex, [], false)
 
@@ -280,26 +314,6 @@ function roll_pony() {
     if (pony.Mutations.length <= 0) {
         delete pony.Mutations;
     }
-
-    // Clipboard text
-    let clipboard_text = "";
-    for (let i in Object.keys(pony)) {
-        let key = Object.keys(pony)[i];
-        let param = pony[key];
-        if (Array.isArray(param)) {
-            let formatted_param = "";
-            for (let i in param) {
-                let item = param[i];
-                formatted_param += item
-                if (i < param.length - 1) {
-                    formatted_param += ", ";
-                }
-            }
-            param = formatted_param;
-        }
-        clipboard_text += key + ": " + param + "\n"
-    }
-    pony.Clipboard = clipboard_text
 
     return pony;
 }
