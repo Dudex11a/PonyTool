@@ -102,6 +102,13 @@ nav button {
     bottom: var(--padding1);
 }
 
+#farm_message {
+    padding: var(--padding1);
+    width: 40%;
+    min-width: 300px;
+    text-align: center;
+}
+
 .hidden {
     margin: 0;
     padding: 0;

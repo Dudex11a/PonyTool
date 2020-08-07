@@ -1,5 +1,3 @@
-var PONYPARAMS = {}
-var FARMING = {}
 var CURRENTOBJECTS = [];
 var PONYPARENTS = [];
 var SHEETS_COMPLETE = 0;
@@ -10,17 +8,18 @@ function init() {
 
     // Get Pony Parameters Spreadsheet data
     get_sheet('https://sheets.googleapis.com/v4/spreadsheets/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
-        // If there is no data use default data
-        if (!data) {
-            data = PONYSHEET
+        if (data) {
+            parse_pony_params(data);
+            $("#pony_parameters_title").text(data.properties.title);
         }
-        parse_pony_params(data);
-        $("#pony_parameters_title").text(data.properties.title);
         finish_requests();
     });
     get_sheet('https://sheets.googleapis.com/v4/spreadsheets/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
-        FARMING = parse_sheet(data.sheets[0]).data;
-        $("#farming_data_title").text(data.properties.title);
+        if (data) {
+            FARMING.items = parse_sheet(data.sheets[0]).data;
+            FARMING.messages = parse_sheet(data.sheets[1]).data;
+            $("#farming_data_title").text(data.properties.title);
+        }
         finish_requests();
     });
 }
@@ -37,7 +36,7 @@ function get_sheet(url, callback) {
         error : function(request, error)
         {
             console.log(JSON.stringify(request));
-            alert("Failed to load Pony Parameters Spreadsheet, resorting to local backup of Pony Parameters.");
+            console.log("Failed to load " + url + " , resorting to local backup of Pony Parameters.");
             callback(null);
         }
     });
@@ -59,7 +58,9 @@ function finish_requests() {
     $("#breed_container").append(PONYPARENTS[0].element);
     $("#breed_container").append(PONYPARENTS[1].element);
     // Add Elements for farming
-    let farm_select = create_select_element(Object.keys(FARMING), "farm");
+    let farm_select = create_select_element(Object.keys(FARMING.items), "farm", () => {
+        update_farm_element();
+    });
     $("#farm_container").append(farm_select);
 }
 
@@ -144,14 +145,29 @@ function roll() {
                 element = object_to_html(object);
                 break;
             case "farm":
-                object = roll_farm()
-                element = array_to_html(object);
+                object = roll_farm();
+                update_farm_element(object);
+                element = object_to_html(array_to_amounts(object), " x");
                 break;
         }
         CURRENTOBJECTS.push(object);
         element.addClass(["card", "result"]);
         element.appendTo(results);
     }
+}
+
+// Order the array into an object that has the items as keys
+// and the amounts of the items as their values.
+function array_to_amounts(array) {
+    let object = {}
+    for (const item of array) {
+        // initialize key
+        if (!object[item]) {
+            object[item] = 0;
+        }
+        object[item] += 1;
+    }
+    return object;
 }
 
 function array_to_html(array) {
@@ -176,7 +192,7 @@ function array_to_html(array) {
     return element;
 }
 
-function object_to_html(object) {
+function object_to_html(object, separator = ": ", line_break = "\n") {
     remove_details(object);
     let param_keys = Object.keys(object);
     let result = $("<div>");
@@ -204,7 +220,7 @@ function object_to_html(object) {
         );
         table_row.appendTo(result);
     });
-    let copy_button = make_copy_button(object_to_text(object));
+    let copy_button = make_copy_button(object_to_text(object, separator, line_break));
     copy_button.appendTo(result);
     return result;
 }
@@ -220,23 +236,28 @@ function make_copy_button(text) {
     
 }
 
-function object_to_text(object) {
+function object_to_text(object, separator = ": ", line_break = "\n") {
     let clipboard_text = "";
-    for (let i in Object.keys(object)) {
-        let key = Object.keys(object)[i];
+    let keys = Object.keys(object);
+    for (let i in keys) {
+        let key = keys[i];
         let param = object[key];
         if (Array.isArray(param)) {
             let formatted_param = "";
-            for (let i in param) {
-                let item = param[i];
+            for (let j in param) {
+                let item = param[j];
                 formatted_param += item
-                if (i < param.length - 1) {
+                if (j < param.length - 1) {
                     formatted_param += ", ";
                 }
             }
             param = formatted_param;
         }
-        clipboard_text += key + ": " + param + "\n";
+        clipboard_text += key + separator + param;
+        // If not the last key add line_break string
+        if (i < keys.length - 1) {
+            clipboard_text += line_break;
+        }
     }
     return clipboard_text;
 }
@@ -375,16 +396,38 @@ function roll_adopt() {
 }
 
 function roll_farm() {
-    let location = $("select.farm").val();
     let items = [];
     let item_amount = 3;
     if (chance(50)) {
         item_amount = 6;
     }
     for (let i = 0; i < item_amount; i++) {
-        items.push(random_in_array(FARMING[location]));
+        items.push(random_in_array(FARMING.items[get_farm_location()]));
     }
     return items;
+}
+
+function update_farm_element(items = CURRENTOBJECTS[0]) {
+    let text_ele = $("#farm_message p")[0];
+    let id_ele = $("#farm_message input")[0];
+    let id = id_ele.value - 1;
+    let location = get_farm_location();
+    let message = FARMING.messages[location][id];
+    // If the message or the items doesn't exist or if it's the wrong data, clear the text exit the function
+    if (!message || !items || items.Marking) {
+        text_ele.innerText = "";
+        return;
+    }
+    let text = message;
+    // Replace codes with their respective text.
+    text = text.replace("<p>", location);
+    text = text.replace("<i>", object_to_text(array_to_amounts(items), " x", ", "));
+
+    text_ele.innerText = text;
+}
+
+function get_farm_location() {
+    return $("select.farm").val();
 }
 
 function combine_objects_w_arrays(object1, object2) {
@@ -610,13 +653,19 @@ function change_mode(mode) {
     buttons.addClass("btn-primary");
 }
 
-function create_select_element(options, id = "") {
+function create_select_element(options, id = "", on_change = null) {
     let select = $("<select>");
     for (i in options) {
         select.append($("<option>").text(options[i]));
     }
     if (id != "") {
         select.addClass(id);
+    }
+    // Callback runs onchange
+    if (on_change) {
+        select.change(() => {
+            on_change();
+        });
     }
     return select;
 }

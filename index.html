@@ -54,6 +54,12 @@
                 <div class="row justify-content-md-center" id="results"></div>
                 <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button></div>
             </div>
+            <!-- Farming Message -->
+            <div class="container d-flex flex-column justify-content-center bg-light farm" id="farm_message">
+                <input type="number" class="farm" id="roll_amount" name="roll_amount" value=1 min="1" onchange="update_farm_element()">
+                <p></p>
+                <button class="btn-primary" onclick="copy_to_clipboard($('#farm_message p').text())">Copy</button>
+            </div>
             <!-- Change Log -->
             <div id="change_log">
                 <h2>Change Log</h2>
@@ -100,7 +106,8 @@
         <script src="bootstrap/js/jquery-3.5.1.min.js"></script>
         <script src="bootstrap/js/popper.min.js"></script>
         <script src="bootstrap/js/bootstrap.min.js"></script>
-        <script src="js/ponysheet.js"></script>
+        <script src="js/offline_data/pony_params.js"></script>
+        <script src="js/offline_data/farming.js"></script>
         <script src="js/main.js"></script>
         <script>
             init();
