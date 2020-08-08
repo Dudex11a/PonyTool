@@ -13,7 +13,7 @@
             <!-- Title -->
             <header class="text-center">
                 <h1 class="jumbotron-heading">Pony Tool</h1>
-                <p>1.6.0</p>
+                <p>1.6.1</p>
                 <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" id="pony_parameters_title" target="_blank">Pony Parameters</a><br>
                 <a href="https://docs.google.com/spreadsheets/d/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/edit?usp=sharing" id="farming_data_title" target="_blank">Farming Data</a>
             </header>
@@ -40,8 +40,8 @@
 
             </div>
             <!-- Farm -->
-            <div class="container d-flex justify-content-center bg-light farm" id="farm_container">
-
+            <div class="container d-flex flex-column justify-content-center bg-light farm" id="farm_container">
+                <h4>Location</h4>
             </div>
             <!-- Roll Button and Amount -->
             <div class="container d-flex justify-content-center" id="roll_container">
@@ -56,13 +56,17 @@
             </div>
             <!-- Farming Message -->
             <div class="container d-flex flex-column justify-content-center bg-light farm" id="farm_message">
-                <input type="number" class="farm" id="roll_amount" name="roll_amount" value=1 min="1" onchange="update_farm_element()">
+                <input type="number" class="farm" style="visibility: hidden;" id="roll_amount" name="roll_amount" value=1 min="1" onchange="update_farm_element()">
                 <p></p>
-                <button class="btn-primary" onclick="copy_to_clipboard($('#farm_message p').text())">Copy</button>
+                <button class="btn-primary" onclick="copy_to_clipboard($('#farm_message p').text())">Copy w/ Message</button>
             </div>
             <!-- Change Log -->
             <div id="change_log">
                 <h2>Change Log</h2>
+                <div>
+                    1.6.1<br>
+                    - Minor style and text changes.
+                </div>
                 <div>
                     1.6.0<br>
                     - Added Farming Messages that are generated on roll, a new tab has been added to the spreadsheet for the messages.
