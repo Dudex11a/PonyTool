@@ -295,9 +295,9 @@ function roll_adopt() {
     let pony = {}
 
     // Determine Species Allowed
-    let species = Object.keys(PONYPARAMS.Species);
+    let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
-    $(species).each((index, value) => {
+    $(all_species).each((index, value) => {
         let detail = value.match(/\(\S*\)/g);
         if (detail) {
             if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
@@ -314,43 +314,56 @@ function roll_adopt() {
     });
     if (available_species.length <= 0) {
         alert("There are no Species with these settings.\nSetting all Species on.");
-        available_species = species;
+        available_species = all_species;
         // Check the boxes
         $( "#common_species" ).prop( "checked", true );
         $( "#uncommon_species" ).prop( "checked", true );
         $( "#rare_species" ).prop( "checked", true );
     }
 
-    pony.Species = special_random(available_species, [], false);
-    // Combine all the regular params and species specific params for randomizing
-    let species_params = get_species_params(pony.Species);
+    let species = special_random(available_species, [], false);
+    pony = roll_pony(species);
+    return pony;
+}
 
-    pony.Sex = special_random(species_params.Sex, [], false)
+function roll_breed() {
+    
+}
+
+function roll_pony(species, params = null) {
+    if (!params) {
+        params = get_species_params(species);
+    }
+    let pony = {
+        "Species": species
+    }
+
+    pony.Sex = special_random(params.Sex, [], false);
 
     // Palettes
-    for(let i in species_params["Palette Place"]) {
-        let place = species_params["Palette Place"][i]
-        pony[place] = special_random(species_params.Palette)
+    for(let i in params["Palette Place"]) {
+        let place = params["Palette Place"][i]
+        pony[place] = special_random(params.Palette)
     }
 
     // Traits
     pony.Traits = []
-    pony.Traits.push(special_random(species_params.Trait, pony.Traits))
-    let exceptions = find_matches(species_params.Trait, pony.Traits)
+    pony.Traits.push(special_random(params.Trait, pony.Traits))
+    let exceptions = find_matches(params.Trait, pony.Traits)
     if (chance(80)) {
-        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(species_params.Trait, pony.Traits)
+        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(params.Trait, pony.Traits)
     }
     if (chance(65)) {
-        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(species_params.Trait, pony.Traits)
+        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(params.Trait, pony.Traits)
     }
     if (chance(30)) {
-        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(species_params.Trait, pony.Traits)
+        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
+        exceptions = find_matches(params.Trait, pony.Traits)
     }
     if (chance(15)) {
-        pony.Traits.push(special_random(species_params.Trait, pony.Traits.concat(exceptions)))
+        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
     }
     // If a Trait is undefined delete it
     // I have to have this here because if a species doesn't have enough triats
@@ -364,29 +377,29 @@ function roll_adopt() {
     // Markings
     pony.Markings = []
     exceptions = []
-    pony.Markings.push(special_random(species_params.Marking, pony.Markings))
+    pony.Markings.push(special_random(params.Marking, pony.Markings))
     if (chance(80)) {
-        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(params.Marking, pony.Markings))
     }
     if (chance(65)) {
-        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(params.Marking, pony.Markings))
     }
     if (chance(30)) {
-        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(params.Marking, pony.Markings))
     }
     if (chance(15)) {
-        pony.Markings.push(special_random(species_params.Marking, pony.Markings))
+        pony.Markings.push(special_random(params.Marking, pony.Markings))
     }
 
     pony.Mutations = []
     if (chance(15)) {
-        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
     }
     if (chance(10)) {
-        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
     }
     if (chance(5)) {
-        pony.Mutations.push(special_random(species_params.Mutation, pony.Mutations));
+        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
     }
     if (pony.Mutations.length <= 0) {
         delete pony.Mutations;
