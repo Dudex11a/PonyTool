@@ -19,10 +19,6 @@ nav button {
     margin: 5px
 }
 
-.breed, select {
-    margin: var(--margin1);
-}
-
 #loading {
     position:fixed;
     padding:0;
@@ -65,6 +61,52 @@ nav button {
     border-style: solid;
     border-width: 1px;
     border-radius: 3px;
+}
+
+#breed_container > div {
+    width: 40%;
+    min-width: 200px;
+    margin: var(--margin1);
+    padding: var(--padding1);
+    padding-bottom: 40px;
+    border-radius: 3px;
+    border: 3px solid var(--light);
+    border-color: rgba(0,0,0,.125);
+    background-color: #FFF;
+}
+
+#breed_container > div span, #breed_container > div p {
+    font-size: 20px;
+    margin-right: var(--margin1);
+    margin-bottom: 3px;
+}
+
+#breed_container > div button {
+    border-radius: 20px;
+}
+
+#breed_container > div select {
+    margin-bottom: var(--margin1);
+}
+
+.add_button {
+    color: white;
+    border-color: var(--success);
+    background-color: var(--success);
+}
+
+.add_button:hover {
+    background-color: #5C5;
+}
+
+.close_button {
+    color: white;
+    border-color: var(--danger);
+    background-color: var(--danger);
+}
+
+.close_button:hover {
+    background-color: var(--warning);
 }
 
 .table_key {

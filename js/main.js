@@ -141,7 +141,7 @@ function roll() {
                 element = object_to_html(object);
                 break;
             case "breed":
-                object = PONYPARENTS[0].get_pony();
+                object = roll_breed();
                 element = object_to_html(object);
                 break;
             case "farm":
@@ -266,7 +266,7 @@ function copy_all() {
     let ponies_text = "";
     for (let i in CURRENTOBJECTS) {
         let pony = CURRENTOBJECTS[i];
-        ponies_text += object_to_text(pony) + "\n";
+        ponies_text += object_to_text(pony) + "\n\n";
     }
     copy_to_clipboard(ponies_text);
 }
@@ -327,82 +327,127 @@ function roll_adopt() {
 }
 
 function roll_breed() {
+    let pony1 = PONYPARENTS[0].get_pony();
+    let pony2 = PONYPARENTS[1].get_pony();
+    let params = combine_objects_w_arrays(pony1, pony2);
+    params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
     
+    return roll_pony(params.Species, params);
 }
 
 function roll_pony(species, params = null) {
+    // Make species an array if not
+    if (!Array.isArray(species)) species = [species];
+
+    // If no params are given just use species params
     if (!params) {
         params = get_species_params(species);
     }
+
+    let multiple_species = false
+    // Remove the duplicate
+    species = clean_array(species);
+    // If there is more than 1 species set multiple_species to true
+    multiple_species = species.length > 1;
+
+    // If hybrid
+    let hybrid_chance = 30;
+    if (multiple_species) {
+        // If it will be a hybrid and the species given is an array
+        if (chance(hybrid_chance)) {
+            let species_limit = 2;
+            // If there are more than the species limit in species given
+            if (species.length > species_limit) {
+                let hybrid_species = [];
+                // Push a random species in until the species limit is hit
+                for (let i = 0; i < species_limit; i++) {
+                    hybrid_species.push(special_random(species, hybrid_species));
+                }
+                species = hybrid_species;
+            }
+        } else {
+            // Random species out of what was given
+            species = random_in_array(species);
+            // Change the params so they only include ones associated with species
+            let keys = Object.keys(params);
+            let species_params = get_species_params(species);
+            let pplaces = species_params["Palette Place"];
+            // Set Species params palette place to all the palettes that species can have
+            // This is so the match array later can match with the pplaces
+            for(let pplace of pplaces) {
+                species_params[pplace] = species_params.Palette;
+            }
+            for (let key of keys) {
+                let species_param = species_params[key];
+                // If the species_params has the key being matched
+                if (species_param) {
+                    params[key] = match_array(params[key], species_param);
+                }
+            }
+        }
+    }
+
     let pony = {
         "Species": species
     }
 
-    pony.Sex = special_random(params.Sex, [], false);
+    pony.Sex = special_random(PONYPARAMS.Sex, [], false);
 
     // Palettes
     for(let i in params["Palette Place"]) {
-        let place = params["Palette Place"][i]
-        pony[place] = special_random(params.Palette)
-    }
-
-    // Traits
-    pony.Traits = []
-    pony.Traits.push(special_random(params.Trait, pony.Traits))
-    let exceptions = find_matches(params.Trait, pony.Traits)
-    if (chance(80)) {
-        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(params.Trait, pony.Traits)
-    }
-    if (chance(65)) {
-        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(params.Trait, pony.Traits)
-    }
-    if (chance(30)) {
-        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
-        exceptions = find_matches(params.Trait, pony.Traits)
-    }
-    if (chance(15)) {
-        pony.Traits.push(special_random(params.Trait, pony.Traits.concat(exceptions)))
-    }
-    // If a Trait is undefined delete it
-    // I have to have this here because if a species doesn't have enough triats
-    // the traits will start coming back undefined and mess other processes up.
-    // I also need to iterate through it backwords to not mess up order while going along.
-    for (let t = pony.Traits.length - 1; t >= 0; t--) {
-        if (!pony.Traits[t]) {
-            pony.Traits.splice(t);
+        let place = params["Palette Place"][i];
+        // If there is a palette place in the params randomize between those
+        // If not pull from all the Palettes
+        if (params[place]) {
+            pony[place] = special_random(params[place]);
+        } else {
+            pony[place] = special_random(params.Palette);
         }
     }
-    // Markings
-    pony.Markings = []
-    exceptions = []
-    pony.Markings.push(special_random(params.Marking, pony.Markings))
-    if (chance(80)) {
-        pony.Markings.push(special_random(params.Marking, pony.Markings))
+
+    // The parameters and odds of each parameter being rolled
+    let odds = {
+        "Trait" :[
+            80,
+            65,
+            30,
+            15
+        ],
+        "Mutation": [
+            15,
+            10,
+            5
+        ]
     }
-    if (chance(65)) {
-        pony.Markings.push(special_random(params.Marking, pony.Markings))
-    }
-    if (chance(30)) {
-        pony.Markings.push(special_random(params.Marking, pony.Markings))
-    }
-    if (chance(15)) {
-        pony.Markings.push(special_random(params.Marking, pony.Markings))
+    // Markings has the same odds as trait
+    odds["Markings"] = odds.Trait;
+
+    // These keys will be Trait, Mutation, and Markings
+    let keys = Object.keys(odds);
+
+    // Initialize arrays in the keys of the pony
+    for (let key of keys) {
+        pony[key] = [];
     }
 
-    pony.Mutations = []
-    if (chance(15)) {
-        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
+    // Garented rolls
+    pony.Trait.push(special_random(params.Trait));
+    pony.Markings.push(special_random(params.Markings));
+
+    // Roll for each odd
+    for (let key of keys) {
+        let odd_values = odds[key];
+        for (odd of odd_values) {
+            if (chance(odd)) {
+                let rolled_value = special_random(params[key], pony[key], true);
+                if (rolled_value) pony[key].push(rolled_value);
+            }
+        }
     }
-    if (chance(10)) {
-        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
-    }
-    if (chance(5)) {
-        pony.Mutations.push(special_random(params.Mutation, pony.Mutations));
-    }
-    if (pony.Mutations.length <= 0) {
-        delete pony.Mutations;
+
+    // If there are no mutations delete the field
+    if (pony.Mutation.length <= 0) {
+        delete pony.Mutation;
     }
 
     return pony;
@@ -441,6 +486,10 @@ function update_farm_element(items = CURRENTOBJECTS[0]) {
 
 function get_farm_location() {
     return $("select.farm").val();
+}
+
+function match_array(array1, array2) {
+    return array1.filter(item => array2.includes(item));
 }
 
 function combine_objects_w_arrays(object1, object2) {
@@ -614,7 +663,12 @@ function special_random(array, exceptions = [], wildcard = true) {
         }
         item = random_in_array(rarity_array);
     } else {
-        item = random_in_array(array);
+        // Wildcard chance if the array is undefined
+        if (wildcard && chance(5)) {
+            item = "Wildcard"
+        } else {
+            item = random_in_array(array);
+        }
     }
     return item;
 }
@@ -713,6 +767,7 @@ class PonyInput {
             // When the species select is changed, update the species params
             this.update_species_parameters();
         });
+        this.species_select.create_select();
         this.element.append(this.species_select.element);
 
         this.element.append(this.param_container);
@@ -757,8 +812,6 @@ class PonyInput {
 
     create_param(name, options, parent = this.param_container, on_change = null) {
         let container = $("<div>");
-        // Title
-        container.append($("<h4>").text(name));
 
         // Select
         let select = create_select_element(options, name);
@@ -768,6 +821,9 @@ class PonyInput {
             });
         }
 
+        // Title
+        container.append($("<p>").text(name));
+        
         container.append(select);
         parent.append(container);
         return select;
@@ -782,9 +838,6 @@ class PonyInput {
         // Get the params of all the species in the Pony
         let params = get_species_params(this.get_species());
 
-        // Sex select
-        this.create_param("Sex", params.Sex);
-
         // Add palettes
         let pps = params["Palette Place"];
         let ps = params["Palette"];
@@ -797,10 +850,12 @@ class PonyInput {
         }
 
         let select_multis = [
-            new SelectMulti("Traits", params.Trait),
-            new SelectMulti("Markings", params.Marking),
-            new SelectMulti("Mutations", params.Mutation)
+            new SelectMulti("Trait", params.Trait),
+            new SelectMulti("Markings", params.Markings),
+            new SelectMulti("Mutation", params.Mutation)
         ];
+        select_multis[0].create_select();
+        select_multis[1].create_select();
         // Add each select_multi element to the container
         for (i in select_multis) {
             let select = select_multis[i];
@@ -817,14 +872,17 @@ class SelectMulti {
         this.element = $("<div>");
         // Button to add select element to self
         this.add_button = $("<button>").text("Add");
-        this.add_button.addClass("btn-primary");
+        this.add_button.addClass("add_button");
         this.add_button.click(() => {
             this.create_select();
-            this.on_change();
+            if (on_change) {
+                this.on_change();
+            }
         });
         // Select container for all the selects created
         this.select_container = $("<div>");
-        this.element.append($("<h4>").text(name));
+        this.select_container.addClass("select_muiti");
+        this.element.append($("<span>").text(name));
         this.element.append(this.add_button);
         this.element.append(this.select_container);
     }
@@ -837,8 +895,8 @@ class SelectMulti {
                 this.on_change();
             });
         }
-        let remove_button = $("<button>").text("Remove");
-        remove_button.addClass("btn-warning");
+        let remove_button = $("<button>").text("X");
+        remove_button.addClass("close_button");
         // Remove this select on click
         remove_button.click((value) => {
             container.remove();
