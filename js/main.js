@@ -2,6 +2,23 @@ var CURRENTOBJECTS = [];
 var PONYPARENTS = [];
 var SHEETS_COMPLETE = 0;
 
+var ITEMS = [
+    "Trait Scroll",
+    "Stat Scroll",
+    "Mutation Scroll",
+    "Fertility Scroll",
+    "Rainbow Feather"
+];
+var STATS = [
+    "Strength",
+    "Agility",
+    "Intelligence",
+    "Charisma",
+    "Perception",
+    "Stealth",
+    "Magic"
+];
+
 function init() {
     // Initialize mode
     change_mode(MODES[0]);
@@ -62,6 +79,15 @@ function finish_requests() {
         update_farm_element();
     });
     $("#farm_container").append(farm_select);
+    let item_select = new SelectMulti("Items", ITEMS);
+    item_select.element.addClass("box1");
+    $("#items").append(item_select.element);
+}
+
+function has_item(item) {
+    let items = get_select_values($("#items"), ".Items");
+    // If it has the item and is on breed
+    return items.includes(item) && MODE === "breed";
 }
 
 function parse_pony_params(data) {
@@ -123,6 +149,15 @@ function roll() {
     let amount_ele = $("#roll_amount")[0];
     if (!amount_ele.className.includes("hidden")) {
         amount = $("#roll_amount")[0].value;
+    }
+    // Breed Amount
+    if (MODE == MODES[1]) {
+        // Fertility Scroll used
+        if (has_item(ITEMS[3])) {
+            amount = 3;
+        } else {
+            amount = random_in_array([1, 2]);
+        }
     }
     // Copy all button visiblity
     $(".copy_all_button").each((index, value) => {
@@ -408,6 +443,7 @@ function roll_pony(species, params = null) {
     // The parameters and odds of each parameter being rolled
     let odds = {
         "Trait" :[
+            100,
             80,
             65,
             30,
@@ -419,8 +455,30 @@ function roll_pony(species, params = null) {
             5
         ]
     }
+
     // Markings has the same odds as trait
     odds["Markings"] = odds.Trait;
+
+    // Trait Scroll used
+    if (has_item(ITEMS[0])) {
+        for (let i in odds.Trait) {
+            odds.Trait[i] += 35;
+        }
+    }
+
+    // Mutation Scroll used
+    if (has_item(ITEMS[2])) {
+        for (let i in odds.Mutation) {
+            odds.Mutation[i] += 35;
+        }
+    }
+
+    // Stats Scroll used
+    if (has_item(ITEMS[1])) {
+        let stat_name = random_in_array(STATS);
+        let stat_boost = random_in_array([1, 2, 3, 4, 5]);
+        pony["Stats"] = "+" + stat_boost + " " + stat_name;
+    }
 
     // These keys will be Trait, Mutation, and Markings
     let keys = Object.keys(odds);
@@ -431,8 +489,8 @@ function roll_pony(species, params = null) {
     }
 
     // Garented rolls
-    pony.Trait.push(special_random(params.Trait));
-    pony.Markings.push(special_random(params.Markings));
+    // pony.Trait.push(special_random(params.Trait));
+    // pony.Markings.push(special_random(params.Markings));
 
     // Roll for each odd
     for (let key of keys) {
@@ -768,6 +826,7 @@ class PonyInput {
             this.update_species_parameters();
         });
         this.species_select.create_select();
+        this.species_select.element.addClass("parent_param");
         this.element.append(this.species_select.element);
 
         this.element.append(this.param_container);
@@ -810,6 +869,29 @@ class PonyInput {
         return pony
     }
 
+    // import_pony(pony) {
+    //     console.log(pony)
+    //     let keys = Object.keys(pony);
+
+    //     for (let key of keys) {
+    //         let param = pony[key];
+    //         let select = this.element.find("." + key);
+    //         for (let element of select) {
+    //             // Is a select multi
+    //             let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
+    //             if (is_multi) {
+    //                 // The index of the element
+    //                 var index = $(element).parent().index();
+    //                 if (param[index]) {
+    //                     $(element).val(param[index]);
+    //                 }
+    //             } else {
+    //                 $(element).val(param);
+    //             }
+    //         }
+    //     }
+    // }
+
     create_param(name, options, parent = this.param_container, on_change = null) {
         let container = $("<div>");
 
@@ -824,6 +906,7 @@ class PonyInput {
         // Title
         container.append($("<p>").text(name));
         
+        container.addClass("parent_param");
         container.append(select);
         parent.append(container);
         return select;
@@ -845,8 +928,11 @@ class PonyInput {
             let place = pps[i];
             // Create elements for each Palette Place
             let select = create_select_element(ps, place);
-            this.param_container.append($("<p>").text(place));
-            this.param_container.append(select);
+            let palette_container = $("<div>");
+            palette_container.append($("<p>").text(place));
+            palette_container.append(select);
+            palette_container.addClass("parent_param");
+            this.param_container.append(palette_container);
         }
 
         let select_multis = [
@@ -859,6 +945,7 @@ class PonyInput {
         // Add each select_multi element to the container
         for (i in select_multis) {
             let select = select_multis[i];
+            select.element.addClass("parent_param");
             this.param_container.append(select.element);
         }
     }
@@ -881,7 +968,7 @@ class SelectMulti {
         });
         // Select container for all the selects created
         this.select_container = $("<div>");
-        this.select_container.addClass("select_muiti");
+        this.element.addClass("select_multi");
         this.element.append($("<span>").text(name));
         this.element.append(this.add_button);
         this.element.append(this.select_container);
