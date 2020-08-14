@@ -7,6 +7,7 @@ var ITEMS = [
     "Stat Scroll",
     "Mutation Scroll",
     "Fertility Scroll",
+    // "One-Night-Stand Scroll",
     "Rainbow Feather"
 ];
 var STATS = [
@@ -79,7 +80,13 @@ function finish_requests() {
         update_farm_element();
     });
     $("#farm_container").append(farm_select);
-    let item_select = new SelectMulti("Items", ITEMS);
+    let item_select = new SelectMulti("Items", ITEMS, () => {
+        // if (has_item("One-Night-Stand Scroll")) {
+        //     PONYPARENTS[1].element.addClass("hidden");
+        // } else {
+        //     PONYPARENTS[1].element.removeClass("hidden");
+        // }
+    });
     item_select.element.addClass("box1");
     $("#items").append(item_select.element);
 }
@@ -326,27 +333,31 @@ function remove_detail(text) {
     return text.toString().replace(all_details, "");
 }
 
-function roll_adopt() {
+function roll_adopt(sort = true) {
     let pony = {}
 
     // Determine Species Allowed
     let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
-    $(all_species).each((index, value) => {
-        let detail = find_rarities(value);
-        if (detail) {
-            if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
-                available_species.push(value);
+    if (sort) {
+        $(all_species).each((index, value) => {
+            let detail = find_rarities(value);
+            if (detail) {
+                if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
+                    available_species.push(value);
+                }
+                if (detail[0] == "(R)" && $('#rare_species').is(":checked")) {
+                    available_species.push(value);
+                }
+            } else {
+                if ($('#common_species').is(":checked")) {
+                    available_species.push(value);
+                }
             }
-            if (detail[0] == "(R)" && $('#rare_species').is(":checked")) {
-                available_species.push(value);
-            }
-        } else {
-            if ($('#common_species').is(":checked")) {
-                available_species.push(value);
-            }
-        }
-    });
+        });
+    } else {
+        available_species = all_species;
+    }
     if (available_species.length <= 0) {
         alert("There are no Species with these settings.\nSetting all Species on.");
         available_species = all_species;
@@ -368,6 +379,9 @@ function find_rarities(string) {
 function roll_breed() {
     let pony1 = PONYPARENTS[0].get_pony();
     let pony2 = PONYPARENTS[1].get_pony();
+    // if (has_item("One-Night-Stand Scroll")) {
+    //     pony2 = roll_adopt(false);
+    // }
     let params = combine_objects_w_arrays(pony1, pony2);
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
     
@@ -383,11 +397,8 @@ function roll_pony(species, params = null) {
         params = get_species_params(species);
     }
 
-    let multiple_species = false
     // Remove the duplicate
     species = clean_array(species);
-    // If there is more than 1 species set multiple_species to true
-    multiple_species = species.length > 1;
 
 
     // Sort rare and common species
@@ -403,6 +414,12 @@ function roll_pony(species, params = null) {
         return true;
     });
 
+    // If there is more than 1 species set multiple_species to true
+    let multiple_species = species.length > 1;
+    // If there is no Rainbow Feather when there is no Rainbow Feather there needs to be further testing
+    if (multiple_species && !has_item("Rainbow Feather")) {
+        multiple_species = common_species.length > 1;
+    }
 
     // If hybrid
     let hybrid_chance = 30;
@@ -415,7 +432,13 @@ function roll_pony(species, params = null) {
                 let hybrid_species = [];
                 // Push a random species in until the species limit is hit
                 for (let i = 0; i < species_limit; i++) {
-                    hybrid_species.push(special_random(species, hybrid_species));
+                    if (has_item("Rainbow Feather") && rare_species.length > 0) {
+                        hybrid_species.push(special_random(rare_species, hybrid_species, false));
+                        // Filter out the species just added from the rare_species
+                        rare_species = rare_species.filter(value => value != hybrid_species[i]);
+                    } else {
+                        hybrid_species.push(special_random(common_species, hybrid_species, false));
+                    }
                 }
                 species = hybrid_species;
             }
@@ -482,17 +505,18 @@ function roll_pony(species, params = null) {
     odds["Markings"] = odds.Trait;
 
     // Trait Scroll used
-    if (has_item(ITEMS[0])) {
+    if (has_item("Trait Scroll")) {
         for (let i in odds.Trait) {
             odds.Trait[i] += 35;
         }
     }
 
     // Mutation Scroll used
-    if (has_item(ITEMS[2])) {
+    if (has_item("Mutation Scroll")) {
         for (let i in odds.Mutation) {
             odds.Mutation[i] += 35;
         }
+        odds.Mutation[0] = 100;
     }
 
     // Stats Scroll used
@@ -535,19 +559,28 @@ function roll_pony(species, params = null) {
 
 function random_species(common_species, rare_species) {
     let species;
-    // Random species out of what was given
-    if (has_item("Rainbow Feather")) {
-        // Error message if there are no rare species
-        if (rare_species.length <= 0) alert("Error:\nThere are no rare species to choose from.");
-        species = random_in_array(rare_species);
-    } else {
-        // Error message if there are no common species
-        if (common_species.length <= 0) alert("Error:\nThere are no common species to choose from.\nDo you need to use a Rainbow Feather?");
-        species = random_in_array(common_species);
+    switch (MODE) {
+        case MODES[0]:
+            // Adopt
+            // If adopt combine the rare and common species to roll
+            species = random_in_array(common_species.concat(rare_species));
+            break;
+        case MODES[1]:
+            // Breed
+            if (has_item("Rainbow Feather")) {
+                // Error message if there are no rare species
+                if (rare_species.length <= 0) alert("Error:\nThere are no rare species to choose from.");
+                species = random_in_array(rare_species);
+            } else {
+                // Error message if there are no common species
+                if (common_species.length <= 0) alert("Error:\nThere are no common species to choose from.\nDo you need to use a Rainbow Feather?");
+                species = random_in_array(common_species);
+            }
+            break;
     }
-    // If species is undefined or something went wrong let the species display "Error"
+    // If species is undefined or something went wrong let the species display the first species
     if (!species) {
-        species = ["Error"];
+        species = [Object.keys(PONYPARAMS.Species)[0]];
     }
     return species;
 }
@@ -1019,15 +1052,14 @@ class SelectMulti {
         let container = $("<div>");
         let select = create_select_element(this.options, this.name);
         if (this.on_change) {
-            select.change(() => {
-                this.on_change();
-            });
+            select.change(() => this.on_change());
         }
         let remove_button = $("<button>").text("X");
         remove_button.addClass("close_button");
         // Remove this select on click
         remove_button.click((value) => {
             container.remove();
+            if (this.on_change) this.on_change();
         });
         container.append(select);
         container.append(remove_button);
