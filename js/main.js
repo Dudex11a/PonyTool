@@ -333,7 +333,7 @@ function roll_adopt() {
     let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
     $(all_species).each((index, value) => {
-        let detail = value.match(/\(\S*\)/g);
+        let detail = find_rarities(value);
         if (detail) {
             if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
                 available_species.push(value);
@@ -361,6 +361,10 @@ function roll_adopt() {
     return pony;
 }
 
+function find_rarities(string) {
+    return string.match(/\(\S*\)/g);
+}
+
 function roll_breed() {
     let pony1 = PONYPARENTS[0].get_pony();
     let pony2 = PONYPARENTS[1].get_pony();
@@ -385,6 +389,21 @@ function roll_pony(species, params = null) {
     // If there is more than 1 species set multiple_species to true
     multiple_species = species.length > 1;
 
+
+    // Sort rare and common species
+    let common_species = [];
+    let rare_species = [];
+    common_species = species.filter(value => {
+        if (find_rarities(value)) {
+            if (find_rarities(value).includes("(R)")) {
+                rare_species.push(value);
+                return false;
+            };
+        }
+        return true;
+    });
+
+
     // If hybrid
     let hybrid_chance = 30;
     if (multiple_species) {
@@ -402,7 +421,7 @@ function roll_pony(species, params = null) {
             }
         } else {
             // Random species out of what was given
-            species = random_in_array(species);
+            species = random_species(common_species, rare_species);
             // Change the params so they only include ones associated with species
             let keys = Object.keys(params);
             let species_params = get_species_params(species);
@@ -420,6 +439,9 @@ function roll_pony(species, params = null) {
                 }
             }
         }
+    } else {
+        // Not multiple species
+        species = random_species(common_species, rare_species);
     }
 
     let pony = {
@@ -509,6 +531,25 @@ function roll_pony(species, params = null) {
     }
 
     return pony;
+}
+
+function random_species(common_species, rare_species) {
+    let species;
+    // Random species out of what was given
+    if (has_item("Rainbow Feather")) {
+        // Error message if there are no rare species
+        if (rare_species.length <= 0) alert("Error:\nThere are no rare species to choose from.");
+        species = random_in_array(rare_species);
+    } else {
+        // Error message if there are no common species
+        if (common_species.length <= 0) alert("Error:\nThere are no common species to choose from.\nDo you need to use a Rainbow Feather?");
+        species = random_in_array(common_species);
+    }
+    // If species is undefined or something went wrong let the species display "Error"
+    if (!species) {
+        species = ["Error"];
+    }
+    return species;
 }
 
 function roll_farm() {
