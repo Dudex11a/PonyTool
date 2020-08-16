@@ -7,7 +7,7 @@ var ITEMS = [
     "Stat Scroll",
     "Mutation Scroll",
     "Fertility Scroll",
-    // "One-Night-Stand Scroll",
+    "One-Night-Stand Scroll",
     "Rainbow Feather"
 ];
 var STATS = [
@@ -81,11 +81,11 @@ function finish_requests() {
     });
     $("#farm_container").append(farm_select);
     let item_select = new SelectMulti("Items", ITEMS, () => {
-        // if (has_item("One-Night-Stand Scroll")) {
-        //     PONYPARENTS[1].element.addClass("hidden");
-        // } else {
-        //     PONYPARENTS[1].element.removeClass("hidden");
-        // }
+        if (has_item("One-Night-Stand Scroll")) {
+            PONYPARENTS[1].element.addClass("hidden");
+        } else {
+            PONYPARENTS[1].element.removeClass("hidden");
+        }
     });
     item_select.element.addClass("box1");
     $("#items").append(item_select.element);
@@ -174,6 +174,18 @@ function roll() {
             $(value).addClass("hidden");
         }
     });
+    // The rarities to get a rare species while breeding w/ Rainbow Feather
+    let rare_rarities = [
+        100,
+        25,
+        15
+    ];
+    let random_pony;
+    if (has_item("One-Night-Stand Scroll")) {
+        // Random pony that's not rare
+        random_pony = roll_adopt([true, true, false]);
+    }
+    // Generate a the objects to put into the result container
     for(let a = 0; a < amount; a++) {
         let element;
         let object;
@@ -183,7 +195,11 @@ function roll() {
                 element = object_to_html(object);
                 break;
             case "breed":
-                object = roll_breed();
+                if (has_item("Rainbow Feather")) {
+                    object = roll_breed(chance(rare_rarities[a]), random_pony);
+                } else {
+                    object = roll_breed(true, random_pony);
+                }
                 element = object_to_html(object);
                 break;
             case "farm":
@@ -333,31 +349,31 @@ function remove_detail(text) {
     return text.toString().replace(all_details, "");
 }
 
-function roll_adopt(sort = true) {
+function roll_adopt(rarities = [
+    $('#common_species').is(":checked"), // Common 0
+    $('#uncommon_species').is(":checked"), //Uncommon 1
+    $('#rare_species').is(":checked") // Rare 2
+]) {
     let pony = {}
 
     // Determine Species Allowed
     let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
-    if (sort) {
-        $(all_species).each((index, value) => {
-            let detail = find_rarities(value);
-            if (detail) {
-                if (detail[0] == "(U)" && $('#uncommon_species').is(":checked")) {
-                    available_species.push(value);
-                }
-                if (detail[0] == "(R)" && $('#rare_species').is(":checked")) {
-                    available_species.push(value);
-                }
-            } else {
-                if ($('#common_species').is(":checked")) {
-                    available_species.push(value);
-                }
+    $(all_species).each((index, value) => {
+        let detail = find_rarities(value);
+        if (detail) {
+            if (detail[0] == "(U)" && rarities[1]) {
+                available_species.push(value);
             }
-        });
-    } else {
-        available_species = all_species;
-    }
+            if (detail[0] == "(R)" && rarities[2]) {
+                available_species.push(value);
+            }
+        } else {
+            if (rarities[0]) {
+                available_species.push(value);
+            }
+        }
+    });
     if (available_species.length <= 0) {
         alert("There are no Species with these settings.\nSetting all Species on.");
         available_species = all_species;
@@ -376,13 +392,25 @@ function find_rarities(string) {
     return string.match(/\(\S*\)/g);
 }
 
-function roll_breed() {
+function roll_breed(rare = true, pony2_overide = null) {
     let pony1 = PONYPARENTS[0].get_pony();
     let pony2 = PONYPARENTS[1].get_pony();
-    // if (has_item("One-Night-Stand Scroll")) {
-    //     pony2 = roll_adopt(false);
-    // }
+    if (has_item("One-Night-Stand Scroll")) {
+        pony2 = pony2_overide;
+    }
     let params = combine_objects_w_arrays(pony1, pony2);
+
+    // Remove rare species from params
+    if (!rare && params.Species) {
+        params.Species = params.Species.filter(value => {
+            // If not rare
+            if (find_rarities(value)) {
+                return !find_rarities(value).includes("(R)");
+            }
+            return true
+        });
+    }
+
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
     
     return roll_pony(params.Species, params);
@@ -458,6 +486,10 @@ function roll_pony(species, params = null) {
                 let species_param = species_params[key];
                 // If the species_params has the key being matched
                 if (species_param) {
+                    // Make param an array if not
+                    if (!Array.isArray(params[key])) {
+                        params[key] = [params[key]];
+                    }
                     params[key] = match_array(params[key], species_param);
                 }
             }
@@ -479,9 +511,9 @@ function roll_pony(species, params = null) {
         // If there is a palette place in the params randomize between those
         // If not pull from all the Palettes
         if (params[place]) {
-            pony[place] = special_random(params[place]);
+            pony[place] = [special_random(params[place])];
         } else {
-            pony[place] = special_random(params.Palette);
+            pony[place] = [special_random(params.Palette)];
         }
     }
 
@@ -534,10 +566,6 @@ function roll_pony(species, params = null) {
         pony[key] = [];
     }
 
-    // Garented rolls
-    // pony.Trait.push(special_random(params.Trait));
-    // pony.Markings.push(special_random(params.Markings));
-
     // Roll for each odd
     for (let key of keys) {
         let odd_values = odds[key];
@@ -567,15 +595,13 @@ function random_species(common_species, rare_species) {
             break;
         case MODES[1]:
             // Breed
-            if (has_item("Rainbow Feather")) {
-                // Error message if there are no rare species
-                if (rare_species.length <= 0) alert("Error:\nThere are no rare species to choose from.");
+            if (has_item("Rainbow Feather") && rare_species.length > 0) {
                 species = random_in_array(rare_species);
-            } else {
-                // Error message if there are no common species
-                if (common_species.length <= 0) alert("Error:\nThere are no common species to choose from.\nDo you need to use a Rainbow Feather?");
-                species = random_in_array(common_species);
+                break;
             }
+            // Error message if there are no common species
+            if (common_species.length <= 0) alert("Error:\nThere are no common species to choose from.\nDo you need to use a Rainbow Feather?");
+            species = random_in_array(common_species);
             break;
     }
     // If species is undefined or something went wrong let the species display the first species
