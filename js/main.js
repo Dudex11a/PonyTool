@@ -196,9 +196,9 @@ function roll() {
                 break;
             case "breed":
                 if (has_item("Rainbow Feather")) {
-                    object = roll_breed(chance(rare_rarities[a]), random_pony);
-                } else {
                     object = roll_breed(true, random_pony);
+                } else {
+                    object = roll_breed(chance(rare_rarities[a]), random_pony);
                 }
                 element = object_to_html(object);
                 break;
@@ -428,7 +428,6 @@ function roll_pony(species, params = null) {
     // Remove the duplicate
     species = clean_array(species);
 
-
     // Sort rare and common species
     let common_species = [];
     let rare_species = [];
@@ -652,25 +651,25 @@ function match_array(array1, array2) {
 
 function combine_objects_w_arrays(object1, object2) {
     // Copy Object1
-    let object = {};
-    object = Object.assign(object, object1);
-
+    delete new_object;
+    let new_object;
+    new_object = object1;
     let object2_keys = Object.keys(object2);
     // Combine species and default parameters
     for (i in object2_keys) {
         let key = object2_keys[i];
         let obj2_value = object2[key];
         // If key exists combine the default and species parameter
-        if (object[key]) {
-            object[key] = object[key].concat(obj2_value);
+        if (new_object[key]) {
+            new_object[key] = new_object[key].concat(obj2_value);
         // If the key does not exist set the value to object2's
         } else {
-            object[key] = obj2_value;
+            new_object[key] = obj2_value;
         }
     }
     
-    object = clean_object(object);
-    return object;
+    new_object = clean_object(new_object);
+    return new_object;
 }
 
 // Delete duplicate values from object arrays and sort
