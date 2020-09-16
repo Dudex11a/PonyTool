@@ -198,12 +198,8 @@ function roll() {
                 if (has_item("Rainbow Feather")) {
                     object = roll_breed(chance(rare_rarities[a]), random_pony);
                 } else {
-<<<<<<< Updated upstream
-                    object = roll_breed(true, random_pony);
-=======
                     object = roll_breed(false, random_pony);
                     // object = roll_breed(chance(rare_rarities[a]), random_pony);
->>>>>>> Stashed changes
                 }
                 element = object_to_html(object);
                 break;
