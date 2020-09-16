@@ -198,7 +198,12 @@ function roll() {
                 if (has_item("Rainbow Feather")) {
                     object = roll_breed(chance(rare_rarities[a]), random_pony);
                 } else {
+<<<<<<< Updated upstream
                     object = roll_breed(true, random_pony);
+=======
+                    object = roll_breed(false, random_pony);
+                    // object = roll_breed(chance(rare_rarities[a]), random_pony);
+>>>>>>> Stashed changes
                 }
                 element = object_to_html(object);
                 break;
@@ -495,8 +500,14 @@ function roll_pony(species, params = null) {
             }
         }
     } else {
-        // Not multiple species
-        species = random_species(common_species, rare_species);
+        // If there are no common species use rare if Rainbow Feather
+        if (has_item("Rainbow Feather") && common_species.length === 0) {
+            // Not multiple species
+            species = random_species(species);
+        } else {
+            // Not multiple species
+            species = random_species(common_species, rare_species);
+        }
     }
 
     let pony = {
