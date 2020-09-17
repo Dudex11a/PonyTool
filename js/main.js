@@ -180,10 +180,11 @@ function roll() {
         25,
         15
     ];
-    let random_pony;
+    let pony1 = PONYPARENTS[0].get_pony();
+    let pony2 = PONYPARENTS[1].get_pony()
     if (has_item("One-Night-Stand Scroll")) {
         // Random pony that's not rare
-        random_pony = roll_adopt([true, true, false]);
+        pony2 = roll_adopt([true, true, false]);
     }
     // Generate a the objects to put into the result container
     for(let a = 0; a < amount; a++) {
@@ -196,10 +197,21 @@ function roll() {
                 break;
             case "breed":
                 if (has_item("Rainbow Feather")) {
-                    object = roll_breed(chance(rare_rarities[a]), random_pony);
+                    // If only rare species
+                    let only_rare = true;
+                    let species = pony1.Species.concat(pony2.Species);
+                    for (value of species) {
+                        if (!value.includes("(R)")) only_rare = false;
+                    }
+                    // if only_rare species then only allow rare species
+                    if (only_rare) {
+                        object = roll_breed(true, pony1, pony2);
+                    } else {
+                        object = roll_breed(chance(rare_rarities[a]), pony1, pony2);
+                    }
+                    
                 } else {
-                    object = roll_breed(false, random_pony);
-                    // object = roll_breed(chance(rare_rarities[a]), random_pony);
+                    object = roll_breed(false, pony1, pony2);
                 }
                 element = object_to_html(object);
                 break;
@@ -393,12 +405,7 @@ function find_rarities(string) {
     return string.match(/\(\S*\)/g);
 }
 
-function roll_breed(rare = true, pony2_overide = null) {
-    let pony1 = PONYPARENTS[0].get_pony();
-    let pony2 = PONYPARENTS[1].get_pony();
-    if (has_item("One-Night-Stand Scroll")) {
-        pony2 = pony2_overide;
-    }
+function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony(), pony2 = PONYPARENTS[1].get_pony()) {
     let params = combine_objects_w_arrays(pony1, pony2);
 
     // Remove rare species from params
@@ -496,14 +503,14 @@ function roll_pony(species, params = null) {
             }
         }
     } else {
-        // If there are no common species use rare if Rainbow Feather
-        if (has_item("Rainbow Feather") && common_species.length === 0) {
-            // Not multiple species
-            species = random_species(species);
-        } else {
-            // Not multiple species
-            species = random_species(common_species, rare_species);
-        }
+        // // If there are no common species use rare if Rainbow Feather
+        // if (has_item("Rainbow Feather") && common_species.length === 0) {
+        //     // Not multiple species
+        //     species = random_species(species);
+        // } else {
+        //     // Not multiple species
+        species = random_species(common_species, rare_species);
+        // }
     }
 
     let pony = {
