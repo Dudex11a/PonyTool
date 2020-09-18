@@ -8,7 +8,8 @@ var ITEMS = [
     "Mutation Scroll",
     "Fertility Scroll",
     "One-Night-Stand Scroll",
-    "Rainbow Feather"
+    "Rainbow Feather",
+    "Magic Mirror"
 ];
 var STATS = [
     "Strength",
@@ -459,6 +460,9 @@ function roll_pony(species, params = null) {
 
     // If hybrid
     let hybrid_chance = 30;
+    if (has_item("Magic Mirror")) {
+        hybrid_chance = 60;
+    }
     if (multiple_species) {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
