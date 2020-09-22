@@ -7,9 +7,9 @@ var ITEMS = [
     "Stat Scroll",
     "Mutation Scroll",
     "Fertility Scroll",
+    "Hybrid Scroll",
     "One-Night-Stand Scroll",
-    "Rainbow Feather",
-    "Hybrid Scroll"
+    "Rainbow Feather"
 ];
 var STATS = [
     "Strength",
@@ -360,7 +360,13 @@ function remove_details(pony) {
 
 function remove_detail(text) {
     let all_details = /(\s*?\[\S*\])|(\s*?\<\S*\>)|(\s*?\(\S*\))/g;
-    return text.toString().replace(all_details, "");
+    let value = "Error";
+    if (text) {
+        value = text.toString().replace(all_details, "");
+    } else {
+        alert("Something went wrong somewhere, please send Dudex a screenshot of all the ponies so he can fix the problem.")
+    }
+    return value;
 }
 
 function roll_adopt(rarities = [
