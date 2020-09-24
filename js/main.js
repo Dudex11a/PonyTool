@@ -138,7 +138,7 @@ function parse_sheet(sheet) {
                 let key = sheet.data[0].rowData[0].values[v].formattedValue;
                 // If there is a value in the spot add the data to the sheet
                 if (value.formattedValue) {
-                    parsed_sheet.data[key].push(value.formattedValue)
+                    parsed_sheet.data[key].push(value.formattedValue.trim());
                 }
             }
         }
