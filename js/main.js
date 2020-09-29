@@ -2,7 +2,7 @@ var CURRENTOBJECTS = [];
 var PONYPARENTS = [];
 var SHEETS_COMPLETE = 0;
 
-var ITEMS = [
+const ITEMS = [
     "Trait Scroll",
     "Stat Scroll",
     "Mutation Scroll",
@@ -11,7 +11,7 @@ var ITEMS = [
     "One-Night-Stand Scroll",
     "Rainbow Feather"
 ];
-var STATS = [
+const STATS = [
     "Strength",
     "Agility",
     "Intelligence",
@@ -21,7 +21,7 @@ var STATS = [
     "Magic"
 ];
 
-function init() {
+async function init() {
     // Initialize mode
     change_mode(MODES[0]);
 
@@ -41,6 +41,11 @@ function init() {
         }
         finish_requests();
     });
+
+    let commits = await get_repo_commits();
+    // Make changelog in the ChangeLog container and set the version number
+    document.getElementById("change_log_content").append(make_changelog_ele(commits));
+    document.getElementById("version_number").append(get_version_number(commits));
 }
 
 function get_sheet(url, callback) {
@@ -59,6 +64,47 @@ function get_sheet(url, callback) {
             callback(null);
         }
     });
+}
+
+function make_changelog_ele(commits) {
+
+    let ele = document.createElement("div");
+    for (commit of commits) {
+        let message = commit.commit.message;
+        // If first character is a number
+        if (!isNaN(message[0])) {
+            let msg_ele = document.createElement("div");
+            msg_ele.className += "change";
+            msg_ele.innerHTML = message.replace("\n", "<br>");
+            ele.append(msg_ele);
+        }
+    }
+
+    return ele;
+}
+
+function get_version_number(commits) {
+    let last_commit_msg = ""
+    for (commit of commits) {
+        let message = commit.commit.message;
+        // If first character is a number
+        if (!isNaN(message[0])) {
+            return message.split("\n")[0];
+        }
+    }
+}
+
+async function get_repo_commits() {
+    const token = "c9c1206ed4fa9bfddd3fabe8f097e2f432c8efa3";
+    const headers = {
+        "Authorization" : "Basic " + btoa("LittlePonyTales:" + token)
+    }
+    const url = "https://api.github.com/repos/Dudex11c/PonyTool/commits";
+    const response = await fetch(url, {
+        "method" : "GET",
+        "headers": headers
+    });
+    return await response.json();
 }
 
 function finish_requests() {
@@ -993,28 +1039,31 @@ class PonyInput {
         return pony
     }
 
-    // import_pony(pony) {
-    //     console.log(pony)
-    //     let keys = Object.keys(pony);
+    import_pony(pony) {
+        
+        let species_select = this.element.find("." + "Species");
+        console.log($(species_select).val());
+        this.update_species_parameters();
 
-    //     for (let key of keys) {
-    //         let param = pony[key];
-    //         let select = this.element.find("." + key);
-    //         for (let element of select) {
-    //             // Is a select multi
-    //             let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
-    //             if (is_multi) {
-    //                 // The index of the element
-    //                 var index = $(element).parent().index();
-    //                 if (param[index]) {
-    //                     $(element).val(param[index]);
-    //                 }
-    //             } else {
-    //                 $(element).val(param);
-    //             }
-    //         }
-    //     }
-    // }
+        let keys = Object.keys(pony);
+        for (let key of keys) {
+            let param = pony[key];
+            let select = this.element.find("." + key);
+            for (let element of select) {
+                // Is a select multi
+                let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
+                if (is_multi) {
+                    // The index of the element
+                    var index = $(element).parent().index();
+                    if (param[index]) {
+                        $(element).val(param[index]);
+                    }
+                } else {
+                    $(element).val(param);
+                }
+            }
+        }
+    }
 
     create_param(name, options, parent = this.param_container, on_change = null) {
         let container = $("<div>");

@@ -147,12 +147,18 @@ nav button {
 }
 
 #change_log {
-    width: 600px;
-    height: 200px;
+    width: 800px;
+    height: 800px;
     margin: 20px auto 20px auto;
     padding: var(--padding1);
     overflow: scroll;
     background-color: var(--light);
+}
+
+.change {
+    padding-bottom: var(--padding1);
+    margin-bottom: var(--margin1);
+    border-bottom: darkgray solid 1px;
 }
 
 .copy_button {
