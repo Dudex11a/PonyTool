@@ -1,15 +1,57 @@
-// key fnAD29Xiq2ACAkuy1YyQtZqInkFVHVVLv5MUaTmK
+const axios = require("axios");
+
+// serverless letlify lambda function, 
+// intermediate between client and github apiv4
 
 exports.handler = (event, context, callback) => {
-    // "event" has information about the path, body, headers, etc. of the request
-    console.log('event', event)
-    // "context" has information about the lambda environment and user details
-    console.log('context', context)
-    // The "callback" ends the execution of the function and returns a response back to the caller
-    return callback(null, {
+  const URL = `https://api.github.com/graphql`;
+  const accessToken = process.env.GITHUB_API_KEY;
+  const query = `
+  query {
+    repositoryOwner(login:"kiranbhalerao123"){
+      pinnedRepositories(first:10) {
+        nodes {
+          name
+          url
+          homepageUrl
+          description
+          repositoryTopics(first:10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  // Send json response to the react client app
+  const send = body => {
+    callback(null, {
       statusCode: 200,
-      body: JSON.stringify({
-        data: '⊂◉‿◉つ'
-      })
+      body: JSON.stringify(body)
+    });
+  };
+
+  // Perform API call
+  const getrepos = () => {
+    axios({
+      method: "POST",
+      url: URL,
+      data: JSON.stringify({ query }),
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
     })
+      .then(res => send(res.data.data.repositoryOwner.pinnedRepositories.nodes))
+      .catch(err => send(err));
+  };
+
+  // Make sure method is GET
+  if (event.httpMethod == "GET") {
+    // Run
+    getrepos();
   }
+};
