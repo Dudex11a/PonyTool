@@ -26,19 +26,15 @@ async function init() {
     change_mode(MODES[0]);
 
     // Get Pony Parameters Spreadsheet data
-    get_sheet('https://sheets.googleapis.com/v4/spreadsheets/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
-        if (data) {
-            parse_pony_params(data);
-            $("#pony_parameters_title").text(data.properties.title);
-        }
+    const pp_res = await fetch("/api/ponyparams");
+    pp_res.json().then(val => {
+        PONYPARAMS = JSON.parse(val);
         finish_requests();
     });
-    get_sheet('https://sheets.googleapis.com/v4/spreadsheets/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/?key=AIzaSyBXseFNL191-4HO4bZV-JcgEUxnm7aW9xQ&includeGridData=true', (data) => {
-        if (data) {
-            FARMING.items = parse_sheet(data.sheets[0]).data;
-            FARMING.messages = parse_sheet(data.sheets[1]).data;
-            $("#farming_data_title").text(data.properties.title);
-        }
+
+    const farming_res = await fetch("/api/farming");
+    farming_res.json().then(val => {
+        FARMING = JSON.parse(val);
         finish_requests();
     });
 
@@ -46,24 +42,6 @@ async function init() {
     // Make changelog in the ChangeLog container and set the version number
     document.getElementById("change_log_content").append(make_changelog_ele(commits));
     document.getElementById("version_number").append(get_version_number(commits));
-}
-
-function get_sheet(url, callback) {
-    $.ajax({
-        url : url,
-        type : 'GET',
-        dataType:'json',
-        success : function(data) {
-            console.log(data.properties.title + " succesfully obtained.");
-            callback(data);
-        },
-        error : function(request, error)
-        {
-            console.log(JSON.stringify(request));
-            console.log("Failed to load " + url + " , resorting to local backup of Pony Parameters.");
-            callback(null);
-        }
-    });
 }
 
 function make_changelog_ele(commits) {
@@ -95,10 +73,7 @@ function get_version_number(commits) {
 }
 
 async function get_repo_commits() {
-    const url = "/api/git_commits";
-    const response = await fetch(url, {
-        "method" : "GET"
-    });
+    const response = await fetch("/api/git_commits");
     return await response.json();
 }
 
@@ -137,54 +112,6 @@ function has_item(item) {
     let items = get_select_values($("#items"), ".Items");
     // If it has the item and is on breed
     return items.includes(item) && MODE === "breed";
-}
-
-function parse_pony_params(data) {
-    let new_params = parse_sheet(data.sheets[0]).data;
-    new_params.Species = {};
-    for(let i = 1; i < data.sheets.length; i++) {
-        let sheet = parse_sheet(data.sheets[i]);
-        let species = sheet.title;
-        new_params.Species[species] = sheet.data;
-    }
-    PONYPARAMS = new_params;
-}
-
-// Parse the Google Spreadsheet data into something more ledgable
-function parse_sheet(sheet) {
-    let parsed_sheet = {
-        "title": "",
-        "data": {}
-    };
-    parsed_sheet.title = sheet.properties.title
-    // If no data return and end here
-    if (!sheet.data[0].rowData) {
-        return parsed_sheet;
-    }
-    // Create keys for the data
-    for(let v = 0; v < sheet.data[0].rowData[0].values.length; v++) {
-        let value = sheet.data[0].rowData[0].values[v];
-        // If the value is valid, initialize the key
-        if (value.formattedValue) {
-            parsed_sheet.data[value.formattedValue] = [];
-        }
-    }
-    // For each row
-    for(let r = 0; r < sheet.data[0].rowData.length; r++) {
-        let row = sheet.data[0].rowData[r];
-        if (r != 0) {
-            // For each value
-            for(let v = 0; v < row.values.length; v++) {
-                let value = row.values[v];
-                let key = sheet.data[0].rowData[0].values[v].formattedValue;
-                // If there is a value in the spot add the data to the sheet
-                if (value.formattedValue) {
-                    parsed_sheet.data[key].push(value.formattedValue.trim());
-                }
-            }
-        }
-    }
-    return parsed_sheet;
 }
 
 function roll() {

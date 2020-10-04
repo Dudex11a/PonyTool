@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 exports.handler = async function(event, context, callback) {
 
     // Github Commits
-    const token = process.env.littleponytails_github;
+    const token = process.env.littleponytales_github;
     const headers = {
         // "Authorization" : "Basic " + btoa("LittlePonyTales:" + token)
         "Authorization" : "Token " + token
