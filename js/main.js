@@ -95,7 +95,7 @@ function get_version_number(commits) {
 }
 
 async function get_repo_commits() {
-    const url = "https://ponytool.netlify.com/api/git_commits";
+    const url = "/api/git_commits";
     const response = await fetch(url, {
         "method" : "GET"
     });
