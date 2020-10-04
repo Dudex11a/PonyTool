@@ -95,14 +95,9 @@ function get_version_number(commits) {
 }
 
 async function get_repo_commits() {
-    const token = "c9c1206ed4fa9bfddd3fabe8f097e2f432c8efa3";
-    const headers = {
-        "Authorization" : "Basic " + btoa("LittlePonyTales:" + token)
-    }
-    const url = "https://api.github.com/repos/Dudex11c/PonyTool/commits";
+    const url = "https://ponytool.netlify.com/api/git_commits";
     const response = await fetch(url, {
-        "method" : "GET",
-        "headers": headers
+        "method" : "GET"
     });
     return await response.json();
 }
