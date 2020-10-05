@@ -21,8 +21,9 @@
             <!-- Tabs / Navigation / Tool Select -->
             <nav class="d-flex justify-content-center bg-light">
                 <button class="btn-primary" onclick="change_mode('adopt')" id="adopt">Adopt</button>
-                <button class="btn-primary" onclick="change_mode('breed')"  id="breed">Breed</button>
-                <button class="btn-primary" onclick="change_mode('farm')"  id="farm">Farm</button>
+                <button class="btn-primary" onclick="change_mode('breed')" id="breed">Breed</button>
+                <button class="btn-primary" onclick="change_mode('farm')" id="farm">Farm</button>
+                <!-- <button class="btn-primary" onclick="change_mode('options')" id="options">⚙️</button> -->
             </nav>
             <!-- Items -->
             <div class="container d-flex justify-content-center bg-light breed" id="items">
@@ -49,12 +50,12 @@
                 <h4>Location</h4>
             </div>
             <!-- Roll Button and Amount -->
-            <div class="container d-flex justify-content-center" id="roll_container">
+            <div class="container d-flex justify-content-center adopt breed farm" id="roll_container">
                 <button onclick="roll()" class="btn-primary">Roll</button>
                 <input type="number" class="adopt" id="roll_amount" name="roll_amount" value=1 min="1">
             </div>
             <!-- Pony / Result Container -->
-            <div class="container album bg-light" id="results_container">
+            <div class="container album bg-light adopt breed farm" id="results_container">
                 <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button></div>
                 <div class="row justify-content-md-center" id="results"></div>
                 <div class="d-flex justify-content-md-center"><button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button></div>

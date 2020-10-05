@@ -20,28 +20,62 @@ const STATS = [
     "Stealth",
     "Magic"
 ];
+const MODES = [
+    "adopt",
+    "breed",
+    "farm",
+    "options"
+]
+var MODE = MODES[0];
 
 async function init() {
     // Initialize mode
     change_mode(MODES[0]);
 
+    // Make requests to the API
+    let res;
     // Get Pony Parameters Spreadsheet data
-    const pp_res = await fetch("/api/ponyparams");
-    pp_res.json().then(val => {
-        PONYPARAMS = JSON.parse(val);
+    res = await fetch("/api/ponyparams");
+    res.json().then(data => {
+        PONYPARAMS = JSON.parse(data);
         finish_requests();
     });
 
-    const farming_res = await fetch("/api/farming");
-    farming_res.json().then(val => {
-        FARMING = JSON.parse(val);
+    // Get Farming Spreadsheet data
+    res = await fetch("/api/farming");
+    res.json().then(data => {
+        FARMING = JSON.parse(data);
         finish_requests();
     });
 
-    let commits = await get_repo_commits();
-    // Make changelog in the ChangeLog container and set the version number
-    document.getElementById("change_log_content").append(make_changelog_ele(commits));
-    document.getElementById("version_number").append(get_version_number(commits));
+    // Get Git Commits
+    res = await fetch("/api/git_commits");
+    res.json().then(commits => {
+        // Make changelog in the ChangeLog container and set the version number
+        document.getElementById("change_log_content").append(make_changelog_ele(commits));
+        document.getElementById("version_number").append(get_version_number(commits));
+    });
+    
+}
+
+function get_options() {
+    return JSON.parse(localStorage.options ? localStorage.options : "{}");
+}
+
+function set_options(options) {
+    localStorage.options = JSON.stringify(options);
+    return options;
+}
+
+function get_option(option) {
+    return JSON.parse(localStorage.options)[option];
+}
+
+function set_option(option, value) {
+    let options = get_options();
+    options[option] = value;
+    localStorage.options = JSON.stringify(options);
+    return options;
 }
 
 function make_changelog_ele(commits) {
@@ -70,11 +104,6 @@ function get_version_number(commits) {
             return message.split("\n")[0];
         }
     }
-}
-
-async function get_repo_commits() {
-    const response = await fetch("/api/git_commits");
-    return await response.json();
 }
 
 function finish_requests() {
@@ -836,14 +865,6 @@ function random_in_array(array) {
 function chance(percent) {
     return (Math.floor(Math.random() * 100) + 1 <= percent);
 }
-
-const MODES = [
-    "adopt",
-    "breed",
-    "farm"
-]
-
-var MODE = MODES[0];
 
 function change_mode(mode) {
     // Set mode
