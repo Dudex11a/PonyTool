@@ -28,34 +28,88 @@ const MODES = [
 ]
 var MODE = MODES[0];
 
+const cannot_fetch = "\nCannot fetch data.\n"
+
 async function init() {
     // Initialize mode
     change_mode(MODES[0]);
 
     // Make requests to the API
+    // I make 3 requests to different URLs. It might be better to make a
+    // route get all the data instead of 3 different ones. The 3 different
+    // APIs work if one goes down but that's unlikly with it all being hosted
+    // by Netlify.
     let res;
+    let url;
+    // The url for the fetch, this is also used in some debug console.log stuff
+    url = "/api/ponyparams";
     // Get Pony Parameters Spreadsheet data
-    res = await fetch("/api/ponyparams");
-    res.json().then(data => {
-        PONYPARAMS = JSON.parse(data);
-        finish_requests();
-    });
+    res = await api_fetch(url);
+    // I "try" this function because when the api_fetch fails and returns an error 
+    // res.json() isn't a function and stops this function, if that happens I load
+    // the offline data if there is any.
+    try {
+        res.json().then(data => {
+            // Save offline data
+            localStorage.pony_params = data;
+            PONYPARAMS = JSON.parse(data);
+            finish_requests();
+        })
+    } catch (err) {
+        console.log("Using offline pony_params data.\n", err);
+        // If there's offline data use it, otherwise it'll display Error.
+        if (localStorage.pony_params) {
+            PONYPARAMS = JSON.parse(localStorage.pony_params);
+            finish_requests();
+        } else {
+            console.log("No offline pony_params data.");
+            finish_requests(url);
+        }
+    };
 
+    // These next two api_fetch follow generally the same format as above.
     // Get Farming Spreadsheet data
-    res = await fetch("/api/farming");
-    res.json().then(data => {
-        FARMING = JSON.parse(data);
-        finish_requests();
-    });
+    url = "/api/farming"
+    res = await api_fetch(url);
+    try {
+        res.json().then(data => {
+            localStorage.farming = data;
+            FARMING = JSON.parse(data);
+            finish_requests();
+        });
+    } catch (err) {
+        console.log("Using offline farming data.\n", err);
+        if (localStorage.farming) {
+            FARMING = JSON.parse(localStorage.farming);
+            finish_requests();
+        } else {
+            console.log("No offline farming data.");
+            finish_requests(url);
+        }
+    };
 
     // Get Git Commits
-    res = await fetch("/api/git_commits");
-    res.json().then(commits => {
-        // Make changelog in the ChangeLog container and set the version number
-        document.getElementById("change_log_content").append(make_changelog_ele(commits));
-        document.getElementById("version_number").append(get_version_number(commits));
-    });
+    url = "/api/git_commits";
+    res = await api_fetch(url);
+    try {
+        res.json().then(commits => {
+            // Make changelog in the ChangeLog container and set the version number
+            document.getElementById("change_log_content").append(make_changelog_ele(commits));
+            document.getElementById("version_number").append(get_version_number(commits));
+        });
+    } catch (err) {
+        console.log("Cannot get git_commits.\n", err);
+    }
     
+}
+
+async function api_fetch(url) {
+    try {
+        return await fetch(url);
+    } catch(err) {
+        console.log(url, cannot_fetch, err);
+        return err;
+    }
 }
 
 function get_options() {
@@ -106,7 +160,12 @@ function get_version_number(commits) {
     }
 }
 
-function finish_requests() {
+function finish_requests(error = undefined) {
+    // If there is a error getting the data make the loading div display Error
+    if (error) {
+        $("#loading h1")[0].innerText = "Error";
+        return;
+    }
     // Make sure all the sheets to be loaded are complete, otherwise return
     SHEETS_COMPLETE++;
     if (SHEETS_COMPLETE < 2) {
@@ -919,6 +978,12 @@ function get_select_values(element, id) {
     }
     return values;
 }
+
+// PonyInput needs some new stuff
+// ------------------------------
+// Load from database button (visability toggleable)
+// Stat input (visability toggleable)
+// 
 
 class PonyInput {
 
