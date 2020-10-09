@@ -28,11 +28,18 @@ const MODES = [
 ]
 var MODE = MODES[0];
 
-const cannot_fetch = "\nCannot fetch data.\n"
+var SITE_URL = "https://ponytool.netlify.com";
+const cannot_fetch = "\nCannot fetch data.\n";
 
 async function init() {
     // Initialize mode
     change_mode(MODES[0]);
+
+    // Use the site url if offline document and not local host
+    let current_url = document.URL
+    if (current_url.includes("localhost") || current_url.includes("https")) {
+        SITE_URL = "";
+    }
 
     // Make requests to the API
     // I make 3 requests to different URLs. It might be better to make a
@@ -42,7 +49,7 @@ async function init() {
     let res;
     let url;
     // The url for the fetch, this is also used in some debug console.log stuff
-    url = "/api/ponyparams";
+    url = SITE_URL + "/api/ponyparams";
     // Get Pony Parameters Spreadsheet data
     res = await api_fetch(url);
     // I "try" this function because when the api_fetch fails and returns an error 
@@ -69,7 +76,7 @@ async function init() {
 
     // These next two api_fetch follow generally the same format as above.
     // Get Farming Spreadsheet data
-    url = "/api/farming"
+    url = SITE_URL + "/api/farming"
     res = await api_fetch(url);
     try {
         res.json().then(data => {
@@ -89,7 +96,7 @@ async function init() {
     };
 
     // Get Git Commits
-    url = "/api/git_commits";
+    url = SITE_URL + "/api/git_commits";
     res = await api_fetch(url);
     try {
         res.json().then(commits => {
@@ -135,7 +142,7 @@ function set_option(option, value) {
 function make_changelog_ele(commits) {
 
     let ele = document.createElement("div");
-    for (commit of commits) {
+    for (let commit of commits) {
         let message = commit.commit.message;
         // If first character is a number
         if (!isNaN(message[0])) {
@@ -151,7 +158,7 @@ function make_changelog_ele(commits) {
 
 function get_version_number(commits) {
     let last_commit_msg = ""
-    for (commit of commits) {
+    for (let commit of commits) {
         let message = commit.commit.message;
         // If first character is a number
         if (!isNaN(message[0])) {
@@ -224,13 +231,14 @@ function roll() {
         }
     }
     // Copy all button visiblity
-    $(".copy_all_button").each((index, value) => {
+    let copy_buttons = $(".copy_all_button");
+    for (let button of copy_buttons) {
         if (amount > 1) {
-            $(value).removeClass("hidden");
+            $(button).removeClass("hidden");
         } else {
-            $(value).addClass("hidden");
+            $(button).addClass("hidden");
         }
-    });
+    }
     // The rarities to get a rare species while breeding w/ Rainbow Feather
     let rare_rarities = [
         100,
@@ -288,7 +296,7 @@ function roll() {
 // and the amounts of the items as their values.
 function array_to_amounts(array) {
     let object = {}
-    for (const item of array) {
+    for (let item of array) {
         // initialize key
         if (!object[item]) {
             object[item] = 0;
@@ -324,7 +332,7 @@ function object_to_html(object, separator = ": ", line_break = "\n") {
     remove_details(object);
     let param_keys = Object.keys(object);
     let result = $("<div>");
-    $(param_keys).each((index, key) => {
+    for (let key of param_keys) {
         let value = object[key];
         if (Array.isArray(value)) {
             let formatted_value = "";
@@ -347,7 +355,7 @@ function object_to_html(object, separator = ": ", line_break = "\n") {
             table_value
         );
         table_row.appendTo(result);
-    });
+    }
     let copy_button = make_copy_button(object_to_text(object, separator, line_break));
     copy_button.appendTo(result);
     return result;
@@ -401,7 +409,7 @@ function copy_all() {
 
 function remove_details(pony) {
     let param_keys = Object.keys(pony)
-    $(param_keys).each((index, key) => {
+    for (let key of param_keys) {
         let value = pony[key];
         if (Array.isArray(value)) {
             for (let i in value) {
@@ -410,7 +418,7 @@ function remove_details(pony) {
         } else {
             pony[key] = remove_detail(pony[key]);
         }
-    });
+    }
     return pony
 }
 
@@ -435,21 +443,21 @@ function roll_adopt(rarities = [
     // Determine Species Allowed
     let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
-    $(all_species).each((index, value) => {
-        let detail = find_rarities(value);
+    for (let species of all_species) {
+        let detail = find_rarities(species);
         if (detail) {
             if (detail[0] == "(U)" && rarities[1]) {
-                available_species.push(value);
+                available_species.push(species);
             }
             if (detail[0] == "(R)" && rarities[2]) {
-                available_species.push(value);
+                available_species.push(species);
             }
         } else {
             if (rarities[0]) {
-                available_species.push(value);
+                available_species.push(species);
             }
         }
-    });
+    }
     if (available_species.length <= 0) {
         alert("There are no Species with these settings.\nSetting all Species on.");
         available_species = all_species;
@@ -648,7 +656,7 @@ function roll_pony(species, params = null) {
     // Roll for each odd
     for (let key of keys) {
         let odd_values = odds[key];
-        for (odd of odd_values) {
+        for (let odd of odd_values) {
             if (chance(odd)) {
                 let rolled_value = special_random(params[key], pony[key], true);
                 if (rolled_value) pony[key].push(rolled_value);
@@ -836,10 +844,10 @@ function combine_species_params(species) {
 }
 
 function special_random(array, exceptions = [], wildcard = true) {
-    $(exceptions).each((index, exception) => {
+    for (let exception of exceptions) {
         // Filter the exceptions out of the array
         array = array.filter(item => item != exception)
-    });
+    }
     let item;
     // If it's an array of Strings (I only check the first value
     if (typeof array[0] == "string") {
@@ -849,7 +857,7 @@ function special_random(array, exceptions = [], wildcard = true) {
         // To remove from the common array later on
         let to_remove = [];
         // Sort by rarity into different arrays
-        $(common).each((index, value) => {
+        for (let value of common) {
             let detail = value.match(/\(\S*\)/g);
             if (detail) {
                 if (detail[0] == "(U)") {
@@ -861,7 +869,7 @@ function special_random(array, exceptions = [], wildcard = true) {
                     to_remove.push(value);
                 }
             }
-        });
+        }
         for (let ri in to_remove) {
             let remove = to_remove[ri];
             // Filter out the uncommon and rares
@@ -982,19 +990,25 @@ function get_select_values(element, id) {
 // PonyInput needs some new stuff
 // ------------------------------
 // Load from database button (visability toggleable)
-// Stat input (visability toggleable)
-// 
+// __MORE DETAILS BUTTON__
+// Save to DB (if connected to DB)
+// Stat input
+// Pony Name
+// Pony ID
+// Ref
+
 
 class PonyInput {
 
-    constructor(title) {
+    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = true) {
         // Create a HTML element for Pony Input
-        this.element = $("<div>")
+        this.element = $("<div>");
         this.element.append($("<h2>").text(title));
 
-        this.param_container = $("<div>");
-
+        // Put elements associated with the species in here
         this.param_eles = [];
+
+        // Load Pony from database button (this will only be visible when connected to the database)
 
         // Create species select element
         let keys = Object.keys(PONYPARAMS.Species);
@@ -1006,8 +1020,58 @@ class PonyInput {
         this.species_select.element.addClass("parent_param");
         this.element.append(this.species_select.element);
 
+        // Container for the species specific params
+        this.param_container = $("<div>");
         this.element.append(this.param_container);
-        this.update_species_parameters()
+
+        // More details container (holds Stat input, Pony Name, Pony ID, and the ref link)
+        this.details_container = $("<div>");
+        // Stat Input
+        let stat_input = $("<div>");
+        for (let stat of STATS) {
+            let container = $("<div>");
+            container.append($("<p>").text(stat));
+            // I need to add number parameter to this element
+            container.append($("<input>"));
+            stat_input.append(container);
+        }
+        // Save to DB button
+        let s_btn = $("<button>").text("Save to PonyDB");
+        // Details elements to go/append into the details container
+        let details_elements = [
+            $("<input>"), // Owner
+            $("<input>"), // Pony Name
+            $("<input>"), // Pony ID
+            $("<input>"), // Ref
+            stat_input,
+            s_btn
+        ];
+        for (let ele of details_elements) {
+            this.details_container.append(ele);
+        }
+        
+        // Move details button (toggles visibility of the more details container)
+        this.details_button = $("<button>").text("+");
+        let btn = this.details_button;
+        let ctn = this.details_container;
+        // Toggle visibility of the details container on button press
+        this.details_button.click(() => {
+            if (ctn.hasClass("hidden")) {
+                ctn.removeClass("hidden");
+                btn.text("-");
+            } else {
+                ctn.addClass("hidden");
+                btn.text("+");
+            }
+        });
+        
+        if (has_details_button) {
+            this.element.append(this.details_button);
+            this.details_container.addClass("hidden");
+        }
+        this.element.append(this.details_container);
+
+        this.update_species_parameters();
     }
 
     get_species() {
@@ -1094,9 +1158,9 @@ class PonyInput {
 
     update_species_parameters() {
         // Remove old parameters
-        this.param_container.children().each((index, value) => {
-            value.remove();
-        });
+        for (let child of this.param_container.children()) {
+            child.remove();
+        }
 
         // Get the params of all the species in the Pony
         let params = get_species_params(this.get_species());
