@@ -1009,6 +1009,10 @@ class PonyInput {
         this.param_eles = [];
 
         // Load Pony from database button (this will only be visible when connected to the database)
+        let load_btn = $("<button>").text("Load Pony from PonyDB");
+        if (has_load_db_button) {
+            this.element.append(load_btn);
+        }
 
         // Create species select element
         let keys = Object.keys(PONYPARAMS.Species);
