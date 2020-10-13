@@ -44,13 +44,28 @@ nav button {
     background-color: #FFF;
 }
 
+
+#results_container {
+    padding: var(--padding1);
+}
+
+#results_container .copy_all_button {
+    margin: 0 auto;
+    display: block;
+}
+
+#results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 #results > div {
-    
+    display: block;
     text-align: center;
     width: 400px;
     margin: var(--margin1);
     padding: var(--padding1);
-    padding-bottom: 40px;
     border-style: solid;
     border-width: 3px;
     border-radius: 3px;
@@ -75,6 +90,10 @@ nav button {
 
 #results .table_value {
     width: 70%;
+}
+
+#results .copy_button {
+    width: 100%;
 }
 
 #breed_container > div {
@@ -165,12 +184,6 @@ nav button {
     padding-bottom: var(--padding1);
     margin-bottom: var(--margin1);
     border-bottom: darkgray solid 1px;
-}
-
-.copy_button {
-    width: calc(100% - var(--padding1) - var(--margin1));
-    position: absolute;
-    bottom: var(--padding1);
 }
 
 .pony_db {
