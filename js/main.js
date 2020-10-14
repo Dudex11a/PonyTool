@@ -147,7 +147,6 @@ function make_changelog_ele(commits) {
         // If first character is a number
         if (!isNaN(message[0])) {
             let msg_ele = document.createElement("div");
-            msg_ele.className += "change";
             msg_ele.innerHTML = message.replace("\n", "<br>");
             ele.append(msg_ele);
         }
@@ -199,7 +198,7 @@ function finish_requests(error = undefined) {
             PONYPARENTS[1].element.removeClass("hidden");
         }
     });
-    item_select.element.addClass("box1");
+    // item_select.element.addClass("box1");
     $("#items").append(item_select.element);
 }
 
@@ -210,6 +209,8 @@ function has_item(item) {
 }
 
 function roll() {
+    // Make results visible, this a really minor visual effect that bothers me.
+    $("#results_container").removeClass("hidden");
     // Empty CURRENTOBJECTS
     CURRENTOBJECTS = []
     // Clear results
@@ -287,7 +288,6 @@ function roll() {
                 break;
         }
         CURRENTOBJECTS.push(object);
-        element.addClass(["card", "result"]);
         element.appendTo(results);
     }
 }
@@ -332,6 +332,7 @@ function object_to_html(object, separator = ": ", line_break = "\n") {
     remove_details(object);
     let param_keys = Object.keys(object);
     let result = $("<div>");
+    result.addClass("clear_box");
     for (let key of param_keys) {
         let value = object[key];
         if (Array.isArray(value)) {
@@ -364,7 +365,7 @@ function object_to_html(object, separator = ": ", line_break = "\n") {
 function make_copy_button(text) {
     let button = $("<button>");
     button.text("Copy");
-    button.addClass(["copy_button", "btn-primary"]);
+    button.addClass(["copy_button", "on"]);
     button.click(() => {
         copy_to_clipboard(text);
     });
@@ -712,8 +713,10 @@ function roll_farm() {
 
 function update_farm_element(items = CURRENTOBJECTS[0]) {
     let text_ele = $("#farm_message p")[0];
-    let id_ele = $("#farm_message input")[0];
-    let id = id_ele.value - 1;
+    // This code was going to be used to randomize messages, I don't use it right now
+    // let id_ele = $("#farm_message input")[0];
+    // let id = id_ele.value - 1;
+    let id = 0
     let location = get_farm_location();
     let message = FARMING.messages[location][id];
     // If the message or the items doesn't exist or if it's the wrong data, clear the text exit the function
@@ -949,12 +952,12 @@ function change_mode(mode) {
 
     // Default navigiation button styles
     let buttons = $("nav button");
-    buttons.removeClass("btn-primary");
-    buttons.addClass("btn-secondary");
+    buttons.removeClass("on");
+    buttons.addClass("off");
     // Add button style to current mode
     let active_button = $("#" + mode);
-    active_button.removeClass("btn-secondary");
-    buttons.addClass("btn-primary");
+    active_button.removeClass("off");
+    buttons.addClass("on");
 }
 
 function create_select_element(options, id = "", on_change = null) {

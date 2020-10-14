@@ -1,22 +1,101 @@
 :root {
     --margin1: 10px;
     --padding1: 10px;
+    --radius1: 3px;
+    --color_lowest: white;
+    --color_highest: black;
+    --color_primary: #0ad150;
+    --color_second: #f2fcfc;
+    --btn_color_off: darkgrey;
+}
+
+body {
+    color: var(--color_highest);
+    background-image: url("../img/background.png");
+    background-repeat: repeat;
+    background-color: var(--color_second);
+    /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
+    /* animation-name: background_scroll;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-duration: 5s; */
+}
+
+@keyframes background_scroll {
+    from {background-position: 0 0;}
+    to {background-position: 50px 50px;}
+}
+
+button {
+    background-color: var(--color_primary);
+    padding: calc(var(--padding1) / 2) var(--padding1);
+    color: var(--color_lowest);
+}
+
+/* The on and off is mainly used for buttons.
+I don't do "button .on" because the default button color overwrites the ".on" color */
+.on {
+    background-color: var(--color_primary);
+}
+
+.off {
+    background-color: var(--btn_color_off);
+}
+
+input:checked {
+    color: var(--color_primary);
+}
+
+a {
+    color: var(--color_primary);
 }
 
 header {
-    background-color: var(--light);
-    margin: var(--margin1);
-    margin-top: 0;
+    background-color: var(--color_lowest);
     padding: 5px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 30pt;
 }
 
 nav {
-    margin-bottom: var(--margin1);
+    background-color: var(--color_lowest);
     padding: 5px;
+    display: flex;
+    justify-content: center;
+    border-top: var(--color_primary) 1px dashed;
+    border-bottom: var(--color_primary) 1px solid;
 }
 
 nav button {
     margin: 5px
+}
+
+/* This is a class instead of a css variable so I can easily resize it if the screen changes size.*/
+.medium_width {
+    width: 50vw;
+    min-width: 600px;
+}
+
+@media only screen and (max-width: 600px) {
+    .medium_width {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
+.small_width {
+    width: 30vw;
+    min-width: 300px;
+}
+
+@media only screen and (max-width: 300px) {
+    .small_width {
+        width: 100%;
+        min-width: 100%;
+    }
 }
 
 #loading {
@@ -40,17 +119,27 @@ nav button {
     left: 30%;
     width: 40%;
     border: 3px solid var(--light);
-    border-radius: 3px;
+    border-radius: var(--radius1);
     background-color: #FFF;
 }
 
+#adopt_container {
+    margin: 0 auto;
+    padding: var(--padding1);
+    display: block;
+    text-align: center;
+    background-color: var(--color_second);
+}
 
 #results_container {
+    margin: 0;
     padding: var(--padding1);
+    background-color: var(--color_second);
+    border-radius: var(--radius1);
 }
 
 #results_container .copy_all_button {
-    margin: 0 auto;
+    width: 100%;
     display: block;
 }
 
@@ -66,9 +155,6 @@ nav button {
     width: 400px;
     margin: var(--margin1);
     padding: var(--padding1);
-    border-style: solid;
-    border-width: 3px;
-    border-radius: 3px;
 }
 
 #results tr {
@@ -96,12 +182,20 @@ nav button {
     width: 100%;
 }
 
+.clear_box {
+    margin: var(--margin1);
+    padding: var(--padding1);
+    border-radius: var(--radius1);
+    border: 2px solid var(--color_primary);
+    background-color: var(--color_lowest);
+}
+
 #breed_container > div {
     width: 40%;
     min-width: 200px;
     margin: var(--margin1);
     padding: var(--padding1);
-    border-radius: 3px;
+    border-radius: var(--radius1);
     border: 3px solid var(--light);
     border-color: rgba(0,0,0,.125);
     background-color: #FFF;
@@ -110,7 +204,7 @@ nav button {
 .box1 {
     margin: var(--margin1);
     padding: var(--padding1);
-    border-radius: 3px;
+    border-radius: var(--radius1);
     border: 3px solid var(--light);
     border-color: rgba(0,0,0,.125);
     background-color: #FFF;
@@ -119,7 +213,7 @@ nav button {
 .parent_param {
     border-bottom: 1px solid var(--gray);
     padding-bottom: 3px;
-    border-radius: 3px;
+    border-radius: var(--radius1);
 }
 
 .select_multi span, .select_multi p {
@@ -155,15 +249,16 @@ nav button {
     background-color: var(--warning);
 }
 
-#items .select_multi {
-    width: 300px;
+#items {
+    margin: var(--margin1) auto;
 }
 
 #roll_container {
-    background-color: var(--light);
-    border: 3px solid var(--light);
-    border-bottom: 0;
-    border-radius: 3px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    background-color: var(--color_second);
+    border-radius: var(--radius1);
     padding: var(--padding1);
 }
 
@@ -172,15 +267,15 @@ nav button {
 }
 
 #change_log {
-    width: 800px;
-    height: 800px;
-    margin: 20px auto 20px auto;
+    margin: 0 auto;
     padding: var(--padding1);
-    overflow: scroll;
-    background-color: var(--light);
+    display: block;
+    background-color: var(--color_second);
 }
 
-.change {
+/* Might fix this up at some point so there aren't so many divs.
+ This is for the individual changes */
+#change_log > div > div > div {
     padding-bottom: var(--padding1);
     margin-bottom: var(--margin1);
     border-bottom: darkgray solid 1px;
@@ -207,9 +302,10 @@ nav button {
 }
 
 .hidden {
-    margin: 0;
-    padding: 0;
-    height: 0;
-    width: 0;
-    visibility: hidden;
+    /* This is all important so that it really will be hidden. */
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    visibility: hidden !important;
 }

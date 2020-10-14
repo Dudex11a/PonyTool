@@ -12,34 +12,32 @@
         <div id="loading"><h1>Loading Spreadsheet...</h1></div>
         <main role="main">
             <!-- Title -->
-            <header class="text-center">
-                <h1 class="jumbotron-heading">Pony Tool</h1>
+            <header>
+                <h1>Pony Tool</h1>
                 <p id="version_number"></p>
                 <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" id="pony_parameters_title" target="_blank">Pony Parameters</a><br>
                 <a href="https://docs.google.com/spreadsheets/d/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/edit?usp=sharing" id="farming_data_title" target="_blank">Farming Data</a>
             </header>
             <!-- Tabs / Navigation / Tool Select -->
-            <nav class="d-flex justify-content-center bg-light">
-                <button class="btn-primary" onclick="change_mode('adopt')" id="adopt">Adopt</button>
-                <button class="btn-primary" onclick="change_mode('breed')" id="breed">Breed</button>
-                <button class="btn-primary" onclick="change_mode('farm')" id="farm">Farm</button>
-                <!-- <button class="btn-primary" onclick="change_mode('options')" id="options">⚙️</button> -->
+            <nav>
+                <button onclick="change_mode('adopt')" id="adopt">Adopt</button>
+                <button onclick="change_mode('breed')" id="breed">Breed</button>
+                <button onclick="change_mode('farm')" id="farm">Farm</button>
+                <!-- <button onclick="change_mode('options')" id="options">⚙️</button> -->
             </nav>
             <!-- Items -->
-            <div class="container d-flex justify-content-center bg-light breed" id="items">
+            <div class="small_width clear_box breed" id="items">
 
             </div>
             <!-- Adopt -->
-            <div class="container d-flex justify-content-center bg-light adopt">
-                <div style="width: 300px">
-                    <h4>Species Included</h4>
-                    <input type="checkbox" id="common_species" value="common" checked>
-                    <label for="common_species"> Common</label><br>
-                    <input type="checkbox" id="uncommon_species" value="uncommon" checked>
-                    <label for="uncommon_species"> Uncommon</label><br>
-                    <input type="checkbox" id="rare_species" value="rare" checked>
-                    <label for="rare_species"> Rare</label>
-                </div>
+            <div class="medium_width adopt" id="adopt_container">
+                <h4>Species Included</h4>
+                <input type="checkbox" id="common_species" value="common" checked>
+                <label for="common_species"> Common</label><br>
+                <input type="checkbox" id="uncommon_species" value="uncommon" checked>
+                <label for="uncommon_species"> Uncommon</label><br>
+                <input type="checkbox" id="rare_species" value="rare" checked>
+                <label for="rare_species"> Rare</label>
             </div>
             <!-- Breed -->
             <div class="container d-flex justify-content-around bg-light breed" id="breed_container">
@@ -50,25 +48,25 @@
                 <h4>Location</h4>
             </div>
             <!-- Roll Button and Amount -->
-            <div class="container d-flex justify-content-center adopt breed farm" id="roll_container">
-                <button onclick="roll()" class="btn-primary">Roll</button>
+            <div class="medium_width adopt breed farm" id="roll_container">
+                <button onclick="roll()">Roll</button>
                 <input type="number" class="adopt" id="roll_amount" name="roll_amount" value=1 min="1">
             </div>
             <!-- Result Container -->
-            <div class="bg-light adopt breed farm" id="results_container">
-                <button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button>
+            <div class="hidden" id="results_container">
+                <button class="copy_all_button hidden" onclick="copy_all()">Copy All</button>
                 <div id="results"></div>
-                <button class="btn-primary btn-lg copy_all_button hidden" onclick="copy_all()">Copy All</button>
+                <button class="copy_all_button hidden" onclick="copy_all()">Copy All</button>
             </div>
             <!-- Farming Message -->
             <div class="container d-flex flex-column justify-content-center bg-light farm" id="farm_message">
-                <input type="number" class="farm" style="visibility: hidden;" id="roll_amount" name="roll_amount" value=1 min="1" onchange="update_farm_element()">
+                <!-- <input type="number" class="farm" style="visibility: hidden;" id="roll_amount" name="roll_amount" value=1 min="1" onchange="update_farm_element()"> -->
                 <p></p>
-                <button class="btn-primary" onclick="copy_to_clipboard($('#farm_message p').text())">Copy w/ Message</button>
+                <button onclick="copy_to_clipboard($('#farm_message p').text())">Copy w/ Message</button>
             </div>
-            <!-- Change Log -->
-            <div id="change_log">
-                <h2>Change Log</h2>
+            <!-- Recend Changes -->
+            <div class="medium_width" id="change_log">
+                <h2>Recent Changes</h2>
                 <div id="change_log_content"></div>
             </div>
         </main>
