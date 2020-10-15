@@ -5,8 +5,18 @@
     --color_lowest: white;
     --color_highest: black;
     --color_primary: #0ad150;
+    --color_primary_dark: #03752b;
     --color_second: #f2fcfc;
+    --color_bad: rgb(230, 67, 67);
     --btn_color_off: darkgrey;
+    --transition_time: 0.05s;
+}
+
+/* Defaults */
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Geneva, sans-serif;
 }
 
 body {
@@ -15,10 +25,11 @@ body {
     background-repeat: repeat;
     background-color: var(--color_second);
     /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
-    /* animation-name: background_scroll;
+    /* animation-name: background_scroll; */
     animation-iteration-count: infinite;
     animation-timing-function: linear;
-    animation-duration: 5s; */
+    animation-duration: 5s;
+    /*  */
 }
 
 @keyframes background_scroll {
@@ -28,8 +39,16 @@ body {
 
 button {
     background-color: var(--color_primary);
+    transition: background-color var(--transition_time);
     padding: calc(var(--padding1) / 2) var(--padding1);
     color: var(--color_lowest);
+    border-color: var(--color_primary_dark);
+    border-radius: var(--radius1);
+}
+
+button:active {
+    background-color: var(--color_primary_dark);
+    transition: background-color var(--transition_time);
 }
 
 /* The on and off is mainly used for buttons.
@@ -48,6 +67,10 @@ input:checked {
 
 a {
     color: var(--color_primary);
+}
+
+a:hover {
+    color: var(--color_primary_dark);
 }
 
 header {
@@ -139,7 +162,9 @@ nav button {
 }
 
 #results_container .copy_all_button {
-    width: 100%;
+    font-size: 16pt;
+    margin: 0 auto;
+    padding: var(--padding1) calc(var(--padding1) * 2);
     display: block;
 }
 
@@ -152,7 +177,7 @@ nav button {
 #results > div {
     display: block;
     text-align: center;
-    width: 400px;
+    width: 360px;
     margin: var(--margin1);
     padding: var(--padding1);
 }
@@ -190,15 +215,29 @@ nav button {
     background-color: var(--color_lowest);
 }
 
+#breed_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 #breed_container > div {
-    width: 40%;
-    min-width: 200px;
+    width: 360px;
     margin: var(--margin1);
     padding: var(--padding1);
-    border-radius: var(--radius1);
-    border: 3px solid var(--light);
-    border-color: rgba(0,0,0,.125);
-    background-color: #FFF;
+}
+
+#breed_container > div > button {
+    width: 100%;
+}
+
+#breed_container .parent_param {
+    border-bottom: var(--color_primary) 1px solid;
+    margin-bottom: var(--margin1);
+}
+
+#breed_container input, #breed_container select, #items select {
+    width: 70%;
 }
 
 .box1 {
@@ -221,32 +260,17 @@ nav button {
 }
 
 .select_multi button {
-    border-radius: 20px;
-    margin: var(--margin1);
-}
-
-.select_multi select {
+    border-radius: var(--radius1);
+    padding: calc(var(--padding1) / 3) var(--padding1);
     margin: calc(var(--margin1) / 2);
 }
 
 .add_button {
-    color: white;
-    border-color: var(--success);
-    background-color: var(--success);
-}
-
-.add_button:hover {
-    background-color: #5C5;
+    background-color: var(--color_primary);
 }
 
 .close_button {
-    color: white;
-    border-color: var(--danger);
-    background-color: var(--danger);
-}
-
-.close_button:hover {
-    background-color: var(--warning);
+    background-color: var(--color_bad);
 }
 
 #items {
@@ -285,8 +309,15 @@ nav button {
     visibility: hidden;
 }
 
-#farm_container {
+#farm_container, #farm_message {
+    padding: var(--padding1);
     text-align: center;
+    margin: 0 auto;
+    background-color: var(--color_second);
+}
+
+#farm_message button {
+    margin: var(--margin1);
 }
 
 #farm_container select {
@@ -294,11 +325,10 @@ nav button {
     width: 200px;
 }
 
-#farm_message {
-    padding: var(--padding1);
-    width: 40%;
-    min-width: 300px;
-    text-align: center;
+/* Pony Input extra parameters */
+.pi_extra {
+    display: flex;
+    flex-flow: column;
 }
 
 .hidden {

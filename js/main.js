@@ -119,6 +119,9 @@ async function api_fetch(url) {
     }
 }
 
+// OPTIONS
+
+
 function get_options() {
     return JSON.parse(localStorage.options ? localStorage.options : "{}");
 }
@@ -137,6 +140,14 @@ function set_option(option, value) {
     options[option] = value;
     localStorage.options = JSON.stringify(options);
     return options;
+}
+
+function make_options() {
+
+}
+
+function apply_options() {
+
 }
 
 function make_changelog_ele(commits) {
@@ -958,6 +969,16 @@ function change_mode(mode) {
     let active_button = $("#" + mode);
     active_button.removeClass("off");
     buttons.addClass("on");
+    // Custom mode behavior
+    switch (mode) {
+        case "options":
+            // Hide the results when going to options
+            $("#results_container").addClass("hidden");
+            break;
+        default:
+            $("#results_container").removeClass("hidden");
+            break;
+    }
 }
 
 function create_select_element(options, id = "", on_change = null) {
@@ -1006,6 +1027,7 @@ class PonyInput {
     constructor(title = "PonyInput", has_details_button = true, has_load_db_button = true) {
         // Create a HTML element for Pony Input
         this.element = $("<div>");
+        this.element.addClass("clear_box");
         this.element.append($("<h2>").text(title));
 
         // Put elements associated with the species in here
@@ -1033,13 +1055,14 @@ class PonyInput {
 
         // More details container (holds Stat input, Pony Name, Pony ID, and the ref link)
         this.details_container = $("<div>");
+        this.details_container.addClass("pi_extra");
         // Stat Input
         let stat_input = $("<div>");
         for (let stat of STATS) {
             let container = $("<div>");
             container.append($("<p>").text(stat));
             // I need to add number parameter to this element
-            container.append($("<input>"));
+            container.append($("<input type='number' value='0'>"));
             stat_input.append(container);
         }
         // Save to DB button
@@ -1058,17 +1081,17 @@ class PonyInput {
         }
         
         // Move details button (toggles visibility of the more details container)
-        this.details_button = $("<button>").text("+");
+        this.details_button = $("<button>").text("Show More");
         let btn = this.details_button;
         let ctn = this.details_container;
         // Toggle visibility of the details container on button press
         this.details_button.click(() => {
             if (ctn.hasClass("hidden")) {
                 ctn.removeClass("hidden");
-                btn.text("-");
+                btn.text("Show Less");
             } else {
                 ctn.addClass("hidden");
-                btn.text("+");
+                btn.text("Show More");
             }
         });
         
@@ -1231,7 +1254,7 @@ class SelectMulti {
         if (this.on_change) {
             select.change(() => this.on_change());
         }
-        let remove_button = $("<button>").text("X");
+        let remove_button = $("<button>").text("Remove");
         remove_button.addClass("close_button");
         // Remove this select on click
         remove_button.click((value) => {
