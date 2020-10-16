@@ -41,6 +41,11 @@ async function init() {
         SITE_URL = "";
     }
 
+    // Add default option to the options in Local Storage
+    add_default_options();
+    // Make the options elements
+    $("#options_container").append(make_options_ele().children());
+
     // Make requests to the API
     // I make 3 requests to different URLs. It might be better to make a
     // route get all the data instead of 3 different ones. The 3 different
@@ -121,6 +126,48 @@ async function api_fetch(url) {
 
 // OPTIONS
 
+const default_options = {
+    // The id of the option
+    /*"example": {
+        // The type to use when making the option for the options tab
+        "type" : "boolean",
+        // The name to use for the options tab
+        "name" : "Example",
+        // The default value
+        "value" : true
+        // A function to run after the value is set
+        "action" : function(){}
+    },*/
+    "scrolling_bg": {
+        "type" : "boolean",
+        "name" : "Scrolling Background",
+        "value" : false,
+        "action" : function(value) {
+            // If scrolling background is on set the animation name to scroll
+            if (value) $("main").css("animation-name", "background_scroll");
+            else $("main").css("animation-name", "_");
+        }
+    },
+    // "test_number": {
+    //     "type" : "number",
+    //     "name" : "Test Number",
+    //     "value" : 1
+    // },
+    // "test_select": {
+    //     "type" : "select",
+    //     "name" : "Test Select",
+    //     "value" : "1",
+    //     "values" : [
+    //         "1",
+    //         "two",
+    //         "3"
+    //     ]
+    // },
+    // This has no type so it doesn't automatically add itself to options
+    "db_pass": {
+        "value" : ""
+    }
+}
 
 function get_options() {
     return JSON.parse(localStorage.options ? localStorage.options : "{}");
@@ -142,13 +189,83 @@ function set_option(option, value) {
     return options;
 }
 
-function make_options() {
-
+function add_default_options() {
+    for (let key of Object.keys(default_options)) {
+        let option = default_options[key];
+        // If the default option is not the current options.
+        // This is so if I add more default options down the line
+        // it'll automatically add them to the options.
+        if (!get_options()[key]) {
+            set_option(key, option.value);
+        }
+    }
 }
 
-function apply_options() {
-
+function make_options_ele() {
+    let ele = $("<div>");
+    for (let key of Object.keys(default_options)) {
+        let option = default_options[key];
+        let current_value = get_options()[key];
+        if (option.type) {
+            let option_ele = $("<div>");
+            // Make title
+            let title_ele = $("<label>").text(option.name)
+            // Set label to be connected to the input
+            title_ele.attr("for", key);
+            option_ele.append(title_ele);
+            // Need to init the input_ele here so it doesn't "redeclare it".
+            let input_ele;
+            // Value of the option
+            let val;
+            switch (option.type) {
+                case "boolean":
+                    input_ele = $("<input type='checkbox'>");
+                    input_ele.attr("id", key);
+                    input_ele.prop("checked", current_value);
+                    // On input change, set option
+                    input_ele.change(() => {
+                        val = input_ele.is(":checked");
+                        set_option(key, val);
+                        if (option.action) option.action(val);
+                    });
+                    break;
+                case "number":
+                    input_ele = $("<input type='number'>");
+                    input_ele.attr("id", key);
+                    input_ele.val(current_value);
+                    input_ele.change(() => {
+                        val = input_ele.val();
+                        set_option(key, val);
+                        if (option.action) option.action(val);
+                    });
+                    break;
+                case "select":
+                    input_ele = $("<select>");
+                    for (let input_option_ele of option.values) {
+                        input_ele.append($("<option>").text(input_option_ele));
+                    }
+                    input_ele.attr("id", key);
+                    input_ele.val(current_value);
+                    input_ele.change(() => {
+                        val = input_ele.val();
+                        set_option(key, val);
+                        if (option.action) option.action(val);
+                    });
+                    break;
+            }
+            // Add input ele if there is one
+            if (input_ele) option_ele.append(input_ele);
+            // Run the option's action with the current_value
+            if (option.action) option.action(current_value);
+            ele.append(option_ele);
+        }
+    }
+    return ele;
 }
+
+// function apply_options() {
+
+// }
 
 function make_changelog_ele(commits) {
 
@@ -1024,7 +1141,7 @@ function get_select_values(element, id) {
 
 class PonyInput {
 
-    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = true) {
+    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = false) {
         // Create a HTML element for Pony Input
         this.element = $("<div>");
         this.element.addClass("clear_box");
@@ -1082,6 +1199,7 @@ class PonyInput {
         
         // Move details button (toggles visibility of the more details container)
         this.details_button = $("<button>").text("Show More");
+        this.details_button.addClass("hidden"); // REMOVE THIS LATER
         let btn = this.details_button;
         let ctn = this.details_container;
         // Toggle visibility of the details container on button press

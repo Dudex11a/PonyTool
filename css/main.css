@@ -10,6 +10,7 @@
     --color_bad: rgb(230, 67, 67);
     --btn_color_off: darkgrey;
     --transition_time: 0.05s;
+    --basic_border: var(--color_primary) 1px solid;
 }
 
 /* Defaults */
@@ -21,11 +22,16 @@
 
 body {
     color: var(--color_highest);
+    background-color: var(--color_lowest);
+}
+
+main {
+    background-color: var(--color_second);
     background-image: url("../img/background.png");
     background-repeat: repeat;
-    background-color: var(--color_second);
+    background-attachment: fixed;
     /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
-    /* animation-name: background_scroll; */
+    animation-name: _;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
     animation-duration: 5s;
@@ -83,13 +89,18 @@ header h1 {
     font-size: 30pt;
 }
 
+footer {
+    background-color: var(--color_lowest);
+    border-top: var(--basic_border);
+}
+
 nav {
     background-color: var(--color_lowest);
     padding: 5px;
     display: flex;
     justify-content: center;
     border-top: var(--color_primary) 1px dashed;
-    border-bottom: var(--color_primary) 1px solid;
+    border-bottom: var(--basic_border);
 }
 
 nav button {
@@ -104,8 +115,9 @@ nav button {
 
 @media only screen and (max-width: 600px) {
     .medium_width {
-        width: 100%;
-        min-width: 100%;
+        /* Without the "!important" other "padding" will mess with this size */
+        padding: 0 5% !important;
+        min-width: 90% !important;
     }
 }
 
@@ -141,9 +153,23 @@ nav button {
     top: 38%;
     left: 30%;
     width: 40%;
-    border: 3px solid var(--light);
+    border: var(--basic_border);
     border-radius: var(--radius1);
     background-color: #FFF;
+}
+
+#credit {
+    font-size: 9px;
+    display: block;
+    position: fixed;
+    padding: 3px 3px 1px 3px;
+    text-align: right;
+    bottom: 0;
+    right: 0;
+    background-color: var(--color_lowest);
+    border-top: var(--basic_border);
+    border-left: var(--basic_border);
+    border-top-left-radius: var(--radius1);
 }
 
 #adopt_container {
@@ -232,7 +258,7 @@ nav button {
 }
 
 #breed_container .parent_param {
-    border-bottom: var(--color_primary) 1px solid;
+    border-bottom: var(--basic_border);
     margin-bottom: var(--margin1);
 }
 
@@ -294,7 +320,6 @@ nav button {
     margin: 0 auto;
     padding: var(--padding1);
     display: block;
-    background-color: var(--color_second);
 }
 
 /* Might fix this up at some point so there aren't so many divs.
@@ -323,6 +348,23 @@ nav button {
 #farm_container select {
     margin: 0 auto 0 auto;
     width: 200px;
+}
+
+#options_container {
+    background-color: var(--color_second);
+    margin: 0 auto;
+}
+
+#options_container > div {
+    display: flex;
+    border-bottom: var(--basic_border);
+    border-radius: var(--radius1);
+    padding: 1px;
+    margin: 1px;
+}
+
+#options_container > div > * {
+    padding: var(--padding1);
 }
 
 /* Pony Input extra parameters */
