@@ -1,6 +1,18 @@
-var CURRENTOBJECTS = [];
+// The results in the #results_container
+var CURRENTRESULTS = [];
+// The PonyInput objects for the parents in the breed tab go in here.
 var PONYPARENTS = [];
+// This is mainly for the "loading database..." message,
+// SHEETS_COMPLETE track the amount of api request that have been processed.
 var SHEETS_COMPLETE = 0;
+// If has a connection to the database, if the db key is working.
+var DB_CONNECTED = true;
+
+function set_connected(value) {
+    DB_CONNECTED = value;
+    if (value) $(".db_hidden").removeClass("hidden");
+    else $(".db_hidden").addClass("hidden");
+}
 
 const ITEMS = [
     "Trait Scroll",
@@ -29,7 +41,7 @@ const MODES = [
 var MODE = MODES[0];
 
 var SITE_URL = "https://ponytool.netlify.com";
-const cannot_fetch = "\nCannot fetch data.\n";
+const CANT_FETCH_STRING = "\nCannot fetch data.\n";
 
 async function init() {
     // Initialize mode
@@ -119,7 +131,7 @@ async function api_fetch(url) {
     try {
         return await fetch(url);
     } catch(err) {
-        console.log(url, cannot_fetch, err);
+        console.log(url, CANT_FETCH_STRING, err);
         return err;
     }
 }
@@ -339,8 +351,8 @@ function has_item(item) {
 function roll() {
     // Make results visible, this a really minor visual effect that bothers me.
     $("#results_container").removeClass("hidden");
-    // Empty CURRENTOBJECTS
-    CURRENTOBJECTS = []
+    // Empty CURRENTRESULTS
+    CURRENTRESULTS = []
     // Clear results
     let results = $("#results")[0]
     results.innerHTML = "";
@@ -415,7 +427,7 @@ function roll() {
                 element = object_to_html(array_to_amounts(object), " x");
                 break;
         }
-        CURRENTOBJECTS.push(object);
+        CURRENTRESULTS.push(object);
         element.appendTo(results);
     }
 }
@@ -529,8 +541,8 @@ function object_to_text(object, separator = ": ", line_break = "\n") {
 
 function copy_all() {
     let ponies_text = "";
-    for (let i in CURRENTOBJECTS) {
-        let pony = CURRENTOBJECTS[i];
+    for (let i in CURRENTRESULTS) {
+        let pony = CURRENTRESULTS[i];
         ponies_text += object_to_text(pony) + "\n\n";
     }
     copy_to_clipboard(ponies_text);
@@ -839,7 +851,7 @@ function roll_farm() {
     return items;
 }
 
-function update_farm_element(items = CURRENTOBJECTS[0]) {
+function update_farm_element(items = CURRENTRESULTS[0]) {
     let text_ele = $("#farm_message p")[0];
     // This code was going to be used to randomize messages, I don't use it right now
     // let id_ele = $("#farm_message input")[0];
@@ -1141,7 +1153,7 @@ function get_select_values(element, id) {
 
 class PonyInput {
 
-    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = false) {
+    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = true) {
         // Create a HTML element for Pony Input
         this.element = $("<div>");
         this.element.addClass("clear_box");
@@ -1151,8 +1163,13 @@ class PonyInput {
         this.param_eles = [];
 
         // Load Pony from database button (this will only be visible when connected to the database)
-        let load_btn = $("<button>").text("Load Pony from PonyDB");
         if (has_load_db_button) {
+            let load_btn = $("<button>").text("Load Pony from PonyDB");
+            load_btn.addClass("db_hidden");
+            // If not connected to db, hide load button
+            if (!DB_CONNECTED) {
+                load_btn.addClass("hidden");
+            }
             this.element.append(load_btn);
         }
 
@@ -1175,9 +1192,13 @@ class PonyInput {
         this.details_container.addClass("pi_extra");
         // Stat Input
         let stat_input = $("<div>");
+        stat_input.addClass("stats");
         for (let stat of STATS) {
             let container = $("<div>");
-            container.append($("<p>").text(stat));
+            // Abreviation of the stat
+            container.append($("<p>").text(stat.slice(0, 3)));
+            // Add stat in class as identifier
+            container.addClass(stat);
             // I need to add number parameter to this element
             container.append($("<input type='number' value='0'>"));
             stat_input.append(container);
@@ -1190,6 +1211,7 @@ class PonyInput {
             $("<input>"), // Pony Name
             $("<input>"), // Pony ID
             $("<input>"), // Ref
+            $("<h4>").text("Stat Modifiers"),
             stat_input,
             s_btn
         ];
@@ -1199,7 +1221,11 @@ class PonyInput {
         
         // Move details button (toggles visibility of the more details container)
         this.details_button = $("<button>").text("Show More");
-        this.details_button.addClass("hidden"); // REMOVE THIS LATER
+        // db_hidden are elements that need to be hidden when you're not connected to the database
+        this.details_button.addClass("db_hidden");
+        if (!DB_CONNECTED) {
+            this.details_button.addClass("hidden");
+        }
         let btn = this.details_button;
         let ctn = this.details_container;
         // Toggle visibility of the details container on button press
