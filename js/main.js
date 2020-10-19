@@ -32,6 +32,13 @@ const STATS = [
     "Stealth",
     "Magic"
 ];
+// These extra inputs are mainly used in the Pony Input for some params
+const EXTRA_INPUTS = [
+    "Owner",
+    "Pony Name",
+    "Pony ID",
+    "Ref Link"
+];
 const MODES = [
     "adopt",
     "breed",
@@ -1140,6 +1147,17 @@ function get_select_values(element, id) {
     return values;
 }
 
+// I should of made this sooner, this turns any string into a id.
+// Right now it just replaces spaces with _.
+function idify(id) {
+    return id.replaceAll(" ", "_");
+}
+
+// Undoes above
+function unidify(unid) {
+    return unid.replaceAll("_", " ");
+}
+
 // PonyInput needs some new stuff
 // ------------------------------
 // Load from database button (visability toggleable)
@@ -1189,7 +1207,7 @@ class PonyInput {
 
         // More details container (holds Stat input, Pony Name, Pony ID, and the ref link)
         this.details_container = $("<div>");
-        this.details_container.addClass("pi_extra");
+        this.details_container.addClass("pi_extra db_hidden");
         // Stat Input
         let stat_input = $("<div>");
         stat_input.addClass("stats");
@@ -1206,30 +1224,34 @@ class PonyInput {
         // Save to DB button
         let s_btn = $("<button>").text("Save to PonyDB");
         // Details elements to go/append into the details container
-        let details_elements = [
-            $("<input>"), // Owner
-            $("<input>"), // Pony Name
-            $("<input>"), // Pony ID
-            $("<input>"), // Ref
+        let details_elements = [];
+        for (let input_name of EXTRA_INPUTS) {
+            let input_ele = $("<div>");
+            input_ele.addClass(idify(input_name));
+            input_ele.append($("<p>").text(input_name));
+            input_ele.append($("<input>"));
+            details_elements.push(input_ele);
+        }
+        details_elements = details_elements.concat([
             $("<h4>").text("Stat Modifiers"),
             stat_input,
             s_btn
-        ];
+        ]);
         for (let ele of details_elements) {
             this.details_container.append(ele);
         }
         
         // Move details button (toggles visibility of the more details container)
-        this.details_button = $("<button>").text("Show More");
+        let details_button = $("<button>").text("Show More");
         // db_hidden are elements that need to be hidden when you're not connected to the database
-        this.details_button.addClass("db_hidden");
+        details_button.addClass("db_hidden");
         if (!DB_CONNECTED) {
-            this.details_button.addClass("hidden");
+            details_button.addClass("hidden");
         }
-        let btn = this.details_button;
+        let btn = details_button;
         let ctn = this.details_container;
         // Toggle visibility of the details container on button press
-        this.details_button.click(() => {
+        details_button.click(() => {
             if (ctn.hasClass("hidden")) {
                 ctn.removeClass("hidden");
                 btn.text("Show Less");
@@ -1240,7 +1262,7 @@ class PonyInput {
         });
         
         if (has_details_button) {
-            this.element.append(this.details_button);
+            this.element.append(details_button);
             this.details_container.addClass("hidden");
         }
         this.element.append(this.details_container);
@@ -1281,6 +1303,20 @@ class PonyInput {
             // Initialize Param
             pony[key] = get_select_values(this.element, "." + key);
         }
+        // Details Params
+        // Init the stats object
+        pony["Stat Mod"] = {}
+        // for each param
+        for (let d_param of STATS.concat(EXTRA_INPUTS)) {
+            let value = this.details_container.find("." + idify(d_param) + " input").val();
+            // If it's a stat put it under the stats, just some orginization stuff.
+            if (STATS.includes(d_param)) {
+                pony["Stat Mod"][d_param] = value;
+            } else {
+                pony[d_param] = value;
+            }
+        }
+        console.log(pony);
         return pony
     }
 

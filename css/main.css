@@ -296,6 +296,7 @@ nav button {
 
 .stats {
     display: flex;
+    margin-bottom: var(--margin1);
 }
 
 .stats > div {
