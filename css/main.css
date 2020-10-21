@@ -67,6 +67,15 @@ I don't do "button .on" because the default button color overwrites the ".on" co
     background-color: var(--btn_color_off);
 }
 
+input {
+    padding-left: 2px;
+}
+
+input[type='checkbox'] {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 input:checked {
     color: var(--color_primary);
 }
@@ -245,11 +254,14 @@ nav button {
 
 #breed_container {
     display: flex;
+    align-items: flex-start;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 #breed_container > div {
+    /* This needs to be relative for the absolute clear button. */
+    position: relative;
     width: 360px;
     margin: var(--margin1);
     padding: var(--padding1);
@@ -263,6 +275,21 @@ nav button {
 #breed_container .parent_param {
     border-bottom: var(--basic_border);
     margin-bottom: var(--margin1);
+}
+
+#breed_container .reset {
+    position: absolute;
+    /* z-index for being able to click button */
+    z-index: 1; 
+    background-color: var(--color_bad);
+    top: 0;
+    right: var(--padding1);
+}
+
+/* For some reason I need this here even though I have it on button:active already. */
+#breed_container .reset:active {
+    background-color: var(--color_primary_dark);
+    transition: background-color var(--transition_time);
 }
 
 #breed_container input, #breed_container select, #items select {
@@ -393,4 +420,5 @@ nav button {
     height: 0 !important;
     width: 0 !important;
     visibility: hidden !important;
+    position: absolute !important;
 }

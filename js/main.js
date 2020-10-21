@@ -6,7 +6,7 @@ var PONYPARENTS = [];
 // SHEETS_COMPLETE track the amount of api request that have been processed.
 var SHEETS_COMPLETE = 0;
 // If has a connection to the database, if the db key is working.
-var DB_CONNECTED = true;
+var DB_CONNECTED = false;
 
 function set_connected(value) {
     DB_CONNECTED = value;
@@ -1218,6 +1218,14 @@ class PonyInput {
         this.element.addClass("clear_box");
         this.element.append($("<h2>").text(title));
 
+        // Refresh Button
+        let reset_button = $("<button>").text("Reset");
+        reset_button.addClass("reset");
+        reset_button.click(() => {
+            this.update_species_parameters(["Earth Pony"]);
+        });
+        this.element.append(reset_button);
+
         // Put elements associated with the species in here
         this.param_eles = [];
 
@@ -1389,20 +1397,13 @@ class PonyInput {
     }
 
     import_pony(pony) {
-        
-        this.species_select.remove_all_select();
 
         // Make the species an array if it's not, this lets me loop through
         // without having to worry it's a string and loop through each character.
         let s = pony["Species"];
         if (!Array.isArray(s)) s = [s];
 
-        for (let value of s) {
-            let sel = this.species_select.create_select().find("select")[0];
-            sel.value = value;
-        }
-
-        this.update_species_parameters();
+        this.update_species_parameters(s);
 
         // let keys = Object.keys(pony);
         // for (let key of keys) {
@@ -1444,7 +1445,17 @@ class PonyInput {
         return select;
     }
 
-    update_species_parameters() {
+    update_species_parameters(species = null) {
+
+        // If species are given, update the species element
+        if (species) {
+            this.species_select.remove_all_select();
+            for (let value of species) {
+                let sel = this.species_select.create_select().find("select")[0];
+                sel.value = value;
+            }
+        }
+
         // Remove old parameters
         for (let child of this.param_container.children()) {
             child.remove();
@@ -1486,7 +1497,7 @@ class PonyInput {
 class SelectMulti {
     constructor(name, options, on_change = null) {
         this.name = name;
-        this.options = options;
+        this.options = clean_array(options);
         this.on_change = on_change;
         this.element = $("<div>");
         // Button to add select element to self
