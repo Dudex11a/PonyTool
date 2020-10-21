@@ -1222,7 +1222,8 @@ class PonyInput {
         let reset_button = $("<button>").text("Reset");
         reset_button.addClass("reset");
         reset_button.click(() => {
-            this.update_species_parameters(["Earth Pony"]);
+            // Reset fields to whatever species is first
+            this.update_species_parameters([Object.keys(PONYPARAMS["Species"])[0]]);
         });
         this.element.append(reset_button);
 
