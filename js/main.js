@@ -457,7 +457,7 @@ function array_to_html(array) {
     let element = $("<div>");
     let items_ele = $("<div>");
     items_ele.value = "";
-    for (i in array) {
+    for (let i in array) {
         var item = array[i];
         // Element text
         items_ele.append(item)
@@ -625,7 +625,8 @@ function find_rarities(string) {
 }
 
 function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
-    let params = combine_objects_w_arrays(pony1, pony2);
+    let params = combine_objects(pony1, pony2);
+    param = clean_object(params);
 
     // Remove rare species from params
     if (!rare && params.Species) {
@@ -887,67 +888,107 @@ function match_array(array1, array2) {
     return array1.filter(item => array2.includes(item));
 }
 
-function combine_objects_w_arrays(object1, object2) {
-    // Copy Object1
-    delete new_object;
-    let new_object;
-    new_object = object1;
-    let object2_keys = Object.keys(object2);
-    // Combine species and default parameters
-    for (i in object2_keys) {
-        let key = object2_keys[i];
-        let obj2_value = object2[key];
-        // If key exists combine the default and species parameter
-        if (new_object[key]) {
-            new_object[key] = new_object[key].concat(obj2_value);
-        // If the key does not exist set the value to object2's
-        } else {
-            new_object[key] = obj2_value;
+// function combine_objects_w_arrays(object1, object2) {
+//     // Copy Object1
+//     let new_object = {...object1};
+//     let object2_keys = Object.keys(object2);
+//     // Combine species and default parameters
+//     for (let key of object2_keys) {
+//         let obj2_value = object2[key];
+//         // If key exists combine the default and species parameter
+//         if (new_object[key]) {
+//             new_object[key] = new_object[key].concat(obj2_value);
+//         // If the key does not exist set the value to object2's
+//         } else {
+//             new_object[key] = obj2_value;
+//         }
+//     }
+//     if (new_object.Trait) {
+//         console.log(new_object);
+//     }
+//     // new_object = clean_object(new_object);
+//     // if (new_object.Trait) {
+//     //     console.log("after", new_object);
+//     // }
+//     return new_object;
+// }
+
+// Combine objects and mainly, combine the arrays with the objects if the keys match
+function combine_objects(obj1, obj2) {
+    let object = obj1;
+    
+    // If they're both arrays combine them, the is the bread and butter
+    if (Array.isArray(object) && Array.isArray(obj2)) {
+        object = object.concat(obj2);
+    }
+    // If we're going into the object, I only check obj2 here because
+    // if somethings wrong it'll just default to valid object.
+    // It's not nessesary to make sure I only continue with a object.
+    else if (!Array.isArray(obj2) && typeof obj2 === "object") {
+        // Loop through the keys
+        for (let key of Object.keys(obj2)) {
+            // If both objects have the same key
+            if (object[key] && obj2[key]) {
+                object[key] = combine_objects(object[key], obj2[key]);
+            }
+            // If obj1 doesn't have the key that obj2 has, add it to obj1
+            else if (obj2[key]) {
+                object[key] = obj2[key];
+            }
         }
     }
-    
-    new_object = clean_object(new_object);
-    return new_object;
+    // If there is no obj1 and there is obj2, make it that.
+    if (!object && obj2) {
+        object = obj2;
+    }
+
+    return object;
 }
 
 // Delete duplicate values from object arrays and sort
 function clean_object(object) {
-    // Delete duplicate values from object arrays and sort
-    let object_keys = Object.keys(object);
-    for (i in object_keys) {
-        let array = object[object_keys[i]];
-        array = clean_array(array);
+    let value = object;
+    // If it's an array just clean that bad boy
+    if (Array.isArray(value)) {
+        value = clean_array(value);
     }
-    return object;
+    // If it's an object and not an array go through the keys and
+    // clean those objects. Clean object first checks if it's an array
+    // so it'll sort that.
+    else if (typeof value === "object") {
+        for (let key of Object.keys(value)) {
+            value[key] = clean_object(value[key]);
+        }
+    }
+    return value;
 }
 
 function clean_array(array) {
     // Remove dupes
     array = [...new Set(array)];
     // Taken from https://stackoverflow.com/a/1129270
-    // Sorts alphabetically
+    // Sorts alphabetically and numerically
     array.sort((a,b) => (a > b) ? 1 : ((b > a) ? -1 : 0));
     return array;
 }
 
 function get_species_params(species) {
     // Copy default pony params into object
-    let params = {};
-    params = Object.assign(params, PONYPARAMS);
+    let params = {...PONYPARAMS};
     // Remove Species from params
     delete params.Species;
-
+    
     // If multiple other species are given, this is used for hybrids
     // This copies the species specific params over
-    if (Array.isArray(species)) {
-        for (i in species) {
-            let value = species[i];
-            params = combine_objects_w_arrays(params, PONYPARAMS.Species[value]);
+    if (species.length > 1) {
+        for (let value of species) {
+            params = combine_objects(params, PONYPARAMS.Species[value]);
         }
     } else {
-        params = combine_objects_w_arrays(params, PONYPARAMS.Species[species]);
+        params = combine_objects(params, PONYPARAMS.Species[species]);
     }
-    
+    params = clean_object(params);
+
     return params;
 }
 
@@ -1089,7 +1130,7 @@ function change_mode(mode) {
 
     // Hide all mode based elements
     // For each mode
-    for (i in MODES) {
+    for (let i in MODES) {
         // Current mode in loop
         let m = MODES[i];
         $("." + m).addClass(["hidden"]);
@@ -1119,7 +1160,7 @@ function change_mode(mode) {
 
 function create_select_element(options, id = "", on_change = null) {
     let select = $("<select>");
-    for (i in options) {
+    for (let i in options) {
         select.append($("<option>").text(options[i]));
     }
     if (id != "") {
@@ -1138,7 +1179,7 @@ function get_select_values(element, id) {
     let values = [];
     let selects = element.find(id);
     // Make array if not
-    for (i in selects) {
+    for (let i in selects) {
         let value = selects[i].value;
         if (typeof value === "string") {
             values.push(selects[i].value);
@@ -1282,9 +1323,9 @@ class PonyInput {
     }
 
     get_species() {
-        // Find species ain't workin, finding Earth Pony for some reason
-        // return $(this.species_select).find(".Species");
-        return get_select_values(this.element, ".Species");
+        let arr = [];
+        for (let ele of this.species_select.element.find(".Species")) arr.push(ele.value);
+        return arr;
     }
 
     // Get's the Pony data from this Input, the reason this is simple
@@ -1297,7 +1338,7 @@ class PonyInput {
         // Default Palette Places
         keys = keys.concat(PONYPARAMS["Palette Place"]);
         // Species Palette Places
-        for (i in all_species) {
+        for (let i in all_species) {
             let species = all_species[i];
             let pp = PONYPARAMS.Species[species]["Palette Place"];
             if (pp) {
@@ -1313,7 +1354,7 @@ class PonyInput {
         // Create Object
         let pony = {}
         // Create parameters
-        for (i in keys) {
+        for (let i in keys) {
             let key = keys[i];
             // Initialize Param
             pony[key] = get_select_values(this.element, "." + key);
@@ -1357,29 +1398,30 @@ class PonyInput {
         if (!Array.isArray(s)) s = [s];
 
         for (let value of s) {
-            let sel = this.species_select.create_select();
-            sel.val(value);
+            let sel = this.species_select.create_select().find("select")[0];
+            sel.value = value;
         }
+
         this.update_species_parameters();
 
-        let keys = Object.keys(pony);
-        for (let key of keys) {
-            let param = pony[key];
-            let select = this.element.find("." + key);
-            for (let element of select) {
-                // Is a select multi
-                let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
-                if (is_multi) {
-                    // The index of the element
-                    var index = $(element).parent().index();
-                    if (param[index]) {
-                        $(element).val(param[index]);
-                    }
-                } else {
-                    $(element).val(param);
-                }
-            }
-        }
+        // let keys = Object.keys(pony);
+        // for (let key of keys) {
+        //     let param = pony[key];
+        //     let select = this.element.find("." + key);
+        //     for (let element of select) {
+        //         // Is a select multi
+        //         let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
+        //         if (is_multi) {
+        //             // The index of the element
+        //             var index = $(element).parent().index();
+        //             if (param[index]) {
+        //                 $(element).val(param[index]);
+        //             }
+        //         } else {
+        //             $(element).val(param);
+        //         }
+        //     }
+        // }
     }
 
     create_param(name, options, parent = this.param_container, on_change = null) {
@@ -1414,7 +1456,7 @@ class PonyInput {
         // Add palettes
         let pps = params["Palette Place"];
         let ps = params["Palette"];
-        for (i in pps) {
+        for (let i in pps) {
             let place = pps[i];
             // Create elements for each Palette Place
             let select = create_select_element(ps, place);
@@ -1433,7 +1475,7 @@ class PonyInput {
         select_multis[0].create_select();
         select_multis[1].create_select();
         // Add each select_multi element to the container
-        for (i in select_multis) {
+        for (let i in select_multis) {
             let select = select_multis[i];
             select.element.addClass("parent_param");
             this.param_container.append(select.element);
