@@ -393,8 +393,8 @@ function roll() {
         25,
         15
     ];
-    let pony1 = PONYPARENTS[0].get_pony();
-    let pony2 = PONYPARENTS[1].get_pony()
+    let pony1 = PONYPARENTS[0].get_pony_simple();
+    let pony2 = PONYPARENTS[1].get_pony_simple()
     if (has_item("One-Night-Stand Scroll")) {
         // Random pony that's not rare
         pony2 = roll_adopt([true, true, false]);
@@ -624,7 +624,7 @@ function find_rarities(string) {
     return string.match(/\(\S*\)/g);
 }
 
-function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony(), pony2 = PONYPARENTS[1].get_pony()) {
+function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
     let params = combine_objects_w_arrays(pony1, pony2);
 
     // Remove rare species from params
@@ -1232,6 +1232,17 @@ class PonyInput {
             input_ele.append($("<input>"));
             details_elements.push(input_ele);
         }
+        // Sex select
+        let sex_id = "Sex";
+        let sex_cont = $("<div>").addClass(sex_id);
+        sex_cont.append($("<p>").text(sex_id));
+        let sex_select = $("<select>");
+        for (let gender of PONYPARAMS[sex_id]) {
+            sex_select.append($("<option>").text(gender));
+        }
+        sex_cont.append(sex_select);
+        details_elements.push(sex_cont);
+
         details_elements = details_elements.concat([
             $("<h4>").text("Stat Modifiers"),
             stat_input,
@@ -1271,10 +1282,14 @@ class PonyInput {
     }
 
     get_species() {
+        // Find species ain't workin, finding Earth Pony for some reason
+        // return $(this.species_select).find(".Species");
         return get_select_values(this.element, ".Species");
     }
 
-    get_pony() {
+    // Get's the Pony data from this Input, the reason this is simple
+    // is because it doesn't need to get all the values for the breeding roller.
+    get_pony_simple() {
         // ----- Make the keys for the Pony Object -----
         let keys = Object.keys(PONYPARAMS);
         let all_species = this.get_species();
@@ -1303,12 +1318,25 @@ class PonyInput {
             // Initialize Param
             pony[key] = get_select_values(this.element, "." + key);
         }
+        return pony
+    }
+
+    // Get the whole pony
+    get_pony() {
+        // Get initial Pony
+        let pony = this.get_pony_simple()
         // Details Params
         // Init the stats object
         pony["Stat Mod"] = {}
         // for each param
-        for (let d_param of STATS.concat(EXTRA_INPUTS)) {
-            let value = this.details_container.find("." + idify(d_param) + " input").val();
+        let details_params = STATS.concat(EXTRA_INPUTS);
+        details_params.push("Sex");
+        for (let d_param of details_params) {
+            // Get the select or input of the id
+            let jqry_base = "." + idify(d_param) + " ";
+            // Jquery for finding the values of the select and input elements of the details paramters
+            let full_jqry = jqry_base + "input, " + jqry_base + "select";
+            let value = this.details_container.find(full_jqry).val();
             // If it's a stat put it under the stats, just some orginization stuff.
             if (STATS.includes(d_param)) {
                 pony["Stat Mod"][d_param] = value;
@@ -1316,14 +1344,22 @@ class PonyInput {
                 pony[d_param] = value;
             }
         }
-        console.log(pony);
-        return pony
+        return pony;
     }
 
     import_pony(pony) {
         
-        let species_select = this.element.find("." + "Species");
-        console.log($(species_select).val());
+        this.species_select.remove_all_select();
+
+        // Make the species an array if it's not, this lets me loop through
+        // without having to worry it's a string and loop through each character.
+        let s = pony["Species"];
+        if (!Array.isArray(s)) s = [s];
+
+        for (let value of s) {
+            let sel = this.species_select.create_select();
+            sel.val(value);
+        }
         this.update_species_parameters();
 
         let keys = Object.keys(pony);
@@ -1444,5 +1480,10 @@ class SelectMulti {
         container.append(select);
         container.append(remove_button);
         this.select_container.append(container);
+        return container;
+    }
+
+    remove_all_select() {
+        this.select_container.children().remove();
     }
 }
