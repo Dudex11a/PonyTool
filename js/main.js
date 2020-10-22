@@ -1217,6 +1217,8 @@ class PonyInput {
         this.element = $("<div>");
         this.element.addClass("clear_box");
         this.element.append($("<h2>").text(title));
+        // Initialize the select multis, this will be used later to edit them in batch
+        this.select_multis = [];
 
         // Refresh Button
         let reset_button = $("<button>").text("Reset");
@@ -1255,9 +1257,9 @@ class PonyInput {
         this.param_container = $("<div>");
         this.element.append(this.param_container);
 
-        // More details container (holds Stat input, Pony Name, Pony ID, and the ref link)
-        this.details_container = $("<div>");
-        this.details_container.addClass("pi_extra db_hidden");
+        // More params container (holds Stat input, Pony Name, Pony ID, and the ref link)
+        this.param2_container = $("<div>");
+        this.param2_container.addClass("pi_extra db_hidden");
         // Stat Input
         let stat_input = $("<div>");
         stat_input.addClass("stats");
@@ -1299,7 +1301,7 @@ class PonyInput {
             s_btn
         ]);
         for (let ele of details_elements) {
-            this.details_container.append(ele);
+            this.param2_container.append(ele);
         }
         
         // Move details button (toggles visibility of the more details container)
@@ -1310,7 +1312,7 @@ class PonyInput {
             details_button.addClass("hidden");
         }
         let btn = details_button;
-        let ctn = this.details_container;
+        let ctn = this.param2_container;
         // Toggle visibility of the details container on button press
         details_button.click(() => {
             if (ctn.hasClass("hidden")) {
@@ -1324,9 +1326,9 @@ class PonyInput {
         
         if (has_details_button) {
             this.element.append(details_button);
-            this.details_container.addClass("hidden");
+            this.param2_container.addClass("hidden");
         }
-        this.element.append(this.details_container);
+        this.element.append(this.param2_container);
 
         this.update_species_parameters();
     }
@@ -1386,7 +1388,7 @@ class PonyInput {
             let jqry_base = "." + idify(d_param) + " ";
             // Jquery for finding the values of the select and input elements of the details paramters
             let full_jqry = jqry_base + "input, " + jqry_base + "select";
-            let value = this.details_container.find(full_jqry).val();
+            let value = this.param2_container.find(full_jqry).val();
             // If it's a stat put it under the stats, just some orginization stuff.
             if (STATS.includes(d_param)) {
                 pony["Stat Mod"][d_param] = value;
@@ -1406,24 +1408,39 @@ class PonyInput {
 
         this.update_species_parameters(s);
 
-        // let keys = Object.keys(pony);
-        // for (let key of keys) {
-        //     let param = pony[key];
-        //     let select = this.element.find("." + key);
-        //     for (let element of select) {
-        //         // Is a select multi
-        //         let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
-        //         if (is_multi) {
-        //             // The index of the element
-        //             var index = $(element).parent().index();
-        //             if (param[index]) {
-        //                 $(element).val(param[index]);
-        //             }
-        //         } else {
-        //             $(element).val(param);
-        //         }
-        //     }
-        // }
+        // Remove old select elements from the multi selects
+        for (let select of this.select_multis) {
+            select.remove_all_select();
+            let param = pony[select.name];
+            if (param) {
+                for (let value of param) {
+                    select.create_select(value);
+                }
+            }
+        }
+
+        // I have this object so I can edit values of the pony if nessesary
+        let filtered_pony = {...pony}
+        // Remove the species since that's already taken care of.
+        delete filtered_pony["Species"];
+        let keys = Object.keys(filtered_pony);
+        for (let key of keys) {
+            let param = filtered_pony[key];
+            let select = this.element.find("." + key);
+            for (let element of select) {
+                // Is a select multi
+                let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
+                // if (is_multi) {
+                //     // The index of the element
+                //     var index = $(element).parent().index();
+                //     if (param[index]) {
+                //         $(element).val(param[index]);
+                //     }
+                // } else {
+                 if (!is_multi) $(element).val(param);
+                // }
+            }
+        }
     }
 
     create_param(name, options, parent = this.param_container, on_change = null) {
@@ -1475,20 +1492,19 @@ class PonyInput {
             let palette_container = $("<div>");
             palette_container.append($("<p>").text(place));
             palette_container.append(select);
-            palette_container.addClass("parent_param");
+            palette_container.addClass("param");
             this.param_container.append(palette_container);
         }
 
-        let select_multis = [
+        this.select_multis = [
             new SelectMulti("Trait", params.Trait),
             new SelectMulti("Markings", params.Markings),
             new SelectMulti("Mutation", params.Mutation)
         ];
-        select_multis[0].create_select();
-        select_multis[1].create_select();
+        this.select_multis[0].create_select();
+        this.select_multis[1].create_select();
         // Add each select_multi element to the container
-        for (let i in select_multis) {
-            let select = select_multis[i];
+        for (let select of this.select_multis) {
             select.element.addClass("parent_param");
             this.param_container.append(select.element);
         }
@@ -1518,9 +1534,11 @@ class SelectMulti {
         this.element.append(this.select_container);
     }
 
-    create_select() {
+    create_select(value = null) {
         let container = $("<div>");
         let select = create_select_element(this.options, this.name);
+        // If there's a value, set the select to that value
+        if (value) select.val(value);
         if (this.on_change) {
             select.change(() => this.on_change());
         }

@@ -272,7 +272,7 @@ nav button {
     margin: var(--margin1) auto;
 }
 
-#breed_container .parent_param {
+#breed_container .param {
     border-bottom: var(--basic_border);
     margin-bottom: var(--margin1);
 }
@@ -305,7 +305,7 @@ nav button {
     background-color: #FFF;
 }
 
-.parent_param {
+.param {
     border-bottom: 1px solid var(--gray);
     padding-bottom: 3px;
     border-radius: var(--radius1);
