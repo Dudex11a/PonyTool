@@ -1259,7 +1259,7 @@ class PonyInput {
 
         // More params container (holds Stat input, Pony Name, Pony ID, and the ref link)
         this.param2_container = $("<div>");
-        this.param2_container.addClass("pi_extra db_hidden");
+        this.param2_container.addClass("pi_extra");
         // Stat Input
         let stat_input = $("<div>");
         stat_input.addClass("stats");
@@ -1306,11 +1306,6 @@ class PonyInput {
         
         // Move details button (toggles visibility of the more details container)
         let details_button = $("<button>").text("Show More");
-        // db_hidden are elements that need to be hidden when you're not connected to the database
-        details_button.addClass("db_hidden");
-        if (!DB_CONNECTED) {
-            details_button.addClass("hidden");
-        }
         let btn = details_button;
         let ctn = this.param2_container;
         // Toggle visibility of the details container on button press
@@ -1323,12 +1318,19 @@ class PonyInput {
                 btn.text("Show More");
             }
         });
-        
+        // The base container for param2, I use this for db_hidden
+        let param2_base = $("<div>");
+        // db_hidden are elements that need to be hidden when you're not connected to the database
+        param2_base.addClass("db_hidden");
+        if (!DB_CONNECTED) {
+            param2_base.addClass("hidden");
+        }
         if (has_details_button) {
-            this.element.append(details_button);
+            param2_base.append(details_button);
             this.param2_container.addClass("hidden");
         }
-        this.element.append(this.param2_container);
+        param2_base.append(this.param2_container);
+        this.element.append(param2_base);
 
         this.update_species_parameters();
     }
@@ -1423,24 +1425,35 @@ class PonyInput {
         let filtered_pony = {...pony}
         // Remove the species since that's already taken care of.
         delete filtered_pony["Species"];
+        // Params
         let keys = Object.keys(filtered_pony);
         for (let key of keys) {
             let param = filtered_pony[key];
             let select = this.element.find("." + key);
             for (let element of select) {
-                // Is a select multi
+                // If is not a select multi
                 let is_multi = $(element).parent().parent().parent().hasClass("select_multi");
-                // if (is_multi) {
-                //     // The index of the element
-                //     var index = $(element).parent().index();
-                //     if (param[index]) {
-                //         $(element).val(param[index]);
-                //     }
-                // } else {
                  if (!is_multi) $(element).val(param);
-                // }
             }
         }
+        // Params 2
+        let param_names = EXTRA_INPUTS.concat(STATS.concat(["Sex"]));
+        for (let param_name of param_names) {
+            // If the param exists
+            let param = filtered_pony[param_name];
+            // Change the param to the correct stats param if it's a stat
+            if (STATS.includes(param_name)) {
+                let stats = filtered_pony["Stat Mod"];
+                if (stats) param = stats[param_name];
+            }
+            if (param) {
+                // input or select element
+                let jqry_base = "." + idify(param_name);
+                // Change value of the param in the PonyInput
+                this.param2_container.find(jqry_base + " input, " + jqry_base + " select").val(param);
+            }
+        }
+
     }
 
     create_param(name, options, parent = this.param_container, on_change = null) {
@@ -1557,5 +1570,13 @@ class SelectMulti {
 
     remove_all_select() {
         this.select_container.children().remove();
+    }
+}
+
+// Pony database interface
+class PonyDatabase {
+    constructor() {
+        this.element = $("<div>");
+        this.element.addClass("pony_db");
     }
 }
