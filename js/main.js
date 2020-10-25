@@ -296,7 +296,7 @@ function make_changelog_ele(commits) {
         // If first character is a number
         if (!isNaN(message[0])) {
             let msg_ele = document.createElement("div");
-            message = message.replaceAll("\n", "<br>");
+            message = message.replaceAll("-", "<br>-");
             msg_ele.innerHTML = message;
             ele.append(msg_ele);
         }
