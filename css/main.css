@@ -117,6 +117,20 @@ nav button {
 }
 
 /* This is a class instead of a css variable so I can easily resize it if the screen changes size.*/
+.large_width {
+    width: 80vw;
+    min-width: 800px;
+}
+
+@media only screen and (max-width: 800px) {
+    .large_width {
+        /* Without the "!important" other "padding" will mess with this size */
+        padding: 0 5% !important;
+        min-width: 90% !important;
+    }
+}
+
+/* This is a class instead of a css variable so I can easily resize it if the screen changes size.*/
 .medium_width {
     width: 50vw;
     min-width: 600px;
@@ -137,8 +151,9 @@ nav button {
 
 @media only screen and (max-width: 300px) {
     .small_width {
-        width: 100%;
-        min-width: 100%;
+        /* Without the "!important" other "padding" will mess with this size */
+        padding: 0 5% !important;
+        min-width: 90% !important;
     }
 }
 
@@ -370,10 +385,6 @@ nav button {
     border-bottom: darkgray solid 1px;
 }
 
-.pony_db {
-    visibility: hidden;
-}
-
 #farm_container, #farm_message {
     padding: var(--padding1);
     text-align: center;
@@ -411,6 +422,49 @@ nav button {
 .pi_extra {
     display: flex;
     flex-flow: column;
+}
+
+.pony_db {
+    margin: var(--margin1) auto;
+}
+
+/* Table item */
+.pony_table > div {
+    display: grid;
+    /* ID, Name, Owner, Species, Link, Offline */
+    grid-template-columns: 15% 25% 25% 20% 10% 5%;
+    height: 30px;
+    border: var(--basic_border);
+    border-radius: 1px;
+}
+
+/* Table fields */
+.pony_table > div > * {
+    display: block;
+    margin-top: auto;
+    margin-bottom: auto;
+    text-align: left;
+    text-overflow: ellipsis;
+    padding: 1px;
+    border-right: var(--basic_border);
+}
+
+.pony_table .selected {
+    background-color: var(--color_second);
+}
+
+
+/* Buttons container */
+.pony_db > .buttons {
+    margin-top: var(--margin1);
+    margin-bottom: var(--margin1);
+    width: 100%;
+    display: flex;
+}
+
+/* Button in buttons of PonyTable */
+.pony_db > .buttons > button {
+    flex-grow: 1;
 }
 
 .hidden {
