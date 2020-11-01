@@ -102,7 +102,7 @@ async function init() {
 
     // These next two api_fetch follow generally the same format as above.
     // Get Farming Spreadsheet data
-    url = SITE_URL + "/api/farming"
+    url = SITE_URL + "/api/farming";
     res = await api_fetch(url);
     try {
         res.json().then(data => {
@@ -190,23 +190,76 @@ const default_options = {
     }
 }
 
+// ---- Save and load json data from local storage
+function save_object(id, data) {
+    localStorage[id] = JSON.stringify(data);
+}
+
+function load_object(id) {
+    return localStorage[id] ? JSON.parse(localStorage[id]) : {};
+}
+// ----
+
+function save_offline_pony(pony) {
+    let ponies = load_object("ponies");
+    const offline_prefix = "o_";
+
+    let id = pony["Pony ID"];
+    // If the pony has no ID make new one
+    if (!id) {
+        alert("The pony you're trying to save doesn't have an ID.\nGenerating new id...");
+        // All offline pony ids
+        let all_ids = Object.keys(ponies);
+        let number = 0;
+        while(!id) {
+            number += 1;
+            let new_id = offline_prefix + number;
+            // If the new id doesn't already exist, use that id
+            if (!all_ids.includes(new_id)) id = new_id;
+        }
+    }
+    // If the id doesn't start with an "o_", make it start with one
+    if (id.slice(0, 2) !== offline_prefix) id = offline_prefix + id;
+    // Save the id back into the pony
+    pony["Pony ID"] = id;
+
+    // If the pony already exists
+    let suffix = " pony " + id + ".";
+    if (ponies[id]) {
+        alert("Updated" + suffix);
+    } else {
+        alert("Added" + suffix);
+    }
+    ponies[id] = pony;
+    save_object("ponies", ponies);
+    // If there is a main database, update the values inside it
+    if (MAIN_DATABASE) MAIN_DATABASE.update_ponies(ponies);
+    return ponies;
+}
+
 function get_options() {
-    return JSON.parse(localStorage.options ? localStorage.options : "{}");
+    // return JSON.parse(localStorage.options ? localStorage.options : "{}");
+    return load_object("options");
 }
 
 function set_options(options) {
-    localStorage.options = JSON.stringify(options);
+    // localStorage.options = JSON.stringify(options);
+    save_object("options", options);
     return options;
 }
 
 function get_option(option) {
-    return JSON.parse(localStorage.options)[option];
+    // return JSON.parse(localStorage.options)[option];
+    return get_options()[option];
 }
 
 function set_option(option, value) {
+    // let options = get_options();
+    // options[option] = value;
+    // localStorage.options = JSON.stringify(options);
     let options = get_options();
     options[option] = value;
-    localStorage.options = JSON.stringify(options);
+    set_options(options);
     return options;
 }
 
@@ -337,24 +390,29 @@ function finish_requests(error = undefined) {
     $("#breed_container").append(PONYPARENTS[0].element);
     $("#breed_container").append(PONYPARENTS[1].element);
     // Add Database Element for the database_container
-    MAIN_DATABASE = new PonyDatabase({
-        "123" : {
-            "Pony ID" : "123",
-            "Pony Name" : "N1",
-            "Owner" : "O1",
-            "Species" : "S1",
-            "Ref Link" : "R1",
-            "Offline" : true
-        },
-        "124" : {
-            "Pony ID" : "124",
-            "Pony Name" : "N2",
-            "Owner" : "O2",
-            "Species" : "S2",
-            "Ref Link" : "https://google.com",
-            "Offline" : true
-        }
-    });
+    MAIN_DATABASE = new PonyDatabase(load_object("ponies"));
+    MAIN_DATABASE.actions["delete"] = function() {
+        save_object("ponies", MAIN_DATABASE.ponies);
+        MAIN_DATABASE.update_ponies();
+    }
+        // { // Test Data
+        //     "123" : {
+        //         "Pony ID" : "123",
+        //         "Pony Name" : "N1",
+        //         "Owner" : "O1",
+        //         "Species" : "S1",
+        //         "Ref Link" : "R1",
+        //         "Offline" : true
+        //     },
+        //     "124" : {
+        //         "Pony ID" : "124",
+        //         "Pony Name" : "N2",
+        //         "Owner" : "O2",
+        //         "Species" : "S2",
+        //         "Ref Link" : "https://google.com",
+        //         "Offline" : true
+        //     }
+        // }
     $("#database_container").append(MAIN_DATABASE.element);
     // Add Elements for farming
     let farm_select = create_select_element(Object.keys(FARMING.items), "farm", () => {
@@ -1249,17 +1307,17 @@ function unidify(unid) {
 
 class PonyInput {
 
-    constructor(title = "PonyInput", has_details_button = true, has_load_db_button = true) {
+    constructor(title = "PonyInput", has_load_db_btn = true, has_show_more_btn = true) {
         // Create a HTML element for Pony Input
         this.element = $("<div>");
-        this.element.addClass("clear_box");
+        this.element.addClass("clear_box pony_input");
         this.element.append($("<h2>").text(title));
         // Initialize the select multis, this will be used later to edit them in batch
         this.select_multis = [];
 
         // Refresh Button
         let reset_button = $("<button>").text("Reset");
-        reset_button.addClass("reset");
+        reset_button.addClass("top_right");
         reset_button.click(() => {
             // Reset fields to whatever species is first
             this.update_species_parameters([Object.keys(PONYPARAMS["Species"])[0]]);
@@ -1270,13 +1328,13 @@ class PonyInput {
         this.param_eles = [];
 
         // Load Pony from database button (this will only be visible when connected to the database)
-        if (has_load_db_button) {
+        if (has_load_db_btn) {
             let load_btn = $("<button>").text("Load Pony from PonyDB");
-            load_btn.addClass("db_hidden");
-            // If not connected to db, hide load button
-            if (!DB_CONNECTED) {
-                load_btn.addClass("hidden");
-            }
+            load_btn.addClass("wide");
+            // // If not connected to db, hide load button
+            // if (!DB_CONNECTED) {
+            //     load_btn.addClass("hidden");
+            // }
             this.element.append(load_btn);
         }
 
@@ -1310,11 +1368,24 @@ class PonyInput {
             container.append($("<input type='number' value='0'>"));
             stat_input.append(container);
         }
-        // Save to DB button
-        let s_btn = $("<button>").text("Save to PonyDB");
+        // Save to DB buttons
+        let buttons_ele = $("<div>");
+        buttons_ele.addClass("flex_buttons");
+        let offline_btn = $("<button>").text("Save Offline");
+        let online_btn = $("<button>").text("Save Online");
+        offline_btn.click(() => {
+            save_offline_pony(this.get_pony());
+        });
+        // ---- Button only visible if connected to db
+        online_btn.addClass("db_hidden");
+        if (!DB_CONNECTED) online_btn.addClass("hidden");
+        // ----
+        buttons_ele.append(offline_btn);
+        buttons_ele.append(online_btn);
         // Details elements to go/append into the details container
         let details_elements = [];
-        for (let input_name of EXTRA_INPUTS) {
+        let inputs = EXTRA_INPUTS;
+        for (let input_name of inputs) {
             let input_ele = $("<div>");
             input_ele.addClass(idify(input_name));
             input_ele.append($("<p>").text(input_name));
@@ -1335,7 +1406,7 @@ class PonyInput {
         details_elements = details_elements.concat([
             $("<h4>").text("Stat Modifiers"),
             stat_input,
-            s_btn
+            buttons_ele
         ]);
         for (let ele of details_elements) {
             this.param2_container.append(ele);
@@ -1343,6 +1414,7 @@ class PonyInput {
         
         // Move details button (toggles visibility of the more details container)
         let details_button = $("<button>").text("Show More");
+        details_button.addClass("wide");
         let btn = details_button;
         let ctn = this.param2_container;
         // Toggle visibility of the details container on button press
@@ -1355,17 +1427,14 @@ class PonyInput {
                 btn.text("Show More");
             }
         });
-        // The base container for param2, I use this for db_hidden
+        // The base container for param2
         let param2_base = $("<div>");
-        // db_hidden are elements that need to be hidden when you're not connected to the database
-        param2_base.addClass("db_hidden");
-        if (!DB_CONNECTED) {
-            param2_base.addClass("hidden");
-        }
-        if (has_details_button) {
-            param2_base.append(details_button);
+        if (has_show_more_btn) {
             this.param2_container.addClass("hidden");
+        } else {
+            details_button.addClass("hidden");
         }
+        param2_base.append(details_button);
         param2_base.append(this.param2_container);
         this.element.append(param2_base);
 
@@ -1593,7 +1662,7 @@ class SelectMulti {
             select.change(() => this.on_change());
         }
         let remove_button = $("<button>").text("Remove");
-        remove_button.addClass("close_button");
+        remove_button.addClass("red_button");
         // Remove this select on click
         remove_button.click((value) => {
             container.remove();
@@ -1628,20 +1697,31 @@ class PonyDatabase {
         // These are functions that will run when certain buttons are pressed
         this.actions = actions;
         // Update the table with this.ponies
-        this.update_table();
+        this.update_ponies();
         // An array of the IDs selected
         this.selection = [];
         // The buttons to control the database
         this.buttons = $("<div>");
-        this.buttons.addClass("buttons");
+        this.buttons.addClass("flex_buttons");
+        // Select
+        let select_b = $("<button>").text("Select");
+        select_b.addClass("select");
+        select_b.click(() => {
+            let a = this.actions["select"];
+            if (a) a(this.get_ponies_by_ids());
+        });
         // Edit
         let edit_b = $("<button>").text("Edit");
         // I use this class to hide the button under certain conditions
         edit_b.addClass("edit");
+        edit_b.click(() => {
+            this.edit_pony(this.selection[0]);
+        });
         // Delete
         let delete_b = $("<button>").text("Delete");
+        delete_b.addClass("red_button");
         delete_b.click(() => {
-            this.remove_ids();
+            this.delete_ids();
         });
         // Save Online
         let save_on_b = $("<button>").text("Save Online");
@@ -1653,19 +1733,29 @@ class PonyDatabase {
         // Save Offline
         let save_off_b = $("<button>").text("Save Offline");
         save_off_b.click(() => {
-            let a = this.actions["save_offline"];
-            if (a) a(this.get_ponies_by_ids());
+            for (let pony_id of this.selection) {
+                console.log(this.ponies[pony_id]);
+                save_offline_pony(this.ponies[pony_id]);
+            }
+        });
+        // New Pony
+        let new_b = $("<button>").text("New Pony");
+        new_b.addClass("wide");
+        new_b.click(() => {
+            this.edit_pony();
         });
         // Append Buttons
-        for (let button of [edit_b, delete_b, save_on_b, save_off_b]) {
+        for (let button of [select_b, edit_b, delete_b, save_on_b, save_off_b]) {
             this.buttons.append(button);
         }
         this.element.append(this.buttons);
+        this.element.append(new_b);
         // I select nothing here to update some appearances of buttons
-        this.select_id();
+        this.select_ids();
     }
 
-    update_table(ponies = this.ponies) {
+    update_ponies(ponies = this.ponies) {
+        this.ponies = ponies;
         // Clear the table
         this.table.empty();
         for (let key of Object.keys(ponies)) {
@@ -1706,7 +1796,7 @@ class PonyDatabase {
                         // Set checkbox value
                         element.prop("checked", value);
                         // No changing checkbox value
-                        element.attr("disabled", true);
+                        element.prop("disabled", true); // NOT WORKING
                         break;
                 }
             }
@@ -1714,7 +1804,7 @@ class PonyDatabase {
             item.append(element);
         }
         item.click(() => {
-            this.select_id([params["Pony ID"]]);
+            this.select_ids([params["Pony ID"]]);
         });
         // Add ID as pony_(id) to the element
         item.attr("id", ID_PREFIX + params["Pony ID"]);
@@ -1722,7 +1812,7 @@ class PonyDatabase {
         return item;
     }
 
-    select_id(ids = []) {
+    select_ids(ids = []) {
         // Remove old selections
         for (let id of this.selection) {
             let element = this.get_id_element(id);
@@ -1740,10 +1830,16 @@ class PonyDatabase {
         // Set visibilty of buttons base on what's selected
         let sel_amm = this.selection.length;
         let edit_b = this.buttons.find(".edit");
+        let select_b = this.buttons.find(".select");
         // If at least one item is selected
         if (sel_amm === 1) {
+            // If select has a function in the database, then allow it to be visible
+            if (this.actions["select"]) {
+                select_b.removeClass("hidden");
+            }
             edit_b.removeClass("hidden");
         } else {
+            select_b.addClass("hidden");
             edit_b.addClass("hidden");
         }
         // If one or more are selected
@@ -1765,7 +1861,7 @@ class PonyDatabase {
     // Get some ponies by id, this is mainly for ponies that are selected
     get_ponies_by_ids(ids = this.selection) {
         let ponies = [];
-        for (id of ids) {
+        for (let id of ids) {
             let pony = this.ponies[id];
             // If the pony exists
             if (pony) {
@@ -1777,8 +1873,43 @@ class PonyDatabase {
         return ponies;
     }
 
+    // Make PonyInput element and some more buttons to edit a pony
+    edit_pony(id) {
+        // Get Pony
+        let pony;
+        let title = "Adding new pony";
+        // This sets up the pony data if there's an ID, if there isn't it'll assume you're adding a pony
+        if (id) {
+            pony = this.ponies[id];
+            title = "Editing " + id;
+        }
+        // Make Pony input
+        let pi = new PonyInput(title, false, false);
+        // Fullscrene element to cover the whole screne
+        let fullscrene_ele = $("<div>");
+        fullscrene_ele.addClass("popup_container");
+        // Center element to center within the fullscrene
+        let center_ele = $("<div>");
+        // ---- What elements are needed to edit a pony
+        center_ele.append(pi.element);
+        let close_button = $("<button>").text("Close");
+        close_button.addClass("wide red_button");
+        close_button.click(() => {
+            $(".popup_container").remove();
+        });
+        center_ele.append(close_button);
+        // ----
+        fullscrene_ele.append(center_ele);
+        // Add to the body of the webpage
+        $("body").append(fullscrene_ele);
+        // Update the element to match the pony's parameters IF we are editing a pony
+        if (pony) pi.import_pony(pony);
+    }
+
     // Remove ids and run delete action
-    remove_ids(ids = this.selection) {
+    delete_ids(ids = this.selection) {
+        // Deletion alert
+        if (!confirm("Are you sure you would like to delete these ponies?")) return;
         // Remove ponies with matching ids as the ones to remove
         for (let id of ids) {
             if (Object.keys(this.ponies).includes(id)) {
@@ -1787,7 +1918,7 @@ class PonyDatabase {
                 // Remove the element
                 this.get_id_element(id).remove();
                 // Update the selection to be none
-                this.select_id();
+                this.select_ids();
             }
         }
         // Run action if exists

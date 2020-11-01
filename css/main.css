@@ -7,6 +7,7 @@
     --color_primary: #0ad150;
     --color_primary_dark: #03752b;
     --color_second: #f2fcfc;
+    --color_second_dark: #b5f7f7;
     --color_bad: rgb(230, 67, 67);
     --btn_color_off: darkgrey;
     --transition_time: 0.05s;
@@ -274,7 +275,7 @@ nav button {
     justify-content: center;
 }
 
-#breed_container > div {
+.pony_input {
     /* This needs to be relative for the absolute clear button. */
     position: relative;
     width: 360px;
@@ -282,17 +283,17 @@ nav button {
     padding: var(--padding1);
 }
 
-#breed_container > div > button {
+.pony_input > button {
     /* width: 100%; */
     margin: var(--margin1) auto;
 }
 
-#breed_container .param {
+.pony_input .param {
     border-bottom: var(--basic_border);
     margin-bottom: var(--margin1);
 }
 
-#breed_container .reset {
+.top_right {
     position: absolute;
     /* z-index for being able to click button */
     z-index: 1; 
@@ -302,12 +303,12 @@ nav button {
 }
 
 /* For some reason I need this here even though I have it on button:active already. */
-#breed_container .reset:active {
+.top_right:active {
     background-color: var(--color_primary_dark);
     transition: background-color var(--transition_time);
 }
 
-#breed_container input, #breed_container select, #items select {
+.pony_input input, .pony_input select, #items select {
     width: 70%;
 }
 
@@ -350,7 +351,7 @@ nav button {
     background-color: var(--color_primary);
 }
 
-.close_button {
+.red_button {
     background-color: var(--color_bad);
 }
 
@@ -430,10 +431,11 @@ nav button {
 
 /* Table item */
 .pony_table > div {
+    padding: var(--padding1);
     display: grid;
     /* ID, Name, Owner, Species, Link, Offline */
     grid-template-columns: 15% 25% 25% 20% 10% 5%;
-    height: 30px;
+    /* height: 30px; */
     border: var(--basic_border);
     border-radius: 1px;
 }
@@ -441,6 +443,7 @@ nav button {
 /* Table fields */
 .pony_table > div > * {
     display: block;
+    min-height: 100%; /* Need this so the border always displays */
     margin-top: auto;
     margin-bottom: auto;
     text-align: left;
@@ -450,12 +453,12 @@ nav button {
 }
 
 .pony_table .selected {
-    background-color: var(--color_second);
+    background-color: var(--color_second_dark);
 }
 
 
 /* Buttons container */
-.pony_db > .buttons {
+.flex_buttons {
     margin-top: var(--margin1);
     margin-bottom: var(--margin1);
     width: 100%;
@@ -463,8 +466,47 @@ nav button {
 }
 
 /* Button in buttons of PonyTable */
-.pony_db > .buttons > button {
+.flex_buttons > button {
     flex-grow: 1;
+}
+
+.popup_container {
+    position: fixed;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    z-index: 1;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.popup_container > div {
+    padding: var(--padding1);
+    margin: auto;
+    max-height: 80vh;
+    position: absolute;
+    background-color: var(--color_lowest);
+    border: var(--basic_border);
+    border-radius: var(--radius1);
+    overflow: scroll;
+}
+
+.wide {
+    margin-top: var(--margin1);
+    margin-bottom: var(--margin1);
+    width: 100%;
 }
 
 .hidden {
