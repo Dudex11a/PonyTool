@@ -434,7 +434,7 @@ nav button {
     padding: var(--padding1);
     display: grid;
     /* ID, Name, Owner, Species, Link, Offline */
-    grid-template-columns: 15% 25% 25% 20% 10% 5%;
+    grid-template-columns: 15% 25% 25% 20% 15%;
     /* height: 30px; */
     border: var(--basic_border);
     border-radius: 1px;

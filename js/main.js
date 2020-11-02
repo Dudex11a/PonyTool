@@ -233,7 +233,7 @@ function save_offline_pony(pony) {
     ponies[id] = pony;
     save_object("ponies", ponies);
     // If there is a main database, update the values inside it
-    if (MAIN_DATABASE) MAIN_DATABASE.update_ponies(ponies);
+    // if (MAIN_DATABASE) MAIN_DATABASE.update_ponies(ponies);
     return ponies;
 }
 
@@ -390,11 +390,22 @@ function finish_requests(error = undefined) {
     $("#breed_container").append(PONYPARENTS[0].element);
     $("#breed_container").append(PONYPARENTS[1].element);
     // Add Database Element for the database_container
-    MAIN_DATABASE = new PonyDatabase(load_object("ponies"));
-    MAIN_DATABASE.actions["delete"] = function() {
-        save_object("ponies", MAIN_DATABASE.ponies);
-        MAIN_DATABASE.update_ponies();
+    MAIN_DATABASE = new PonyDatabase();
+    // Set the actions of the MAIN_DATABASE, the reason why I
+    // don't do this in the constructor is because I need
+    // the database to already be initialized.
+    // Right now the database will only be loaded with offline ponies.
+    MAIN_DATABASE.actions = {
+        "delete" : function() {
+            save_object("ponies", MAIN_DATABASE.ponies);
+            MAIN_DATABASE.update_ponies();
+        },
+        "update_ponies" : function() {
+            MAIN_DATABASE.ponies = load_object("ponies");
+        }
     }
+    // Update the database with the ponies
+    MAIN_DATABASE.update_ponies();
         // { // Test Data
         //     "123" : {
         //         "Pony ID" : "123",
@@ -1252,6 +1263,7 @@ function get_select_values(element, id) {
 }
 
 function create_popup_element(ele_innards) {
+    let obj = {}
     let ele = $("<div>");
     ele.addClass("popup_container");
     let center_ele = $("<div>");
@@ -1264,15 +1276,21 @@ function create_popup_element(ele_innards) {
     // ---- Close button
     let close_button = $("<button>").text("Close");
     close_button.addClass("wide red_button");
-    close_button.click(() => {
-        ele.remove();
-    });
     center_ele.append(close_button);
     // ----
     ele.append(center_ele);
     // Append it to the document
     $("body").append(ele);
-    return ele;
+    obj = {
+        "element" : ele,
+        "close" : function() {
+            ele.remove();
+        }
+    }
+    close_button.click(() => {
+        obj.close();
+    });
+    return obj;
 }
 
 // I should of made this sooner, this turns any string into a id.
@@ -1286,24 +1304,15 @@ function unidify(unid) {
     return unid.replaceAll("_", " ");
 }
 
-// PonyInput needs some new stuff
-// ------------------------------
-// Load from database button (visability toggleable)
-// __MORE DETAILS BUTTON__
-// Save to DB (if connected to DB)
-// Stat input
-// Pony Name
-// Pony ID
-// Ref
-
-
 class PonyInput {
 
-    constructor(title = "PonyInput", has_load_db_btn = true, has_show_more_btn = true) {
+    constructor(title = "PonyInput", has_load_db_btn = true, has_show_more_btn = true, actions = {}) {
         // Create a HTML element for Pony Input
         this.element = $("<div>");
         this.element.addClass("clear_box pony_input");
         this.element.append($("<h2>").text(title));
+        // Initialize actions, these are functions set to run when certain functions are ran
+        this.actions = actions;
         // Initialize the select multis, this will be used later to edit them in batch
         this.select_multis = [];
 
@@ -1321,12 +1330,43 @@ class PonyInput {
 
         // Load Pony from database button (this will only be visible when connected to the database)
         if (has_load_db_btn) {
-            let load_btn = $("<button>").text("Load Pony from PonyDB");
+            // Need a reference to this
+            let input = this;
+            let load_btn = $("<button>").text("Load Pony from Database");
             load_btn.addClass("wide");
-            // // If not connected to db, hide load button
-            // if (!DB_CONNECTED) {
-            //     load_btn.addClass("hidden");
-            // }
+            // Move database into popup
+            load_btn.click(() => {
+                // Stop if there is no MAIN_DATABASE, this should never happen.
+                if (!MAIN_DATABASE) return;
+                // Create database for popup
+                // Initialize this function for use later
+                let close_popup = function(ponies){}
+                let db = new PonyDatabase(MAIN_DATABASE.ponies);
+                db.actions = {
+                    "select" : function(ponies) {
+                        close_popup(ponies);
+                    },
+                    "delete" : function() {
+                        // Save to the offline database and update the main database
+                        save_object("ponies", db.ponies);
+                        db.update_ponies();
+                        MAIN_DATABASE.update_ponies();
+                    },
+                    "update_ponies" : function() {
+                        db.ponies = load_object("ponies");
+                        // Update the main database aswell
+                        MAIN_DATABASE.update_ponies();
+                    }
+                }
+                db.update_ponies();
+
+                // Create the popup for the database
+                let popup = create_popup_element(db.element);
+                close_popup = function(ponies) {
+                    input.import_pony(ponies[0]);
+                    popup.close();
+                }
+            });
             this.element.append(load_btn);
         }
 
@@ -1366,7 +1406,11 @@ class PonyInput {
         let offline_btn = $("<button>").text("Save Offline");
         let online_btn = $("<button>").text("Save Online");
         offline_btn.click(() => {
-            save_offline_pony(this.get_pony());
+            let ponies = save_offline_pony(this.get_pony());
+            let a = this.actions["save_offline"];
+            if (a) {
+                a();
+            }
         });
         // ---- Button only visible if connected to db
         online_btn.addClass("db_hidden");
@@ -1695,7 +1739,7 @@ class PonyDatabase {
         // These are functions that will run when certain buttons are pressed
         this.actions = actions;
         // Update the table with this.ponies
-        this.update_ponies();
+        // this.update_ponies();
         // An array of the IDs selected
         this.selection = [];
         // The buttons to control the database
@@ -1724,6 +1768,9 @@ class PonyDatabase {
         // Save Online
         let save_on_b = $("<button>").text("Save Online");
         save_on_b.addClass("db_hidden");
+        if (!DB_CONNECTED) {
+            save_on_b.addClass("hidden");
+        }
         save_on_b.click(() => {
             let a = this.actions["save_online"];
             if (a) a(this.get_ponies_by_ids());
@@ -1751,12 +1798,15 @@ class PonyDatabase {
         this.select_ids();
     }
 
-    update_ponies(ponies = this.ponies) {
-        this.ponies = ponies;
+    update_ponies() {
+        // Remove selection
+        this.select_ids();
+        let a = this.actions["update_ponies"];
+        if (a) a();
         // Clear the table
         this.table.empty();
-        for (let key of Object.keys(ponies)) {
-            let pony = ponies[key];
+        for (let key of Object.keys(this.ponies)) {
+            let pony = this.ponies[key];
             let item = this.create_table_item(pony);
             this.table.append(item);
         }
@@ -1771,8 +1821,8 @@ class PonyDatabase {
             "Pony Name" : $("<p>"),
             "Owner" : $("<p>"),
             "Species" : $("<p>"),
-            "Ref Link" : $("<a target='_blank'>"),
-            "Offline" : $("<input type='checkbox'>")
+            "Ref Link" : $("<a target='_blank'>")
+            // "Offline" : $("<input type='checkbox'>")
         }
         // Iterate through each text element
         for (let key of Object.keys(elements)) {
@@ -1803,8 +1853,8 @@ class PonyDatabase {
         item.click(() => {
             this.select_ids([params["Pony ID"]]);
         });
-        // Add ID as pony_(id) to the element
-        item.attr("id", ID_PREFIX + params["Pony ID"]);
+        // Add class as pony_(id) to the element
+        item.addClass(ID_PREFIX + params["Pony ID"]);
         // return the item
         return item;
     }
@@ -1852,7 +1902,7 @@ class PonyDatabase {
     }
 
     get_id_element(id) {
-        return this.table.find("#" + ID_PREFIX + id);
+        return this.table.find("." + ID_PREFIX + id);
     }
 
     // Get some ponies by id, this is mainly for ponies that are selected
@@ -1881,29 +1931,16 @@ class PonyDatabase {
             title = "Editing " + id;
         }
         // Make Pony input
-        let pi = new PonyInput(title, false, false);
-
-        // CHANGED TO create_popup_element
-        // let fullscrene_ele = $("<div>");
-        // fullscrene_ele.addClass("popup_container");
-        // // Center element to center within the fullscrene
-        // let center_ele = $("<div>");
-        // // ---- What elements are needed to edit a pony
-        // center_ele.append(pi.element);
-        // let close_button = $("<button>").text("Close");
-        // close_button.addClass("wide red_button");
-        // close_button.click(() => {
-        //     $(".popup_container").remove();
-        // });
-        // center_ele.append(close_button);
-        // // ----
-        // fullscrene_ele.append(center_ele);
-
-        // // Add to the body of the webpage
-        // $("body").append(fullscrene_ele);
+        let db = this;
+        let pi = new PonyInput(title, false, false, {
+            "save_offline" : function() {
+                db.update_ponies();
+            }
+        });
 
         // Fullscrene element to cover the whole screne
         create_popup_element(pi.element);
+
         // Update the element to match the pony's parameters IF we are editing a pony
         if (pony) pi.import_pony(pony);
     }
