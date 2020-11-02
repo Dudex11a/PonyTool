@@ -721,7 +721,7 @@ function find_rarities(string) {
 
 function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
     let params = combine_objects(pony1, pony2);
-    param = clean_object(params);
+    params = clean_object(params);
 
     // Remove rare species from params
     if (!rare && params.Species) {
@@ -820,14 +820,7 @@ function roll_pony(species, params = null) {
             }
         }
     } else {
-        // // If there are no common species use rare if Rainbow Feather
-        // if (has_item("Rainbow Feather") && common_species.length === 0) {
-        //     // Not multiple species
-        //     species = random_species(species);
-        // } else {
-        //     // Not multiple species
         species = random_species(common_species, rare_species);
-        // }
     }
 
     let pony = {
@@ -939,7 +932,7 @@ function random_species(common_species, rare_species) {
     if (!species) {
         species = [Object.keys(PONYPARAMS.Species)[0]];
     }
-    return species;
+    return [species];
 }
 
 function roll_farm() {
@@ -982,31 +975,6 @@ function get_farm_location() {
 function match_array(array1, array2) {
     return array1.filter(item => array2.includes(item));
 }
-
-// function combine_objects_w_arrays(object1, object2) {
-//     // Copy Object1
-//     let new_object = {...object1};
-//     let object2_keys = Object.keys(object2);
-//     // Combine species and default parameters
-//     for (let key of object2_keys) {
-//         let obj2_value = object2[key];
-//         // If key exists combine the default and species parameter
-//         if (new_object[key]) {
-//             new_object[key] = new_object[key].concat(obj2_value);
-//         // If the key does not exist set the value to object2's
-//         } else {
-//             new_object[key] = obj2_value;
-//         }
-//     }
-//     if (new_object.Trait) {
-//         console.log(new_object);
-//     }
-//     // new_object = clean_object(new_object);
-//     // if (new_object.Trait) {
-//     //     console.log("after", new_object);
-//     // }
-//     return new_object;
-// }
 
 // Combine objects and mainly, combine the arrays with the objects if the keys match
 function combine_objects(obj1, obj2) {
@@ -1764,7 +1732,6 @@ class PonyDatabase {
         let save_off_b = $("<button>").text("Save Offline");
         save_off_b.click(() => {
             for (let pony_id of this.selection) {
-                console.log(this.ponies[pony_id]);
                 save_offline_pony(this.ponies[pony_id]);
             }
         });
