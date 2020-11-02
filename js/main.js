@@ -477,7 +477,7 @@ function roll() {
         15
     ];
     let pony1 = PONYPARENTS[0].get_pony_simple();
-    let pony2 = PONYPARENTS[1].get_pony_simple()
+    let pony2 = PONYPARENTS[1].get_pony_simple();
     if (has_item("One-Night-Stand Scroll")) {
         // Random pony that's not rare
         pony2 = roll_adopt([true, true, false]);
@@ -1283,6 +1283,30 @@ function get_select_values(element, id) {
     return values;
 }
 
+function create_popup_element(ele_innards) {
+    let ele = $("<div>");
+    ele.addClass("popup_container");
+    let center_ele = $("<div>");
+    // Allow for arrays, if it's not array just append it normal
+    if (Array.isArray(ele_innards)) {
+        for (let element of ele_innards) center_ele.append(element);
+    } else {
+        center_ele.append(ele_innards);
+    }
+    // ---- Close button
+    let close_button = $("<button>").text("Close");
+    close_button.addClass("wide red_button");
+    close_button.click(() => {
+        ele.remove();
+    });
+    center_ele.append(close_button);
+    // ----
+    ele.append(center_ele);
+    // Append it to the document
+    $("body").append(ele);
+    return ele;
+}
+
 // I should of made this sooner, this turns any string into a id.
 // Right now it just replaces spaces with _.
 function idify(id) {
@@ -1320,7 +1344,7 @@ class PonyInput {
         reset_button.addClass("top_right");
         reset_button.click(() => {
             // Reset fields to whatever species is first
-            this.update_species_parameters([Object.keys(PONYPARAMS["Species"])[0]]);
+            this.reset_params();
         });
         this.element.append(reset_button);
 
@@ -1438,7 +1462,8 @@ class PonyInput {
         param2_base.append(this.param2_container);
         this.element.append(param2_base);
 
-        this.update_species_parameters();
+        // Refresh and reset the params
+        this.reset_params();
     }
 
     get_species() {
@@ -1627,6 +1652,11 @@ class PonyInput {
             select.element.addClass("parent_param");
             this.param_container.append(select.element);
         }
+    }
+
+    // I use this in more than one place, I want easy access
+    reset_params() {
+        this.update_species_parameters([Object.keys(PONYPARAMS["Species"])[0]]);
     }
 }
 
@@ -1885,23 +1915,28 @@ class PonyDatabase {
         }
         // Make Pony input
         let pi = new PonyInput(title, false, false);
+
+        // CHANGED TO create_popup_element
+        // let fullscrene_ele = $("<div>");
+        // fullscrene_ele.addClass("popup_container");
+        // // Center element to center within the fullscrene
+        // let center_ele = $("<div>");
+        // // ---- What elements are needed to edit a pony
+        // center_ele.append(pi.element);
+        // let close_button = $("<button>").text("Close");
+        // close_button.addClass("wide red_button");
+        // close_button.click(() => {
+        //     $(".popup_container").remove();
+        // });
+        // center_ele.append(close_button);
+        // // ----
+        // fullscrene_ele.append(center_ele);
+
+        // // Add to the body of the webpage
+        // $("body").append(fullscrene_ele);
+
         // Fullscrene element to cover the whole screne
-        let fullscrene_ele = $("<div>");
-        fullscrene_ele.addClass("popup_container");
-        // Center element to center within the fullscrene
-        let center_ele = $("<div>");
-        // ---- What elements are needed to edit a pony
-        center_ele.append(pi.element);
-        let close_button = $("<button>").text("Close");
-        close_button.addClass("wide red_button");
-        close_button.click(() => {
-            $(".popup_container").remove();
-        });
-        center_ele.append(close_button);
-        // ----
-        fullscrene_ele.append(center_ele);
-        // Add to the body of the webpage
-        $("body").append(fullscrene_ele);
+        create_popup_element(pi.element);
         // Update the element to match the pony's parameters IF we are editing a pony
         if (pony) pi.import_pony(pony);
     }
