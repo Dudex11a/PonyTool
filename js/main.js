@@ -349,7 +349,7 @@ function make_changelog_ele(commits) {
         // If first character is a number
         if (!isNaN(message[0])) {
             let msg_ele = document.createElement("div");
-            message = message.replaceAll("-", "<br>-");
+            message = message.replaceAll("- ", "<br>- ");
             msg_ele.innerHTML = message;
             ele.append(msg_ele);
         }
@@ -381,14 +381,7 @@ function finish_requests(error = undefined) {
         return;
     }
     // Remove loading screen
-    $("#loading")[0].remove()
-    // Add Pony Input Elements for parents
-    PONYPARENTS = [
-        new PonyInput("Parent 1"),
-        new PonyInput("Parent 2")
-    ];
-    $("#breed_container").append(PONYPARENTS[0].element);
-    $("#breed_container").append(PONYPARENTS[1].element);
+    $("#loading")[0].remove();
     // Add Database Element for the database_container
     MAIN_DATABASE = new PonyDatabase();
     // Set the actions of the MAIN_DATABASE, the reason why I
@@ -406,6 +399,27 @@ function finish_requests(error = undefined) {
     }
     // Update the database with the ponies
     MAIN_DATABASE.update_ponies();
+    // Save the version of the database
+    // This is so if I need to make any changes to the local database I can use this
+    // version number to tell if there are any changes I need to make
+    let db_version = load_object("db_version");
+    if (db_version > 1) {}
+    save_object("db_version", 1);
+    // Add Pony Input Elements for parents
+    PONYPARENTS = [
+        new PonyInput("Parent 1"),
+        new PonyInput("Parent 2")
+    ];
+    for (let pony of PONYPARENTS) {
+        $("#breed_container").append(pony.element);
+        pony.actions = {
+            "save_offline" : function() {
+                MAIN_DATABASE.update_ponies();
+            }
+        }
+    }
+    $("#breed_container").append(PONYPARENTS[0].element);
+    $("#breed_container").append(PONYPARENTS[1].element);
         // { // Test Data
         //     "123" : {
         //         "Pony ID" : "123",
@@ -1325,9 +1339,6 @@ class PonyInput {
         });
         this.element.append(reset_button);
 
-        // Put elements associated with the species in here
-        this.param_eles = [];
-
         // Load Pony from database button (this will only be visible when connected to the database)
         if (has_load_db_btn) {
             // Need a reference to this
@@ -1343,11 +1354,12 @@ class PonyInput {
                 let close_popup = function(ponies){}
                 let db = new PonyDatabase(MAIN_DATABASE.ponies);
                 db.actions = {
+                    // What to do when the "Select" button is pressed
                     "select" : function(ponies) {
                         close_popup(ponies);
                     },
+                    // Save to the offline database and update the main database
                     "delete" : function() {
-                        // Save to the offline database and update the main database
                         save_object("ponies", db.ponies);
                         db.update_ponies();
                         MAIN_DATABASE.update_ponies();
@@ -1378,12 +1390,11 @@ class PonyInput {
         });
         this.species_select.create_select();
         this.species_select.element.addClass("parent_param");
-        this.element.append(this.species_select.element);
 
         // Container for the species specific params
         this.param_container = $("<div>");
-        this.element.append(this.param_container);
 
+        // **** PARAMS2 ****
         // More params container (holds Stat input, Pony Name, Pony ID, and the ref link)
         this.param2_container = $("<div>");
         this.param2_container.addClass("pi_extra");
@@ -1441,8 +1452,7 @@ class PonyInput {
 
         details_elements = details_elements.concat([
             $("<h4>").text("Stat Modifiers"),
-            stat_input,
-            buttons_ele
+            stat_input
         ]);
         for (let ele of details_elements) {
             this.param2_container.append(ele);
@@ -1472,7 +1482,19 @@ class PonyInput {
         }
         param2_base.append(details_button);
         param2_base.append(this.param2_container);
-        this.element.append(param2_base);
+        // ****   ****
+        // Append containers in certain order
+        if (has_show_more_btn) {
+            this.element.append(this.species_select.element);
+            this.element.append(this.param_container);
+            param2_base.find(".pi_extra").append(buttons_ele);
+            this.element.append(param2_base);
+        } else {
+            this.element.append(param2_base);
+            this.element.append(this.species_select.element);
+            this.element.append(this.param_container);
+            this.element.append(buttons_ele);
+        }
 
         // Refresh and reset the params
         this.reset_params();
@@ -1805,11 +1827,20 @@ class PonyDatabase {
         if (a) a();
         // Clear the table
         this.table.empty();
+        // ---- Make titles for each row
+        let titles_container = $("<div>");
+        let titles = ["ID", "Name", "Owner", "Species", "Ref"];
+        for (let title of titles) {
+            let ele = $("<div>").text(title);
+            titles_container.append(ele);
+        }
+        this.table.append(titles_container);
         for (let key of Object.keys(this.ponies)) {
             let pony = this.ponies[key];
             let item = this.create_table_item(pony);
             this.table.append(item);
         }
+        // ----
     }
 
     create_table_item(params = {}) {
