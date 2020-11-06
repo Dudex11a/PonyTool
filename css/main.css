@@ -440,6 +440,11 @@ nav button {
     border-radius: 1px;
 }
 
+.pony_table > div:first-child {
+    background-color: var(--color_second);
+    border-color: var(--color_second_dark);
+}
+
 /* Table fields */
 .pony_table > div > * {
     display: block;

@@ -1,3 +1,7 @@
+// |________________________________________________________|
+// |Made by Dudex11a, you can reach me at dudex11c@gmail.com|
+// |________________________________________________________|
+
 // The results in the #results_container
 var CURRENTRESULTS = [];
 // The PonyInput objects for the parents in the breed tab go in here.
@@ -44,6 +48,7 @@ const MODES = [
     "adopt",
     "breed",
     "farm",
+    "quests",
     "database",
     "options"
 ]
@@ -760,7 +765,6 @@ function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2
     }
 
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
-    
     return roll_pony(params.Species, params);
 }
 
@@ -1003,6 +1007,13 @@ function match_array(array1, array2) {
 
 // Combine objects and mainly, combine the arrays with the objects if the keys match
 function combine_objects(obj1, obj2) {
+    // Copy obj 1 and 2 to different objects, this is so they aren't references to
+    // the actual objects and I acidentally edit those.
+    if (Array.isArray(obj1)) obj1 = [...obj1];
+    else if (typeof obj1 === "object") obj1 = {...obj1}
+    if (Array.isArray(obj2)) obj2 = [...obj2];
+    else if (typeof obj2 === "object") obj2 = {...obj2}
+    
     let object = obj1;
     
     // If they're both arrays combine them, the is the bread and butter
@@ -1112,14 +1123,6 @@ function find_matches(params, values) {
 
 function copy_to_clipboard(text) {
     navigator.clipboard.writeText(text);
-}
-
-function combine_species_params(species) {
-    let species_param
-    if (species_param) {
-
-    }
-    return PONYSHEET[parameter].concat(PONYSHEET.Species[species][parameter])
 }
 
 function special_random(array, exceptions = [], wildcard = true) {
