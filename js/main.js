@@ -751,18 +751,19 @@ function find_rarities(string) {
 
 function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
     let params = combine_objects(pony1, pony2);
-    params = clean_object(params);
 
+    // Don't need this because roll_pony takes care of this.
+    // Keeping this incase there are any problems later.
     // Remove rare species from params
-    if (!rare && params.Species) {
-        params.Species = params.Species.filter(value => {
-            // If not rare
-            if (find_rarities(value)) {
-                return !find_rarities(value).includes("(R)");
-            }
-            return true
-        });
-    }
+    // if (!rare && params.Species) {
+    //     params.Species = params.Species.filter(value => {
+    //         // If not rare
+    //         if (find_rarities(value)) {
+    //             return !find_rarities(value).includes("(R)");
+    //         }
+    //         return true
+    //     });
+    // }
 
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
     return roll_pony(params.Species, params);
@@ -777,8 +778,12 @@ function roll_pony(species, params = null) {
         params = get_species_params(species);
     }
 
+    // Unreference species and params
+    species = [...species];
+    params = {...params}
+
     // Remove the duplicate
-    species = clean_array(species);
+    params = clean_object(params);
 
     // Sort rare and common species
     let common_species = [];
@@ -795,16 +800,19 @@ function roll_pony(species, params = null) {
 
     // If there is more than 1 species set multiple_species to true
     let multiple_species = species.length > 1;
-    // If there is no Rainbow Feather when there is no Rainbow Feather there needs to be further testing
-    if (multiple_species && !has_item("Rainbow Feather")) {
-        multiple_species = common_species.length > 1;
-    }
 
     // If hybrid
     let hybrid_chance = 30;
     if (has_item("Hybrid Scroll")) {
         hybrid_chance = 60;
     }
+
+    // If there is no Rainbow Feather when there are multiple species (like "Earth Pony, Alicorn")
+    // just use the common species.
+    if (multiple_species && !has_item("Rainbow Feather")) {
+        species = [...common_species];
+    }
+
     if (multiple_species) {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
@@ -827,25 +835,26 @@ function roll_pony(species, params = null) {
         } else {
             // Random species out of what was given
             species = random_species(common_species, rare_species);
-            // Change the params so they only include ones associated with species
-            let keys = Object.keys(params);
-            let species_params = get_species_params(species);
-            let pplaces = species_params["Palette Place"];
-            // Set Species params palette place to all the palettes that species can have
-            // This is so the match array later can match with the pplaces
-            for(let pplace of pplaces) {
-                species_params[pplace] = species_params.Palette;
-            }
-            for (let key of keys) {
-                let species_param = species_params[key];
-                // If the species_params has the key being matched
-                if (species_param) {
-                    // Make param an array if not
-                    if (!Array.isArray(params[key])) {
-                        params[key] = [params[key]];
-                    }
-                    params[key] = match_array(params[key], species_param);
+        }
+
+        // Change the params so they only include ones associated with species
+        let keys = Object.keys(params);
+        let species_params = get_species_params(species);
+        let pplaces = species_params["Palette Place"];
+        // Set Species params palette place to all the palettes that species can have
+        // This is so the match array later can match with the pplaces
+        for(let pplace of pplaces) {
+            species_params[pplace] = species_params.Palette;
+        }
+        for (let key of keys) {
+            let species_param = species_params[key];
+            // If the species_params has the key being matched
+            if (species_param) {
+                // Make param an array if not
+                if (!Array.isArray(params[key])) {
+                    params[key] = [params[key]];
                 }
+                params[key] = match_array(params[key], species_param);
             }
         }
     } else {
@@ -959,6 +968,7 @@ function random_species(common_species, rare_species) {
     }
     // If species is undefined or something went wrong let the species display the first species
     if (!species) {
+        console.log("Something went wrong with the species in 'roll_pony'.");
         species = [Object.keys(PONYPARAMS.Species)[0]];
     }
     return [species];
@@ -1013,7 +1023,7 @@ function combine_objects(obj1, obj2) {
     else if (typeof obj1 === "object") obj1 = {...obj1}
     if (Array.isArray(obj2)) obj2 = [...obj2];
     else if (typeof obj2 === "object") obj2 = {...obj2}
-    
+
     let object = obj1;
     
     // If they're both arrays combine them, the is the bread and butter
