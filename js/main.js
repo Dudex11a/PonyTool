@@ -928,12 +928,17 @@ function roll_pony(species, params = null) {
         pony[key] = [];
     }
 
-    // Roll for each odd
+    // Roll for some of the params (i.e. Traits, Markings...)
+    // This will go to each param and then each odd in the odds object.
     for (let key of keys) {
         let odd_values = odds[key];
         for (let odd of odd_values) {
             if (chance(odd)) {
-                let rolled_value = special_random(params[key], pony[key], true);
+                // Values that the pony has can't be used again, they are an exception.
+                let exceptions = pony[key];
+                // Find matches for potential other bodypart values. This is mainly for Traits.
+                exceptions = exceptions.concat(find_matches(params[key], pony[key]));
+                let rolled_value = special_random(params[key], exceptions, true);
                 if (rolled_value) pony[key].push(rolled_value);
             }
         }
