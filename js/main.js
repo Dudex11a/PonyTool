@@ -25,9 +25,16 @@ const ITEMS = [
     "Mutation Scroll",
     "Fertility Scroll",
     "Hybrid Scroll",
+    "Wildcard Scroll",
     "One-Night-Stand Scroll",
-    "Rainbow Feather"
+    "Rainbow Feather",
+    "Illegal Ponies"
 ];
+
+function wildcard_chance() {
+    return has_item("Wildcard Scroll") ? 15 : 5;
+}
+
 const STATS = [
     "Strength",
     "Agility",
@@ -37,6 +44,7 @@ const STATS = [
     "Stealth",
     "Magic"
 ];
+
 // These extra inputs are mainly used in the Pony Input for some params
 const EXTRA_INPUTS = [
     "Owner",
@@ -44,6 +52,7 @@ const EXTRA_INPUTS = [
     "Pony ID",
     "Ref Link"
 ];
+
 const MODES = [
     "adopt",
     "breed",
@@ -779,7 +788,7 @@ function roll_pony(species, params = null) {
     }
 
     // Unreference species and params
-    species = [...species];
+    species = clean_array(species);
     params = {...params}
 
     // Remove the duplicate
@@ -846,6 +855,7 @@ function roll_pony(species, params = null) {
         for(let pplace of pplaces) {
             species_params[pplace] = species_params.Palette;
         }
+
         for (let key of keys) {
             let species_param = species_params[key];
             // If the species_params has the key being matched
@@ -854,7 +864,9 @@ function roll_pony(species, params = null) {
                 if (!Array.isArray(params[key])) {
                     params[key] = [params[key]];
                 }
-                params[key] = match_array(params[key], species_param);
+                // Only keep parameters related to the species
+                if (!has_item("Illegal Ponies")) params[key] = match_array(params[key], species_param);
+                
             }
         }
     } else {
@@ -1182,7 +1194,7 @@ function special_random(array, exceptions = [], wildcard = true) {
             push_into_array(rarities, "rare", 5);
         }
         if (wildcard) {
-            push_into_array(rarities, "wildcard", 5);
+            push_into_array(rarities, "wildcard", wildcard_chance());
         }
         if (common.length > 0) {
             push_into_array(rarities, "common", Math.abs(rarities.length - 100));
@@ -1206,8 +1218,8 @@ function special_random(array, exceptions = [], wildcard = true) {
         item = random_in_array(rarity_array);
     } else {
         // Wildcard chance if the array is undefined
-        if (wildcard && chance(5)) {
-            item = "Wildcard"
+        if (wildcard && chance(wildcard_chance())) {
+            item = "Wildcard";
         } else {
             item = random_in_array(array);
         }

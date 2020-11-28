@@ -185,6 +185,17 @@ nav button {
     background-color: #FFF;
 }
 
+#links {
+    display: flex;
+    justify-content: center;
+}
+
+#links * {
+    font-size: 10pt;
+    display: block;
+    padding: 0 var(--padding1) 0 var(--padding1);
+}
+
 #credit {
     font-size: 9px;
     display: block;
