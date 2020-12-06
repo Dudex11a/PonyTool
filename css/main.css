@@ -109,6 +109,7 @@ nav {
     padding: 5px;
     display: flex;
     justify-content: center;
+    overflow-x: scroll;
     border-top: var(--color_primary) 1px dashed;
     border-bottom: var(--basic_border);
 }
@@ -304,6 +305,24 @@ nav button {
     margin-bottom: var(--margin1);
 }
 
+.pony_input .group {
+    margin: var(--margin1);
+    padding: var(--padding1);
+    border: var(--basic_border);
+    border-radius: var(--radius1);
+}
+
+/* .pony_input .group > :first-child {
+    text-decoration: underline;
+} */
+
+.pony_input .group > * {
+    /* padding: var(--padding1) none; */
+    margin: var(--margin1) none;
+    border-bottom: var(--basic_border);
+    border-radius: var(--radius1);
+}
+
 .top_right {
     position: absolute;
     /* z-index for being able to click button */
@@ -338,7 +357,7 @@ nav button {
     border-radius: var(--radius1);
 }
 
-.select_multi span, .select_multi p {
+span, .select_multi p {
     font-size: 20px;
 }
 

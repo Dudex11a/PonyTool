@@ -454,7 +454,7 @@ function finish_requests(error = undefined) {
         // }
     $("#database_container").append(MAIN_DATABASE.element);
     // Add Elements for farming
-    let farm_select = create_select_element(Object.keys(FARMING.items), "farm", () => {
+    let farm_select = create_select_element("farm", Object.keys(FARMING.items), () => {
         update_farm_element();
     });
     $("#farm_container").append(farm_select);
@@ -961,6 +961,16 @@ function roll_pony(species, params = null) {
         delete pony.Mutation;
     }
 
+    // Roll extra parts
+    // Seprate parts into an object
+    const parts = find_matches(Object.keys(params), ["[P]"]);
+    // Roll for each part
+    for (let part of parts) {
+        const part_name = remove_detail(part);
+        // Input a random for the pony
+        pony[part_name] = special_random(params[part]);
+    }
+
     return pony;
 }
 
@@ -1276,13 +1286,13 @@ function change_mode(mode) {
     }
 }
 
-function create_select_element(options, id = "", on_change = null) {
+function create_select_element(name = "", options, on_change = null) {
     let select = $("<select>");
-    for (let i in options) {
-        select.append($("<option>").text(options[i]));
+    for (let option of options) {
+        select.append($("<option>").text(option));
     }
-    if (id != "") {
-        select.addClass(id);
+    if (name != "") {
+        select.addClass(idify(name));
     }
     // Callback runs onchange
     if (on_change) {
@@ -1291,6 +1301,24 @@ function create_select_element(options, id = "", on_change = null) {
         });
     }
     return select;
+}
+
+function create_titled_select_element(name, options, on_change) {
+    let container = $("<div>");
+
+    // Select
+    let select = create_select_element(name, options);
+    if (on_change) {
+        select.change(() => {
+            on_change();
+        });
+    }
+
+    // Title
+    container.append($("<p>").text(name));
+    
+    container.append(select);
+    return container;
 }
 
 function get_select_values(element, id) {
@@ -1419,7 +1447,6 @@ class PonyInput {
             this.update_species_parameters();
         });
         this.species_select.create_select();
-        this.species_select.element.addClass("parent_param");
 
         // Container for the species specific params
         this.param_container = $("<div>");
@@ -1550,7 +1577,7 @@ class PonyInput {
             let species = all_species[i];
             let pp = PONYPARAMS.Species[species]["Palette Place"];
             if (pp) {
-                keys = keys.concat(pp);
+                keys = keys.concat(pp); 
             }
         }
         // Remove unwanted keys from array
@@ -1562,12 +1589,8 @@ class PonyInput {
         // Create Object
         let pony = {}
         // Create parameters
-        for (let i in keys) {
-            let key = keys[i];
-            // Initialize Param
-            pony[key] = get_select_values(this.element, "." + key);
-        }
-        return pony
+        for (let key of keys) pony[key] = get_select_values(this.element, "." + idify(key));
+        return pony;
     }
 
     // Get the whole pony
@@ -1651,26 +1674,6 @@ class PonyInput {
 
     }
 
-    create_param(name, options, parent = this.param_container, on_change = null) {
-        let container = $("<div>");
-
-        // Select
-        let select = create_select_element(options, name);
-        if (on_change) {
-            select.change(() => {
-                on_change();
-            });
-        }
-
-        // Title
-        container.append($("<p>").text(name));
-        
-        container.addClass("parent_param");
-        container.append(select);
-        parent.append(container);
-        return select;
-    }
-
     update_species_parameters(species = null) {
 
         // If species are given, update the species element
@@ -1693,16 +1696,19 @@ class PonyInput {
         // Add palettes
         let pps = params["Palette Place"];
         let ps = params["Palette"];
+        let palette_place_ele = $("<div>").html("<span>Palettes</span>");
+        palette_place_ele.addClass("group");
         for (let i in pps) {
             let place = pps[i];
             // Create elements for each Palette Place
-            let select = create_select_element(ps, place);
+            let select = create_select_element(place, ps);
             let palette_container = $("<div>");
             palette_container.append($("<p>").text(place));
             palette_container.append(select);
-            palette_container.addClass("param");
-            this.param_container.append(palette_container);
+            // palette_container.addClass("param");
+            palette_place_ele.append(palette_container);
         }
+        this.param_container.append(palette_place_ele);
 
         this.select_multis = [
             new SelectMulti("Trait", params.Trait),
@@ -1713,9 +1719,13 @@ class PonyInput {
         this.select_multis[1].create_select();
         // Add each select_multi element to the container
         for (let select of this.select_multis) {
-            select.element.addClass("parent_param");
             this.param_container.append(select.element);
         }
+        // Add parts input if nessesary.
+        // Get any parts
+        const parts = find_matches(Object.keys(params), ["[P]"]);
+        // Create a select for each part
+        for (const part of parts) this.param_container.append(create_titled_select_element(part, params[part]));
     }
 
     // I use this in more than one place, I want easy access
@@ -1749,7 +1759,7 @@ class SelectMulti {
 
     create_select(value = null) {
         let container = $("<div>");
-        let select = create_select_element(this.options, this.name);
+        let select = create_select_element(this.name, this.options);
         // If there's a value, set the select to that value
         if (value) select.val(value);
         if (this.on_change) {
