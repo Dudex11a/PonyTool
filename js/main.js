@@ -1696,7 +1696,7 @@ class PonyInput {
         // Add palettes
         let pps = params["Palette Place"];
         let ps = params["Palette"];
-        let palette_place_ele = $("<div>").html("<span>Palettes</span>");
+        let palette_place_ele = $("<div>").html("<h4>Palettes</h4>");
         palette_place_ele.addClass("group");
         for (let i in pps) {
             let place = pps[i];
@@ -1709,6 +1709,18 @@ class PonyInput {
             palette_place_ele.append(palette_container);
         }
         this.param_container.append(palette_place_ele);
+        
+        // Add parts input if nessesary.
+        // Get any parts
+        const parts = find_matches(Object.keys(params), ["[P]"]);
+        // If there are any parts, make the elements for them.
+        if (parts.length) {
+            // Create a select for each part
+            let parts_ele = $("<div>").html("<h4>Parts</h4>");
+            parts_ele.addClass("group");
+            for (const part of parts) parts_ele.append(create_titled_select_element(part, params[part]));
+            this.param_container.append(parts_ele);
+        }
 
         this.select_multis = [
             new SelectMulti("Trait", params.Trait),
@@ -1721,11 +1733,6 @@ class PonyInput {
         for (let select of this.select_multis) {
             this.param_container.append(select.element);
         }
-        // Add parts input if nessesary.
-        // Get any parts
-        const parts = find_matches(Object.keys(params), ["[P]"]);
-        // Create a select for each part
-        for (const part of parts) this.param_container.append(create_titled_select_element(part, params[part]));
     }
 
     // I use this in more than one place, I want easy access

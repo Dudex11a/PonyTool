@@ -118,6 +118,12 @@ nav button {
     margin: 5px
 }
 
+h4, span {
+    font-size: 18px;
+    text-decoration: none;
+    font-weight: normal;
+}
+
 /* This is a class instead of a css variable so I can easily resize it if the screen changes size.*/
 .large_width {
     width: 80vw;
@@ -317,8 +323,8 @@ nav button {
 } */
 
 .pony_input .group > * {
-    /* padding: var(--padding1) none; */
-    margin: var(--margin1) none;
+    padding-bottom: var(--padding1);
+    margin-bottom: var(--margin1);
     border-bottom: var(--basic_border);
     border-radius: var(--radius1);
 }
