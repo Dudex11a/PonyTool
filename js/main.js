@@ -822,6 +822,7 @@ function roll_pony(species, params = null) {
         species = [...common_species];
     }
 
+    let species_params = get_species_params(species);
     if (multiple_species) {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
@@ -848,7 +849,6 @@ function roll_pony(species, params = null) {
 
         // Change the params so they only include ones associated with species
         let keys = Object.keys(params);
-        let species_params = get_species_params(species);
         let pplaces = species_params["Palette Place"];
         // Set Species params palette place to all the palettes that species can have
         // This is so the match array later can match with the pplaces
@@ -963,12 +963,12 @@ function roll_pony(species, params = null) {
 
     // Roll extra parts
     // Seprate parts into an object
-    const parts = find_matches(Object.keys(params), ["[P]"]);
+    const parts = find_matches(Object.keys(species_params), ["[P]"]);
     // Roll for each part
     for (let part of parts) {
         const part_name = remove_detail(part);
         // Input a random for the pony
-        pony[part_name] = special_random(params[part]);
+        pony[part_name] = [special_random(params[part])];
     }
 
     return pony;
@@ -1325,10 +1325,10 @@ function get_select_values(element, id) {
     let values = [];
     let selects = element.find(id);
     // Make array if not
-    for (let i in selects) {
-        let value = selects[i].value;
+    for (let select of selects) {
+        let value = select.value;
         if (typeof value === "string") {
-            values.push(selects[i].value);
+            values.push(value);
         }
     }
     return values;
@@ -1367,14 +1367,22 @@ function create_popup_element(ele_innards) {
 
 // I should of made this sooner, this turns any string into a id.
 // Right now it just replaces spaces with _.
-function idify(id) {
-    return id.replaceAll(" ", "_");
+function idify(name) {
+    let id = name;
+    // Replace [0] with [1]
+    let replacements = [
+        [" ", "_"],
+        ["[", ""],
+        ["]", ""]
+    ]
+    for (let replacement of replacements) id = id.replaceAll(...replacement);
+    return id;
 }
 
 // Undoes above
-function unidify(unid) {
-    return unid.replaceAll("_", " ");
-}
+// function unidify(unid) {
+//     return unid.replaceAll("_", " ");
+// }
 
 class PonyInput {
 
@@ -1569,6 +1577,10 @@ class PonyInput {
         // ----- Make the keys for the Pony Object -----
         let keys = Object.keys(PONYPARAMS);
         let all_species = this.get_species();
+        // Append species specific keys (i.e. parts)
+        for (let species of all_species) keys = keys.concat(Object.keys(PONYPARAMS["Species"][species]));
+        // Remove dupe keys
+        keys = [...keys]
         // Combine the Palette Places into the keys
         // Default Palette Places
         keys = keys.concat(PONYPARAMS["Palette Place"]);
@@ -1798,7 +1810,7 @@ class PonyDatabase {
     constructor(ponies = {}, actions = {}) {
         // Overall container
         this.element = $("<div>");
-        this.element.addClass("pony_db clear_box medium_width");
+        this.element.addClass("pony_db clear_box");
         // Table for the ponies
         this.table = $("<div>");
         this.table.addClass("pony_table");

@@ -91,7 +91,7 @@ a:hover {
 
 header {
     background-color: var(--color_lowest);
-    padding: 5px;
+    padding: 5px 0;
     text-align: center;
 }
 
@@ -106,10 +106,10 @@ footer {
 
 nav {
     background-color: var(--color_lowest);
-    padding: 5px;
+    padding: 5px 0;
     display: flex;
     justify-content: center;
-    overflow-x: scroll;
+    overflow-x: auto;
     border-top: var(--color_primary) 1px dashed;
     border-bottom: var(--basic_border);
 }
@@ -219,7 +219,7 @@ h4, span {
 
 #adopt_container {
     margin: 0 auto;
-    padding: var(--padding1);
+    padding: var(--padding1) 0;
     display: block;
     text-align: center;
     background-color: var(--color_second);
@@ -227,7 +227,7 @@ h4, span {
 
 #results_container {
     margin: 0;
-    padding: var(--padding1);
+    padding: var(--padding1) 0;
     background-color: var(--color_second);
     border-radius: var(--radius1);
 }
@@ -322,7 +322,7 @@ h4, span {
     text-decoration: underline;
 } */
 
-.pony_input .group > * {
+.pony_input .group > :not(:last-child) {
     padding-bottom: var(--padding1);
     margin-bottom: var(--margin1);
     border-bottom: var(--basic_border);
@@ -401,7 +401,7 @@ span, .select_multi p {
     justify-content: center;
     background-color: var(--color_second);
     border-radius: var(--radius1);
-    padding: var(--padding1);
+    padding: var(--padding1) 0;
 }
 
 #roll_container * {
@@ -410,7 +410,7 @@ span, .select_multi p {
 
 #change_log {
     margin: 0 auto;
-    padding: var(--padding1);
+    padding: var(--padding1) 0;
     display: block;
 }
 
@@ -423,7 +423,7 @@ span, .select_multi p {
 }
 
 #farm_container, #farm_message {
-    padding: var(--padding1);
+    padding: var(--padding1) 0;
     text-align: center;
     margin: 0 auto;
     background-color: var(--color_second);
@@ -447,8 +447,8 @@ span, .select_multi p {
     display: flex;
     border-bottom: var(--basic_border);
     border-radius: var(--radius1);
-    padding: 1px;
-    margin: 1px;
+    padding: 1px 0;
+    margin: 1px 0;
 }
 
 #options_container > div > * {
@@ -463,6 +463,7 @@ span, .select_multi p {
 
 .pony_db {
     margin: var(--margin1) auto;
+    width: 600px;
 }
 
 /* Table item */
@@ -474,6 +475,11 @@ span, .select_multi p {
     /* height: 30px; */
     border: var(--basic_border);
     border-radius: 1px;
+    user-select: none;
+}
+
+.pony_table > div:not(:first-child) {
+    cursor: pointer;
 }
 
 .pony_table > div:first-child {
@@ -536,12 +542,13 @@ span, .select_multi p {
 .popup_container > div {
     padding: var(--padding1);
     margin: auto;
-    max-height: 80vh;
+    max-height: 80%;
+    max-width: 100%;
     position: absolute;
     background-color: var(--color_lowest);
     border: var(--basic_border);
     border-radius: var(--radius1);
-    overflow: scroll;
+    overflow: auto;
 }
 
 .wide {
