@@ -802,7 +802,7 @@ function roll_pony(species, params = null) {
             if (find_rarities(value).includes("(R)")) {
                 rare_species.push(value);
                 return false;
-            };
+            }
         }
         return true;
     });
@@ -849,6 +849,8 @@ function roll_pony(species, params = null) {
 
         // Change the params so they only include ones associated with species
         let keys = Object.keys(params);
+        // I redo this line here because the species might be changed
+        species_params = get_species_params(species);
         let pplaces = species_params["Palette Place"];
         // Set Species params palette place to all the palettes that species can have
         // This is so the match array later can match with the pplaces
