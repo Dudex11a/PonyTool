@@ -1,17 +1,21 @@
 :root {
+    --pri_hue: 141deg;
+    --sec_hue: 186deg;
+
     --margin1: 10px;
     --padding1: 10px;
     --radius1: 3px;
-    --color_lowest: white;
-    --color_highest: black;
-    --color_primary: #0ad150;
-    --color_primary_dark: #03752b;
-    --color_second: #f2fcfc;
-    --color_second_dark: #b5f7f7;
-    --color_bad: rgb(230, 67, 67);
-    --btn_color_off: darkgrey;
+    --color_lowest: hsl(0 0% 100%);
+    --color_highest: hsl(0 0% 0%);
+    --color_primary: hsl(var(--pri_hue) 91% 43%);
+    --color_primary_dark: hsl(var(--pri_hue) 95% 24%);
+    --color_second: hsl(var(--sec_hue) 63% 97%);
+    --color_second_dark: hsl(var(--sec_hue) 80% 84%);
+    --color_bad: hsl(0 77% 58%);
+    --btn_color_off: hsl(0 0% 66%);
     --transition_time: 0.05s;
     --basic_border: var(--color_primary) 1px solid;
+    --secondary_border: var(--color_second_dark);
 }
 
 /* Defaults */
@@ -27,16 +31,27 @@ body {
 }
 
 main {
-    background-color: var(--color_second);
+    background-color: #0000;
+    /* filter: hue-rotate(var(--sec_hue)); */
+}
+
+#background {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
     background-image: url("../img/background.png");
     background-repeat: repeat;
     background-attachment: fixed;
+    filter: hue-rotate(var(--sec_hue));
     /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
     animation-name: _;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
     animation-duration: 5s;
-    /*  */
 }
 
 @keyframes background_scroll {
@@ -116,6 +131,11 @@ nav {
 
 nav button {
     margin: 5px
+}
+
+span, input[type='checkbox'], label {
+    cursor: pointer;
+    user-select: none;
 }
 
 h4, span {
@@ -445,10 +465,13 @@ span, .select_multi p {
 
 #options_container > div {
     display: flex;
-    border-bottom: var(--basic_border);
     border-radius: var(--radius1);
     padding: 1px 0;
     margin: 1px 0;
+}
+
+#options_container > :not(:last-child) {
+    border-bottom: var(--basic_border);
 }
 
 #options_container > div > * {
@@ -473,9 +496,15 @@ span, .select_multi p {
     /* ID, Name, Owner, Species, Link, Offline */
     grid-template-columns: 15% 25% 25% 20% 15%;
     /* height: 30px; */
-    border: var(--basic_border);
+    border-left: var(--basic_border);
+    border-right: var(--basic_border);
+    border-bottom: var(--basic_border);
     border-radius: 1px;
     user-select: none;
+}
+
+.pony_table > :first-child {
+    border-top: var(--basic_border);
 }
 
 .pony_table > div:not(:first-child) {
@@ -488,7 +517,7 @@ span, .select_multi p {
 }
 
 /* Table fields */
-.pony_table > div > * {
+.pony_table > div > :not(:last-child) {
     display: block;
     min-height: 100%; /* Need this so the border always displays */
     margin-top: auto;
@@ -557,7 +586,7 @@ span, .select_multi p {
     width: 100%;
 }
 
-.hidden {
+.hidden, .hidden * {
     /* This is all important so that it really will be hidden. */
     margin: 0 !important;
     padding: 0 !important;

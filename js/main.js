@@ -822,7 +822,7 @@ function roll_pony(species, params = null) {
         species = [...common_species];
     }
 
-    let species_params = get_species_params(species);
+    let species_params;
     if (multiple_species) {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
@@ -873,6 +873,8 @@ function roll_pony(species, params = null) {
         }
     } else {
         species = random_species(common_species, rare_species);
+        // Set species params for later use
+        species_params = get_species_params(species);
     }
 
     let pony = {
@@ -1829,7 +1831,7 @@ class PonyDatabase {
         this.buttons = $("<div>");
         this.buttons.addClass("flex_buttons");
         // Select
-        let select_b = $("<button>").text("Select");
+        let select_b = $("<button>").text("Load");
         select_b.addClass("select");
         select_b.click(() => {
             let a = this.actions["select"];
