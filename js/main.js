@@ -183,6 +183,73 @@ const default_options = {
             else $("main").css("animation-name", "_");
         }
     },
+    "primary_color": {
+        "type" : "color",
+        "name" : "Primary Theme Color",
+        "value" : tinycolor("#0ad150").toHsl(),
+        "action" : function(hsl) {
+            // Apply color to element
+            this.ele.val("#" + tinycolor(hsl).toHex());
+            // Apply color to css
+            let prefix = "pri";
+            let suffixs = ["h", "s", "l"];
+            let types = ["deg", "%", "%"];
+            let values = Object.values(hsl);
+            // Change css variables for the suffixs
+            for (let i in suffixs) {
+                let suffix = suffixs[i];
+                let type = types[i];
+                let value = values[i];
+                // Change the value around if the type is a %
+                if (type === "%") {
+                    // Remove % and change to a number
+                    value = Number(value.replaceAll(type, ""));
+                }
+                value = Math.round(value);
+                $(":root").css(`--${prefix}_${suffix}`, value + type);
+            }
+        }
+    },
+    "secondary_color": {
+        "type" : "color",
+        "name" : "Secondary Theme Color",
+        "value" : tinycolor("#f3fbfc").toHsl(),
+        "action" : function(hsl) {
+            // Apply color to element
+            this.ele.val("#" + tinycolor(hsl).toHex());
+            // Apply color to css
+            let prefix = "sec";
+            let suffixs = ["h", "s", "l"];
+            let types = ["deg", "%", "%"];
+            let values = Object.values(hsl);
+            // Change css variables for the suffixs
+            for (let i in suffixs) {
+                let suffix = suffixs[i];
+                let type = types[i];
+                let value = values[i];
+                // Change the value around if the type is a %
+                if (type === "%") {
+                    // Remove % and change to a number
+                    value = Number(value.replaceAll(type, ""));
+                }
+                value = Math.round(value);
+                $(":root").css(`--${prefix}_${suffix}`, value + type);
+            }
+        }
+    },
+    "reset_theme" : {
+        "type" : "button",
+        "name" : "Reset Theme",
+        "action" : function() {
+            // Set defaults for defined options
+            let option_names = ["primary_color", "secondary_color"];
+            for (let option_name of option_names) {
+                let option = default_options[option_name];
+                set_option(option_name, option.value);
+                option.action(option.value);
+            }
+        }
+    },
     // "test_number": {
     //     "type" : "number",
     //     "name" : "Test Number",
@@ -340,11 +407,30 @@ function make_options_ele() {
                         if (option.action) option.action(val);
                     });
                     break;
+                case "color":
+                    input_ele = $("<input type='color'>");
+                    input_ele.change(e => {
+                        // Set the value through tinycolor, I might want to make my own code for this later
+                        // so I don't need the 33KB tinycolor package.
+                        val = tinycolor(input_ele.val()).toHsl();
+                        set_option(key, val);
+                        if (option.action) option.action(val);
+                    });
+                    break;
+                case "button":
+                    input_ele = $("<button>");
+                    input_ele.click(e => {
+                        if (option.action) option.action(val);
+                    });
+                    break;
             }
             // Add input ele if there is one
-            if (input_ele) option_ele.append(input_ele);
+            if (input_ele) {
+                option_ele.append(input_ele);
+                option.ele = input_ele;
+            }
             // Run the option's action with the current_value
-            if (option.action) option.action(current_value);
+            if (option.action && option.value) option.action(current_value);
             ele.append(option_ele);
         }
     }
@@ -1402,7 +1488,7 @@ class PonyInput {
 
         // Refresh Button
         let reset_button = $("<button>").text("Reset");
-        reset_button.addClass("top_right");
+        reset_button.addClass("top_right red_button");
         reset_button.click(() => {
             // Reset fields to whatever species is first
             this.reset_params();

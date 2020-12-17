@@ -1,16 +1,24 @@
 :root {
-    --pri_hue: 141deg;
-    --sec_hue: 186deg;
+    --contrast_threshold: 60%;
+    --pri_h: 141deg;
+    --pri_s: 91%;
+    --pri_l: 43%;
+    --pri_txt_l: calc((var(--pri_l) - var(--contrast_threshold)) * -100);
+    --sec_h: 186deg;
+    --sec_s: 63%;
+    --sec_l: 97%;
+    --sec_txt_l: calc((var(--sec_l) - var(--contrast_threshold)) * -100);
+
 
     --margin1: 10px;
     --padding1: 10px;
     --radius1: 3px;
     --color_lowest: hsl(0 0% 100%);
     --color_highest: hsl(0 0% 0%);
-    --color_primary: hsl(var(--pri_hue) 91% 43%);
-    --color_primary_dark: hsl(var(--pri_hue) 95% 24%);
-    --color_second: hsl(var(--sec_hue) 63% 97%);
-    --color_second_dark: hsl(var(--sec_hue) 80% 84%);
+    --color_primary: hsl(var(--pri_h) var(--pri_s) var(--pri_l));
+    --color_primary_dark: hsl(var(--pri_h) calc(var(--pri_s) - 4%) calc(var(--pri_l) - 19%));
+    --color_second: hsl(var(--sec_h) var(--sec_s) var(--sec_l));
+    --color_second_dark: hsl(var(--sec_h) calc(var(--sec_s) + 17%) calc(var(--sec_s) - 13%));
     --color_bad: hsl(0 77% 58%);
     --btn_color_off: hsl(0 0% 66%);
     --transition_time: 0.05s;
@@ -32,7 +40,7 @@ body {
 
 main {
     background-color: #0000;
-    /* filter: hue-rotate(var(--sec_hue)); */
+    /* filter: hue-rotate(var(--sec_h)); */
 }
 
 #background {
@@ -46,7 +54,7 @@ main {
     background-image: url("../img/background.png");
     background-repeat: repeat;
     background-attachment: fixed;
-    filter: hue-rotate(var(--sec_hue));
+    filter: hue-rotate(var(--sec_h));
     /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
     animation-name: _;
     animation-iteration-count: infinite;
@@ -63,13 +71,14 @@ button {
     background-color: var(--color_primary);
     transition: background-color var(--transition_time);
     padding: calc(var(--padding1) / 2) var(--padding1);
-    color: var(--color_lowest);
+    color: hsl(0 0% var(--pri_txt_l));
     border-color: var(--color_primary_dark);
     border-radius: var(--radius1);
 }
 
 button:active {
     background-color: var(--color_primary_dark);
+    color: hsl(0 0% var(--pri_txt_l));
     transition: background-color var(--transition_time);
 }
 
@@ -77,10 +86,12 @@ button:active {
 I don't do "button .on" because the default button color overwrites the ".on" color */
 .on {
     background-color: var(--color_primary);
+    color: hsl(0 0% var(--pri_txt_l));
 }
 
 .off {
     background-color: var(--btn_color_off);
+    color: white;
 }
 
 input {
@@ -97,7 +108,7 @@ input:checked {
 }
 
 a {
-    color: var(--color_primary);
+    color: var(--color_primary_dark);
 }
 
 a:hover {
@@ -133,7 +144,7 @@ nav button {
     margin: 5px
 }
 
-span, input[type='checkbox'], label {
+span, input[type='checkbox'], label, button {
     cursor: pointer;
     user-select: none;
 }
@@ -353,7 +364,6 @@ h4, span {
     position: absolute;
     /* z-index for being able to click button */
     z-index: 1; 
-    background-color: var(--color_bad);
     top: 0;
     right: var(--padding1);
 }
@@ -409,6 +419,7 @@ span, .select_multi p {
 
 .red_button {
     background-color: var(--color_bad);
+    color: white;
 }
 
 #items {
