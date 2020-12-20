@@ -17,7 +17,6 @@
     --margin1: 10px;
     --padding1: 10px;
     --radius1: 3px;
-    --color_highest: hsl(0 0% 0%);
     --color_primary: hsl(var(--pri_h) var(--pri_s) var(--pri_l));
     --color_primary_dark: hsl(var(--pri_h) calc(var(--pri_s) - 4%) calc(var(--pri_l) - 19%));
     --color_primary_basic: hsl(var(--pri_h) var(--pri_s) 70%);
@@ -31,10 +30,8 @@
     --color_background_basic: hsl(var(--bac_h) var(--bac_s) 70%);
     --color_background_txt: hsl(0 0% var(--bac_txt_l));
     --color_bad: hsl(0 77% 58%);
-    --btn_color_off: hsl(0 0% 66%);
     --transition_time: 0.05s;
     --basic_border: var(--color_primary) 1px solid;
-    /* --secondary_border: var(--color_secondary_dark); */
 }
 
 /* Defaults */
@@ -55,7 +52,6 @@ body {
 
 main {
     background-color: #0000;
-    /* filter: hue-rotate(var(--sec_h)); */
 }
 
 #background {
@@ -117,7 +113,7 @@ I don't do "button .on" because the default button color overwrites the ".on" co
 }
 
 .off {
-    background-color: var(--btn_color_off);
+    background-color: var(--color_bad);
     color: white;
 }
 
