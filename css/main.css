@@ -8,25 +8,33 @@
     --sec_s: 63%;
     --sec_l: 97%;
     --sec_txt_l: calc((var(--sec_l) - var(--contrast_threshold)) * -100);
+    --bac_h: 0deg;
+    --bac_s: 0%;
+    --bac_l: 100%;
+    --bac_txt_l: calc((var(--bac_l) - var(--contrast_threshold)) * -100);
 
 
     --margin1: 10px;
     --padding1: 10px;
     --radius1: 3px;
-    --color_lowest: hsl(0 0% 100%);
     --color_highest: hsl(0 0% 0%);
     --color_primary: hsl(var(--pri_h) var(--pri_s) var(--pri_l));
     --color_primary_dark: hsl(var(--pri_h) calc(var(--pri_s) - 4%) calc(var(--pri_l) - 19%));
-    --color_primary_basic: hsl(var(--pri_h) var(--pri_s) 50%);
-    --color_primary_txt: 0 0% var(--pri_txt_l);
+    --color_primary_basic: hsl(var(--pri_h) var(--pri_s) 70%);
+    --color_primary_txt: hsl(0 0% var(--pri_txt_l));
     --color_secondary: hsl(var(--sec_h) var(--sec_s) var(--sec_l));
     --color_secondary_dark: hsl(var(--sec_h) calc(var(--sec_s) + 17%) calc(var(--sec_s) - 13%));
-    --color_secondary_txt: 0 0% var(--sec_txt_l);
+    --color_secondary_basic: hsl(var(--sec_h) var(--sec_s) 70%);
+    --color_secondary_txt: hsl(0 0% var(--sec_txt_l));
+    --color_background: hsl(var(--bac_h) var(--bac_s) var(--bac_l));
+    --color_background_dark: hsl(var(--bac_h) calc(var(--bac_s) + 17%) calc(var(--bac_s) - 13%));
+    --color_background_basic: hsl(var(--bac_h) var(--bac_s) 70%);
+    --color_background_txt: hsl(0 0% var(--bac_txt_l));
     --color_bad: hsl(0 77% 58%);
     --btn_color_off: hsl(0 0% 66%);
     --transition_time: 0.05s;
     --basic_border: var(--color_primary) 1px solid;
-    --secondaryary_border: var(--color_secondary_dark);
+    /* --secondary_border: var(--color_secondary_dark); */
 }
 
 /* Defaults */
@@ -41,8 +49,8 @@
 }
 
 body {
-    color: var(--color_highest);
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
 }
 
 main {
@@ -51,6 +59,10 @@ main {
 }
 
 #background {
+    background-color: var(--color_secondary);
+}
+
+#background, #background > div {
     display: block;
     position: fixed;
     top: 0;
@@ -58,10 +70,13 @@ main {
     bottom: 0;
     left: 0;
     z-index: -1;
+}
+
+#background > div {
     background-image: url("../img/background.png");
     background-repeat: repeat;
     background-attachment: fixed;
-    filter: hue-rotate(var(--sec_h));
+    filter: brightness(calc(var(--sec_l) + 40%)) hue-rotate(var(--pri_h));
     /* While scrolling backgrounds are cool it makes the Firefox battery usage on my Mac triple. */
     animation-name: _;
     animation-iteration-count: infinite;
@@ -87,6 +102,12 @@ button:active {
     background-color: var(--color_primary_dark);
     color: hsl(0 0% var(--pri_txt_l));
     transition: background-color var(--transition_time);
+}
+
+select, input {
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
+    border-color: var(--color_primary_dark);
 }
 
 /* The on and off is mainly used for buttons.
@@ -122,7 +143,8 @@ a:hover {
 }
 
 header {
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
     padding: 5px 0;
     text-align: center;
 }
@@ -132,12 +154,14 @@ header h1 {
 }
 
 footer {
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
     border-top: var(--basic_border);
 }
 
 nav {
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
     padding: 5px 0;
     display: flex;
     justify-content: center;
@@ -248,7 +272,8 @@ h4, span {
     text-align: right;
     bottom: 0;
     right: 0;
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
     border-top: var(--basic_border);
     border-left: var(--basic_border);
     border-top-left-radius: var(--radius1);
@@ -322,7 +347,8 @@ h4, span {
     padding: var(--padding1);
     border-radius: var(--radius1);
     border: 2px solid var(--color_primary);
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
 }
 
 #breed_container {
@@ -565,7 +591,8 @@ span, .select_multi p {
 }
 
 .pony_table .selected {
-    background-color: var(--color_secondary_dark);
+    color: black;
+    background-color: var(--color_secondary_basic);
 }
 
 
@@ -610,7 +637,8 @@ span, .select_multi p {
     max-height: 80%;
     max-width: 100%;
     position: absolute;
-    background-color: var(--color_lowest);
+    color: var(--color_background_txt);
+    background-color: var(--color_background);
     border: var(--basic_border);
     border-radius: var(--radius1);
     overflow: auto;

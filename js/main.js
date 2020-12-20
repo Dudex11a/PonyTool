@@ -179,7 +179,7 @@ const default_options = {
         "name" : "Scrolling Background",
         "value" : false,
         "action" : function(value) {
-            const bg_ele = $("#background");
+            const bg_ele = $("#background > div");
             // If scrolling background is on set the animation name to scroll
             if (value) bg_ele.css("animation-name", "background_scroll");
             else bg_ele.css("animation-name", "_");
@@ -187,7 +187,7 @@ const default_options = {
     },
     "primary_color": {
         "type" : "color",
-        "name" : "Primary Theme Color",
+        "name" : "Primary Color",
         "value" : tinycolor("#0ad150").toHsl(),
         "action" : function(hsl) {
             // Apply color to element
@@ -214,7 +214,7 @@ const default_options = {
     },
     "secondary_color": {
         "type" : "color",
-        "name" : "Secondary Theme Color",
+        "name" : "Secondary Color",
         "value" : tinycolor("#f3fbfc").toHsl(),
         "action" : function(hsl) {
             // Apply color to element
@@ -239,12 +239,39 @@ const default_options = {
             }
         }
     },
+    "background_color": {
+        "type" : "color",
+        "name" : "Background Color",
+        "value" : tinycolor("#FFF").toHsl(),
+        "action" : function(hsl) {
+            // Apply color to element
+            this.ele.val("#" + tinycolor(hsl).toHex());
+            // Apply color to css
+            let prefix = "bac";
+            let suffixs = ["h", "s", "l"];
+            let types = ["deg", "%", "%"];
+            let values = Object.values(hsl);
+            // Change css variables for the suffixs
+            for (let i in suffixs) {
+                let suffix = suffixs[i];
+                let type = types[i];
+                let value = values[i];
+                // Change the value around if the type is a %
+                if (type === "%") {
+                    // Remove % and change to a number
+                    value = Number(value.replaceAll(type, ""));
+                }
+                value = Math.round(value);
+                $(":root").css(`--${prefix}_${suffix}`, value + type);
+            }
+        }
+    },
     "reset_theme" : {
         "type" : "button",
         "name" : "Reset Theme",
         "action" : function() {
             // Set defaults for defined options
-            let option_names = ["primary_color", "secondary_color"];
+            let option_names = ["primary_color", "secondary_color", "background_color"];
             for (let option_name of option_names) {
                 let option = default_options[option_name];
                 set_option(option_name, option.value);
