@@ -17,13 +17,16 @@
     --color_highest: hsl(0 0% 0%);
     --color_primary: hsl(var(--pri_h) var(--pri_s) var(--pri_l));
     --color_primary_dark: hsl(var(--pri_h) calc(var(--pri_s) - 4%) calc(var(--pri_l) - 19%));
-    --color_second: hsl(var(--sec_h) var(--sec_s) var(--sec_l));
-    --color_second_dark: hsl(var(--sec_h) calc(var(--sec_s) + 17%) calc(var(--sec_s) - 13%));
+    --color_primary_basic: hsl(var(--pri_h) var(--pri_s) 50%);
+    --color_primary_txt: 0 0% var(--pri_txt_l);
+    --color_secondary: hsl(var(--sec_h) var(--sec_s) var(--sec_l));
+    --color_secondary_dark: hsl(var(--sec_h) calc(var(--sec_s) + 17%) calc(var(--sec_s) - 13%));
+    --color_secondary_txt: 0 0% var(--sec_txt_l);
     --color_bad: hsl(0 77% 58%);
     --btn_color_off: hsl(0 0% 66%);
     --transition_time: 0.05s;
     --basic_border: var(--color_primary) 1px solid;
-    --secondary_border: var(--color_second_dark);
+    --secondaryary_border: var(--color_secondary_dark);
 }
 
 /* Defaults */
@@ -31,6 +34,10 @@
     margin: 0;
     padding: 0;
     font-family: Verdana, Geneva, sans-serif;
+}
+
+::selection {
+    background-color: var(--color_primary_basic);
 }
 
 body {
@@ -86,7 +93,6 @@ button:active {
 I don't do "button .on" because the default button color overwrites the ".on" color */
 .on {
     background-color: var(--color_primary);
-    color: hsl(0 0% var(--pri_txt_l));
 }
 
 .off {
@@ -108,7 +114,7 @@ input:checked {
 }
 
 a {
-    color: var(--color_primary_dark);
+    color: hsl(var(--pri_h) var(--pri_s) 45%);
 }
 
 a:hover {
@@ -253,13 +259,15 @@ h4, span {
     padding: var(--padding1) 0;
     display: block;
     text-align: center;
-    background-color: var(--color_second);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
 }
 
 #results_container {
     margin: 0;
     padding: var(--padding1) 0;
-    background-color: var(--color_second);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
     border-radius: var(--radius1);
 }
 
@@ -430,7 +438,8 @@ span, .select_multi p {
     margin: 0 auto;
     display: flex;
     justify-content: center;
-    background-color: var(--color_second);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
     border-radius: var(--radius1);
     padding: var(--padding1) 0;
 }
@@ -457,7 +466,8 @@ span, .select_multi p {
     padding: var(--padding1) 0;
     text-align: center;
     margin: 0 auto;
-    background-color: var(--color_second);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
 }
 
 #farm_message button {
@@ -470,15 +480,15 @@ span, .select_multi p {
 }
 
 #options_container {
-    background-color: var(--color_second);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
     margin: 0 auto;
 }
 
 #options_container > div {
-    display: flex;
-    border-radius: var(--radius1);
-    padding: 1px 0;
-    margin: 1px 0;
+    padding: calc(var(--padding1)/2);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
 #options_container > :not(:last-child) {
@@ -486,7 +496,21 @@ span, .select_multi p {
 }
 
 #options_container > div > * {
+    padding: calc(var(--padding1)/2);
+}
+
+#options_container > div > :last-child {
+    margin: auto 0 auto auto;
+}
+
+/* #options_container > div > * {
     padding: var(--padding1);
+} */
+
+#options_container > div > button, #options_container > div > input[type=color] {
+    padding: 0;
+    height: 25px;
+    width: 25%;
 }
 
 /* Pony Input extra parameters */
@@ -523,8 +547,9 @@ span, .select_multi p {
 }
 
 .pony_table > div:first-child {
-    background-color: var(--color_second);
-    border-color: var(--color_second_dark);
+    background-color: var(--color_secondary);
+    color: var(--color_secondary_txt);
+    border-color: var(--color_secondary_dark);
 }
 
 /* Table fields */
@@ -540,7 +565,7 @@ span, .select_multi p {
 }
 
 .pony_table .selected {
-    background-color: var(--color_second_dark);
+    background-color: var(--color_secondary_dark);
 }
 
 

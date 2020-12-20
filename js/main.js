@@ -418,7 +418,8 @@ function make_options_ele() {
                     });
                     break;
                 case "button":
-                    input_ele = $("<button>");
+                    input_ele = $("<button>").text("Press");
+                    input_ele.addClass("red_button");
                     input_ele.click(e => {
                         if (option.action) option.action(val);
                     });
