@@ -433,7 +433,7 @@ function make_options_ele() {
                 option.ele = input_ele;
             }
             // Run the option's action with the current_value
-            if (option.action && option.value) option.action(current_value);
+            if (option.action && option.value !== undefined) option.action(current_value);
             ele.append(option_ele);
         }
     }
