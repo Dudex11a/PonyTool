@@ -610,7 +610,7 @@ function roll() {
     // Breed Amount
     if (MODE == MODES[1]) {
         // Fertility Scroll used
-        if (has_item(ITEMS[3])) {
+        if (has_item("Fertility Scroll")) {
             amount = 3;
         } else {
             amount = random_in_array([1, 2]);
