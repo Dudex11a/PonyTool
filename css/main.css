@@ -113,7 +113,7 @@ I don't do "button .on" because the default button color overwrites the ".on" co
 }
 
 .off {
-    background-color: var(--color_bad);
+    background-color: darkgrey;
     color: white;
 }
 
