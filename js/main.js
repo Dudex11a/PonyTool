@@ -179,9 +179,10 @@ const default_options = {
         "name" : "Scrolling Background",
         "value" : false,
         "action" : function(value) {
+            const bg_ele = $("#background");
             // If scrolling background is on set the animation name to scroll
-            if (value) $("main").css("animation-name", "background_scroll");
-            else $("main").css("animation-name", "_");
+            if (value) bg_ele.css("animation-name", "background_scroll");
+            else bg_ele.css("animation-name", "_");
         }
     },
     "primary_color": {
