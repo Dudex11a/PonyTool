@@ -1052,8 +1052,8 @@ function roll_pony(species, params = null) {
         odds.Mutation[0] = 100;
     }
 
-    // Stats Scroll used
-    if (has_item(ITEMS[1])) {
+    // Stat Scroll used
+    if (has_item("Stat Scroll")) {
         let stat_name = random_in_array(STATS);
         let stat_boost = random_in_array([1, 2, 3, 4, 5]);
         pony["Stats"] = "+" + stat_boost + " " + stat_name;
