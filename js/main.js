@@ -22,6 +22,7 @@ function set_connected(value = DB_CONNECTED) {
 const ITEMS = [
     "Trait Scroll",
     "Stat Scroll",
+    "Marking Scroll",
     "Mutation Scroll",
     "Fertility Scroll",
     "Hybrid Scroll",
@@ -1005,6 +1006,13 @@ function roll_pony(species, params = null) {
     if (has_item("Trait Scroll")) {
         for (let i in odds.Trait) {
             odds.Trait[i] += 35;
+        }
+    }
+
+    // Marking Scroll used
+    if (has_item("Marking Scroll")) {
+        for (let i in odds.Markings) {
+            odds.Markings[i] += 35;
         }
     }
 
