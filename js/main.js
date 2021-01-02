@@ -628,8 +628,8 @@ function roll() {
     // The rarities to get a rare species while breeding w/ Rainbow Feather
     let rare_rarities = [
         100,
-        25,
-        15
+        20,
+        10
     ];
     let pony1 = PONYPARENTS[0].get_pony_simple();
     let pony2 = PONYPARENTS[1].get_pony_simple();
@@ -877,9 +877,7 @@ function find_rarities(string) {
 function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
     let params = combine_objects(pony1, pony2);
 
-    // Don't need this because roll_pony takes care of this.
-    // Keeping this incase there are any problems later.
-    // Remove rare species from params
+    // Remove rare species from params, this is for the Rainbow Feather
     if (!rare && params.Species) {
         params.Species = params.Species.filter(value => {
             // If not rare
