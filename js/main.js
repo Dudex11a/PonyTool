@@ -628,8 +628,8 @@ function roll() {
     // The rarities to get a rare species while breeding w/ Rainbow Feather
     let rare_rarities = [
         100,
-        20,
-        10
+        25,
+        15
     ];
     let pony1 = PONYPARENTS[0].get_pony_simple();
     let pony2 = PONYPARENTS[1].get_pony_simple();
