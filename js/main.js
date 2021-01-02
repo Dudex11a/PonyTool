@@ -651,7 +651,7 @@ function roll() {
                     // If only rare species
                     let only_rare = true;
                     let species = pony1.Species.concat(pony2.Species);
-                    for (value of species) {
+                    for (let value of species) {
                         if (!value.includes("(R)")) only_rare = false;
                     }
                     // if only_rare species then only allow rare species
@@ -880,15 +880,15 @@ function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2
     // Don't need this because roll_pony takes care of this.
     // Keeping this incase there are any problems later.
     // Remove rare species from params
-    // if (!rare && params.Species) {
-    //     params.Species = params.Species.filter(value => {
-    //         // If not rare
-    //         if (find_rarities(value)) {
-    //             return !find_rarities(value).includes("(R)");
-    //         }
-    //         return true
-    //     });
-    // }
+    if (!rare && params.Species) {
+        params.Species = params.Species.filter(value => {
+            // If not rare
+            if (find_rarities(value)) {
+                return !find_rarities(value).includes("(R)");
+            }
+            return true
+        });
+    }
 
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
     return roll_pony(params.Species, params);
