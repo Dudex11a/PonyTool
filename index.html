@@ -15,8 +15,8 @@
             <h1>Pony Tool</h1>
             <p id="version_number"></p>
             <div id="links">
-                <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit" id="pony_parameters_title" target="_blank">Pony Parameters</a><br>
-                <a href="https://docs.google.com/spreadsheets/d/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/edit?usp=sharing" id="farming_data_title" target="_blank">Farming Data</a>
+                <a href="https://docs.google.com/spreadsheets/d/17fPtZaia9huJ5zzr4qS-vFKH8ZO9EKCF7GH5-5GmyYA/edit"target="_blank">Pony Parameters</a><br>
+                <a href="https://docs.google.com/spreadsheets/d/1uIIEUqCuyP0rsEg0Gc4IEVoGyb6ZP6gN7fteBFnyB-Q/edit?usp=sharing"target="_blank">Misc Data</a>
             </div>
         </header>
         <!-- Tabs / Navigation / Tool Select -->
@@ -25,6 +25,7 @@
             <button onclick="change_mode('breed')" id="breed">Breed</button>
             <button onclick="change_mode('database')" id="database">Database</button>
             <button onclick="change_mode('farm')" id="farm">Farm</button>
+            <button onclick="change_mode('list')" id="list">List</button>
             <!-- <button onclick="change_mode('quests')" id="quests">Quests</button> -->
             <button onclick="change_mode('options')" id="options">Options</button>
         </nav>
@@ -59,14 +60,18 @@
             <div class="medium_width options" id="options_container">
                 
             </div>
-            <!-- Roll Button and Amount -->
-            <div class="medium_width adopt breed farm" id="roll_container">
-                <button onclick="roll()">Roll</button>
-                <input type="number" class="adopt" id="roll_amount" name="roll_amount" value=1 min="1">
+            <!-- List Container -->
+            <div class="medium_width list" id="list_container">
+                <h4>List to roll</h4>
             </div>
             <!-- Quests Container -->
             <div class="medium_width quests" id="quests_container">
 
+            </div>
+            <!-- Roll Button and Amount -->
+            <div class="medium_width adopt breed farm list" id="roll_container">
+                <button onclick="roll()">Roll</button>
+                <input type="number" class="adopt" id="roll_amount" name="roll_amount" value=1 min="1">
             </div>
             <!-- Result Container -->
             <div class="hidden" id="results_container">

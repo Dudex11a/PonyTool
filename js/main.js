@@ -60,7 +60,8 @@ const MODES = [
     "farm",
     "quests",
     "database",
-    "options"
+    "options",
+    "list"
 ]
 var MODE = MODES[0];
 
@@ -116,25 +117,47 @@ async function init() {
     };
 
     // These next two api_fetch follow generally the same format as above.
-    // Get Farming Spreadsheet data
-    url = SITE_URL + "/api/farming";
+    // Get Misc Spreadsheet data
+    url = SITE_URL + "/api/misc";
     res = await api_fetch(url);
     try {
         res.json().then(data => {
-            localStorage.farming = data;
-            FARMING = JSON.parse(data);
+            localStorage.misc = data;
+            MISC = JSON.parse(data);
+            FARMING = MISC.farming;
             finish_requests();
         });
     } catch (err) {
         console.log("Using offline farming data.\n", err);
         if (localStorage.farming) {
-            FARMING = JSON.parse(localStorage.farming);
+            MISC = JSON.parse(localStorage.farming);
+            FARMING = MISC.farming;
             finish_requests();
         } else {
             console.log("No offline farming data.");
             finish_requests(url);
         }
     };
+
+    // Old
+    // url = SITE_URL + "/api/farming";
+    // res = await api_fetch(url);
+    // try {
+    //     res.json().then(data => {
+    //         localStorage.farming = data;
+    //         FARMING = JSON.parse(data);
+    //         finish_requests();
+    //     });
+    // } catch (err) {
+    //     console.log("Using offline farming data.\n", err);
+    //     if (localStorage.farming) {
+    //         FARMING = JSON.parse(localStorage.farming);
+    //         finish_requests();
+    //     } else {
+    //         console.log("No offline farming data.");
+    //         finish_requests(url);
+    //     }
+    // };
 
     // Get Git Commits
     url = SITE_URL + "/api/git_commits";
@@ -581,6 +604,10 @@ function finish_requests(error = undefined) {
             PONYPARENTS[1].element.removeClass("hidden");
         }
     });
+    // Add input for list
+    let lists = Object.keys(MISC.list);
+    let list_select = create_select_element("list", lists);
+    $("#list_container").append(list_select);
     // item_select.element.addClass("box1");
     $("#items").append(item_select.element);
     // Set the visibility of elements that should be hidden if not connected to the db
@@ -670,6 +697,10 @@ function roll() {
                 object = roll_farm();
                 update_farm_element(object);
                 element = object_to_html(array_to_amounts(object), " x");
+                break;
+            case "list":
+                object = roll_list();
+                element = $("<div>").text(object);
                 break;
         }
         CURRENTRESULTS.push(object);
@@ -1136,6 +1167,12 @@ function roll_farm() {
         items.push(random_in_array(FARMING.items[get_farm_location()]));
     }
     return items;
+}
+
+function roll_list() {
+    let list_name = $(".list select").val();
+    let object = random_in_array(MISC.list[list_name]);
+    return object;
 }
 
 function update_farm_element(items = CURRENTRESULTS[0]) {

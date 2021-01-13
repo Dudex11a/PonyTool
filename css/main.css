@@ -275,7 +275,7 @@ h4, span {
     border-top-left-radius: var(--radius1);
 }
 
-#adopt_container {
+#adopt_container, #list_container {
     margin: 0 auto;
     padding: var(--padding1) 0;
     display: block;
