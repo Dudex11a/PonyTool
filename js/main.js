@@ -1,6 +1,11 @@
 // |________________________________________________________|
 // |Made by Dudex11a, you can reach me at dudex11c@gmail.com|
 // |________________________________________________________|
+// Things I would improve if I made this again.
+    // - The roll_pony function has gotten too conviluted overtime.
+    // I guess I could do it again but the amount of time I'd have
+    // to put into that for the reward isn't worth it in my eyes.
+
 
 // The results in the #results_container
 var CURRENTRESULTS = [];
@@ -915,15 +920,15 @@ function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2
             if (find_rarities(value)) {
                 return !find_rarities(value).includes("(R)");
             }
-            return true
+            return true;
         });
     }
 
     params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
-    return roll_pony(params.Species, params);
+    return roll_pony(params.Species, params, {"multi" : true});
 }
 
-function roll_pony(species, params = null) {
+function roll_pony(species, params = null, options = {}) {
     // Make species an array if not
     if (!Array.isArray(species)) species = [species];
 
@@ -968,7 +973,7 @@ function roll_pony(species, params = null) {
     }
 
     let species_params;
-    if (multiple_species) {
+    if (multiple_species || options.multi) {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
             let species_limit = 2;
@@ -1003,6 +1008,7 @@ function roll_pony(species, params = null) {
             species_params[pplace] = species_params.Palette;
         }
 
+        // Filter out params that aren't related with the species
         for (let key of keys) {
             let species_param = species_params[key];
             // If the species_params has the key being matched
@@ -1013,12 +1019,11 @@ function roll_pony(species, params = null) {
                 }
                 // Only keep parameters related to the species
                 if (!has_item("Illegal Ponies")) params[key] = match_array(params[key], species_param);
-                
             }
         }
     } else {
         species = random_species(common_species, rare_species);
-        // Set species params for later use
+        // Set species params for later use (in parts)
         species_params = get_species_params(species);
     }
 
