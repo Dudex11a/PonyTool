@@ -944,6 +944,22 @@ function roll_pony(species, params = null, options = {}) {
     // Remove the duplicate
     params = clean_object(params);
 
+    // Remove subspecies values from the params and put them in their own object
+    let subspecies_params = {}
+    let tag = "<Ss>";
+    for (let key of Object.keys(params)) {
+        let arr = params[key];
+        let matches = [];
+        // Find subspecies parameters
+        matches = arr.filter(val => val.includes(tag));
+        if (matches.length > 0) {
+            // Add subspecies params to object
+            subspecies_params[key] = matches;
+        }
+        // Remove subspecies from params
+        params[key] = arr.filter(val => !val.includes(tag));
+    }
+
     // Sort rare and common species
     let common_species = [];
     let rare_species = [];
@@ -1299,6 +1315,7 @@ function get_all_params() {
     return get_species_params(Object.keys(PONYPARAMS.Species));
 }
 
+// Example of function use: find_matches(Object.keys(species_params), ["[P]"])
 function find_matches(params, values) {
     let exceptions = []
     for (let v in values) {
