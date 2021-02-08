@@ -667,7 +667,7 @@ function roll() {
     let pony2 = PONYPARENTS[1].get_pony_simple();
     if (has_item("One-Night-Stand Scroll")) {
         // Random pony that's not rare
-        pony2 = roll_adopt([true, true, false]);
+        pony2 = roll_adopt({ rarities : [true, true, false] });
     }
     // Generate a the objects to put into the result container
     for(let a = 0; a < amount; a++) {
@@ -679,6 +679,11 @@ function roll() {
                 element = object_to_html(object);
                 break;
             case "breed":
+                let arg = {
+                    "pony1" : pony1,
+                    "pony2" : pony2,
+                    "child_number" : a
+                }
                 if (has_item("Rainbow Feather")) {
                     // If only rare species
                     let only_rare = true;
@@ -688,13 +693,16 @@ function roll() {
                     }
                     // if only_rare species then only allow rare species
                     if (only_rare) {
-                        object = roll_breed(true, pony1, pony2);
+                        arg.rare = true;
+                        object = roll_breed(arg);
                     } else {
-                        object = roll_breed(chance(rare_rarities[a]), pony1, pony2);
+                        arg.rare = chance(rare_rarities[a]);
+                        object = roll_breed(arg);
                     }
                     
                 } else {
-                    object = roll_breed(false, pony1, pony2);
+                    arg.rare = false;
+                    object = roll_breed(arg);
                 }
                 element = object_to_html(object);
                 break;
@@ -867,11 +875,15 @@ function remove_detail(text) {
     return value;
 }
 
-function roll_adopt(rarities = [
-    $('#common_species').is(":checked"), // Common 0
-    $('#uncommon_species').is(":checked"), //Uncommon 1
-    $('#rare_species').is(":checked") // Rare 2
-]) {
+function roll_adopt(arg = {}) {
+    // Default arguments
+    if (!arg.rarities) arg.rarities = [
+        $('#common_species').is(":checked"), // Common 0
+        $('#uncommon_species').is(":checked"), //Uncommon 1
+        $('#rare_species').is(":checked") // Rare 2
+    ];
+    if (!arg.roll_type) arg.roll_type = "adopt";
+
     let pony = {}
 
     // Determine Species Allowed
@@ -880,14 +892,14 @@ function roll_adopt(rarities = [
     for (let species of all_species) {
         let detail = find_rarities(species);
         if (detail) {
-            if (detail[0] == "(U)" && rarities[1]) {
+            if (detail[0] == "(U)" && arg.rarities[1]) {
                 available_species.push(species);
             }
-            if (detail[0] == "(R)" && rarities[2]) {
+            if (detail[0] == "(R)" && arg.rarities[2]) {
                 available_species.push(species);
             }
         } else {
-            if (rarities[0]) {
+            if (arg.rarities[0]) {
                 available_species.push(species);
             }
         }
@@ -901,8 +913,8 @@ function roll_adopt(rarities = [
         $( "#rare_species" ).prop( "checked", true );
     }
 
-    let species = special_random(available_species, [], false);
-    pony = roll_pony(species);
+    arg.species = special_random(available_species, [], false);
+    pony = roll_pony(arg);
     return pony;
 }
 
@@ -910,12 +922,19 @@ function find_rarities(string) {
     return string.match(/\(\S*\)/g);
 }
 
-function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
-    let params = combine_objects(pony1, pony2);
+// function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2 = PONYPARENTS[1].get_pony_simple()) {
+function roll_breed(arg = {}) {
+    // Default arguments
+    if (!arg.rare) arg.rare = true;
+    if (!arg.pony1) arg.pony1 = PONYPARENTS[0].get_pony_simple();
+    if (!arg.pony2) arg.pony2 = PONYPARENTS[1].get_pony_simple();
+    if (!arg.roll_type) arg.roll_type = "breed";
+
+    arg.params = combine_objects(arg.pony1, arg.pony2);
 
     // Remove rare species from params, this is for the Rainbow Feather
-    if (!rare && params.Species) {
-        params.Species = params.Species.filter(value => {
+    if (!arg.rare && arg.params.Species) {
+        arg.params.Species = arg.params.Species.filter(value => {
             // If not rare
             if (find_rarities(value)) {
                 return !find_rarities(value).includes("(R)");
@@ -924,11 +943,15 @@ function roll_breed(rare = true, pony1 = PONYPARENTS[0].get_pony_simple(), pony2
         });
     }
 
-    params["Palette Place"] = get_species_params(params.Species)["Palette Place"];
-    return roll_pony(params.Species, params, {"multi" : true});
+    arg.params["Palette Place"] = get_species_params(arg.params.Species)["Palette Place"];
+    arg.species = arg.params.Species;
+    return roll_pony(arg);
 }
 
-function roll_pony(species, params = null, options = {}) {
+function roll_pony(arg = {}) {
+    let species = arg.species;
+    let params = arg.params;
+
     // Make species an array if not
     if (!Array.isArray(species)) species = [species];
 
@@ -956,8 +979,8 @@ function roll_pony(species, params = null, options = {}) {
             // Add subspecies params to object
             subspecies_params[key] = matches;
         }
-        // Remove subspecies from params
-        params[key] = arr.filter(val => !val.includes(tag));
+        // Remove subspecies from params if breeding
+        if (arg.roll_type === "breed") params[key] = arr.filter(val => !val.includes(tag));
     }
 
     // Sort rare and common species
@@ -989,7 +1012,7 @@ function roll_pony(species, params = null, options = {}) {
     }
 
     let species_params;
-    if (multiple_species || options.multi) {
+    if (multiple_species || arg.roll_type == "breed") {
         // If it will be a hybrid and the species given is an array
         if (chance(hybrid_chance)) {
             let species_limit = 2;
@@ -1380,7 +1403,7 @@ function special_random(array, exceptions = [], wildcard = true) {
         }
 
         // Rolling rarity
-        let rarities = []
+        rarities = []
         if (uncommon.length > 0) {
             push_into_array(rarities, "uncommon", 20);
         }
