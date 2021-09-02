@@ -1017,7 +1017,7 @@ function roll_pony(species, params = null, options = {}) {
                 if (!Array.isArray(params[key])) {
                     params[key] = [params[key]];
                 }
-                // Only keep parameters related to the species
+                // Only keep parameters related to the species unless "Illegal Ponies" is in play
                 if (!has_item("Illegal Ponies")) params[key] = match_array(params[key], species_param);
             }
         }
@@ -1032,6 +1032,27 @@ function roll_pony(species, params = null, options = {}) {
     }
 
     pony.Sex = special_random(PONYPARAMS.Sex, [], false);
+
+    // Change Palettes if they're any specific part palettes
+    for (let specie of species) {
+        let part_with_specific_palettes = find_matches(Object.keys(PONYPARAMS.Species[specie]), ["[Pal]"]);
+        // console.log(specific_part_palette_names);
+        // For each part palette of the species
+        for (let part_w_detail of part_with_specific_palettes) {
+            const part_name = remove_detail(part_w_detail);
+            const specific_part_palettes = [...species_params[part_w_detail]];
+            if (species.length > 1) {
+                
+            } else {
+                if (params.hasOwnProperty(part_name)) {
+                    console.log(params[part_name], specific_part_palettes);
+                } else {
+                    // If species has no params of part, set the params of the part to the specific_part_palettes
+                    params[part_name] = specific_part_palettes;
+                }
+            }
+        }
+    }
 
     // Palettes
     for(let i in params["Palette Place"]) {
@@ -1124,7 +1145,7 @@ function roll_pony(species, params = null, options = {}) {
 
     // Roll extra parts
     // Seprate parts into an object
-    const parts = find_matches(Object.keys(species_params), ["[P]"]);
+    const parts = find_matches(Object.keys(species_params), ["[Part]"]);
     // Roll for each part
     for (let part of parts) {
         const part_name = remove_detail(part);
@@ -1879,8 +1900,26 @@ class PonyInput {
         palette_place_ele.addClass("group");
         for (let i in pps) {
             let place = pps[i];
+            // Handle part specific palettes
+            let place_palettes = [...ps];
+            let species = this.get_species();
+            for (let specie of species) {
+                let places_w_specific_palettes_w_details = find_matches(Object.keys(PONYPARAMS.Species[specie]), ["[Pal]"]);
+                for (let place_w_specific_palettes_w_details of places_w_specific_palettes_w_details) {
+                    let place_w_specific_palettes = remove_detail(place_w_specific_palettes_w_details);
+                    if (place_w_specific_palettes == place) {
+                        let specific_palettes = [...params[place_w_specific_palettes_w_details]]
+                        if (species.length > 1) {
+                            place_palettes = place_palettes.concat(specific_palettes);
+                        } else {
+                            place_palettes = specific_palettes;
+                        }
+                    }
+                }
+            }
+            //
             // Create elements for each Palette Place
-            let select = create_select_element(place, ps);
+            let select = create_select_element(place, place_palettes);
             let palette_container = $("<div>");
             palette_container.append($("<p>").text(place));
             palette_container.append(select);
@@ -1891,7 +1930,7 @@ class PonyInput {
         
         // Add parts input if nessesary.
         // Get any parts
-        const parts = find_matches(Object.keys(params), ["[P]"]);
+        const parts = find_matches(Object.keys(params), ["[Part]"]);
         // If there are any parts, make the elements for them.
         if (parts.length) {
             // Create a select for each part
