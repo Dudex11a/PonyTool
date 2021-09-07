@@ -143,6 +143,7 @@ header {
     background-color: var(--color_background);
     padding: 5px 0;
     text-align: center;
+    border-bottom: var(--color_primary) 1px dashed;
 }
 
 header h1 {
@@ -155,18 +156,18 @@ footer {
     border-top: var(--basic_border);
 }
 
-nav {
+nav, .nav {
     color: var(--color_background_txt);
     background-color: var(--color_background);
     padding: 5px 0;
     display: flex;
     justify-content: center;
     overflow-x: auto;
-    border-top: var(--color_primary) 1px dashed;
+    /* border-top: var(--color_primary) 1px dashed; */
     border-bottom: var(--basic_border);
 }
 
-nav button {
+nav button, .nav button {
     margin: 5px
 }
 
@@ -238,6 +239,8 @@ h4, span {
 }
 
 #loading * {
+    padding: var(--padding1);
+
     font-size: 200%;
     text-align: center;
     position: absolute;
@@ -246,7 +249,7 @@ h4, span {
     width: 40%;
     border: var(--basic_border);
     border-radius: var(--radius1);
-    background-color: #FFF;
+    background-color: var(--color_background);
 }
 
 #links {

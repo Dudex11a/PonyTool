@@ -70,12 +70,20 @@ const MODES = [
 ]
 var MODE = MODES[0];
 
+const ADOPT_MODES = [
+    "rarity",
+    "species"
+];
+
+var ADOPT_MODE = ADOPT_MODES[0];
+
 var SITE_URL = "https://ponytool.netlify.com";
 const CANT_FETCH_STRING = "\nCannot fetch data.\n";
 
 async function init() {
-    // Initialize mode
+    // Initialize modes
     change_mode(MODES[0]);
+    change_adopt_mode(ADOPT_MODES[0]);
 
     // Use the site url if offline document and not local host
     let current_url = document.URL
@@ -563,6 +571,11 @@ function finish_requests(error = undefined) {
     let db_version = load_object("db_version");
     if (db_version > 1) {}
     save_object("db_version", 1);
+    // Add select multi for adopt tab
+    let species_values = Object.keys(PONYPARAMS.Species);
+    let species_select = new SelectMulti("Select Species", species_values);
+    $("#adopt_container .modes .species").append(species_select.element);
+    species_select.create_select(species_values[0]);
     // Add Pony Input Elements for parents
     PONYPARENTS = [
         new PonyInput("Parent 1"),
@@ -871,29 +884,42 @@ function roll_adopt(rarities = [
     $('#common_species').is(":checked"), // Common 0
     $('#uncommon_species').is(":checked"), //Uncommon 1
     $('#rare_species').is(":checked") // Rare 2
-]) {
+    ]) {
     let pony = {}
-
-    // Determine Species Allowed
-    let all_species = Object.keys(PONYPARAMS.Species);
     let available_species = [];
-    for (let species of all_species) {
-        let detail = find_rarities(species);
-        if (detail) {
-            if (detail[0] == "(U)" && rarities[1]) {
-                available_species.push(species);
+    let all_species = Object.keys(PONYPARAMS.Species);
+
+    // If adopt is rarity based or species based
+    switch (ADOPT_MODE) {
+        // Rarities
+        case ADOPT_MODES[0]:
+            // Determine Species Allowed
+            for (let species of all_species) {
+                let detail = find_rarities(species);
+                if (detail) {
+                    if (detail[0] == "(U)" && rarities[1]) {
+                        available_species.push(species);
+                    }
+                    if (detail[0] == "(R)" && rarities[2]) {
+                        available_species.push(species);
+                    }
+                } else {
+                    if (rarities[0]) {
+                        available_species.push(species);
+                    }
+                }
             }
-            if (detail[0] == "(R)" && rarities[2]) {
-                available_species.push(species);
+            break;
+        // Species
+        case ADOPT_MODES[1]:
+            for (select_element of $("#adopt_container .modes .species select")) {
+                available_species.push(select_element.value);
             }
-        } else {
-            if (rarities[0]) {
-                available_species.push(species);
-            }
-        }
+            break;
     }
+
     if (available_species.length <= 0) {
-        alert("There are no Species with these settings.\nSetting all Species on.");
+        alert("There are no Species with these settings.\nSelecting a random species instead.");
         available_species = all_species;
         // Check the boxes
         $( "#common_species" ).prop( "checked", true );
@@ -943,6 +969,7 @@ function roll_pony(species, params = null, options = {}) {
 
     // Remove the duplicate
     params = clean_object(params);
+    let og_params = {...params};
 
     // Sort rare and common species
     let common_species = [];
@@ -1032,7 +1059,7 @@ function roll_pony(species, params = null, options = {}) {
     }
 
     pony.Sex = special_random(PONYPARAMS.Sex, [], false);
-
+    
     // Change Palettes if they're any specific part palettes
     for (let specie of species) {
         let part_with_specific_palettes = find_matches(Object.keys(PONYPARAMS.Species[specie]), ["[Pal]"]);
@@ -1041,13 +1068,16 @@ function roll_pony(species, params = null, options = {}) {
         for (let part_w_detail of part_with_specific_palettes) {
             const part_name = remove_detail(part_w_detail);
             const specific_part_palettes = [...species_params[part_w_detail]];
+            const og_part = og_params[part_name] ? og_params[part_name] : [];
+            const specific_part_palettes_that_match = match_array(og_part, specific_part_palettes);
             if (species.length > 1) {
-                
+                params[part_name] = params[part_name].concat(specific_part_palettes_that_match);
             } else {
                 if (params.hasOwnProperty(part_name)) {
-                    console.log(params[part_name], specific_part_palettes);
+                    params[part_name] = specific_part_palettes_that_match;
                 } else {
-                    // If species has no params of part, set the params of the part to the specific_part_palettes
+                    // If species has no params of part, set the params of the part to the specific_part_palettes.
+                    // This is usually adopts.
                     params[part_name] = specific_part_palettes;
                 }
             }
@@ -1472,6 +1502,28 @@ function change_mode(mode) {
             $("#results_container").removeClass("hidden");
             break;
     }
+}
+
+// Change Adopt tab UI based on mode
+function change_adopt_mode(mode) {
+    // Set adopt mode
+    ADOPT_MODE = mode;
+    // Hide all containers in adopt_container that aren't the selected mode
+    for (child of $("#adopt_container > .modes").children()) {
+        if (child.className.includes(mode)) {
+            $(child).removeClass("hidden");
+        } else {
+            $(child).addClass("hidden");
+        }
+    }
+    // Default the nav button styles
+    let buttons = $("#adopt_container > .nav button");
+    buttons.removeClass("on");
+    buttons.addClass("off");
+    // Set the pressed button's style to on
+    let pressed_button = $("#adopt_container > .nav ." + mode);
+    pressed_button.removeClass("off");
+    pressed_button.addClass("on");
 }
 
 function create_select_element(name = "", options, on_change = null) {
@@ -1916,8 +1968,9 @@ class PonyInput {
                         }
                     }
                 }
+                // Clean because of the palettes added.
+                place_palettes = clean_array(place_palettes);
             }
-            //
             // Create elements for each Palette Place
             let select = create_select_element(place, place_palettes);
             let palette_container = $("<div>");
@@ -1960,6 +2013,9 @@ class PonyInput {
 }
 
 class SelectMulti {
+
+    select_elements = []
+
     constructor(name, options, on_change = null) {
         this.name = name;
         this.options = clean_array(options);
@@ -2006,6 +2062,10 @@ class SelectMulti {
     remove_all_select() {
         this.select_container.children().remove();
     }
+
+    // return_values() {
+
+    // }
 }
 
 // The prefix for the Pony ID of the ID for the element

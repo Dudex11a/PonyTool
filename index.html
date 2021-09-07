@@ -36,13 +36,24 @@
             </div>
             <!-- Adopt -->
             <div class="medium_width adopt" id="adopt_container">
-                <h4>Species Included</h4>
-                <input type="checkbox" id="common_species" value="common" checked>
-                <label for="common_species"> Common</label><br>
-                <input type="checkbox" id="uncommon_species" value="uncommon" checked>
-                <label for="uncommon_species"> Uncommon</label><br>
-                <input type="checkbox" id="rare_species" value="rare" checked>
-                <label for="rare_species"> Rare</label>
+                <div class="nav">
+                    <button onclick="change_adopt_mode('rarity')" class="rarity">Rarity</button>
+                    <button onclick="change_adopt_mode('species')" class="species">Species</button>
+                </div>
+                <div class="modes">
+                    <div class="rarity">
+                        <h4>Rarities Included</h4>
+                        <input type="checkbox" id="common_species" value="common" checked>
+                        <label for="common_species"> Common</label><br>
+                        <input type="checkbox" id="uncommon_species" value="uncommon" checked>
+                        <label for="uncommon_species"> Uncommon</label><br>
+                        <input type="checkbox" id="rare_species" value="rare" checked>
+                        <label for="rare_species"> Rare</label>
+                    </div>
+                    <div class="species">
+    
+                    </div>
+                </div>
             </div>
             <!-- Breed -->
             <div class="breed" id="breed_container">
