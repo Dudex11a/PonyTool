@@ -807,12 +807,13 @@ function make_copy_button(text) {
     
 }
 
-function object_to_text(object, separator = ": ", line_break = "\n") {
+function object_to_text(object, separator = ": ", line_break = "\n", add_and = false) {
     let clipboard_text = "";
     let keys = Object.keys(object);
     for (let i in keys) {
         let key = keys[i];
         let param = object[key];
+        // If Array change param
         if (Array.isArray(param)) {
             let formatted_param = "";
             for (let j in param) {
@@ -823,6 +824,13 @@ function object_to_text(object, separator = ": ", line_break = "\n") {
                 }
             }
             param = formatted_param;
+        }
+        // If is last key and there is more than 1 key
+        if (i == keys.length - 1 && keys.length > 1) {
+            // If add "and"
+            if (add_and) {
+                clipboard_text += "and "
+            }
         }
         clipboard_text += key + separator + param;
         // If not the last key add line_break string
@@ -1283,7 +1291,7 @@ function update_farm_element(items = CURRENTRESULTS[0]) {
     // Setup basic message
     let basic_items_array = items.regular;
     basic_message = basic_message.replace("<p>", location);
-    basic_message = basic_message.replace("<i>", object_to_text(array_to_amounts(basic_items_array), " x", ", "));
+    basic_message = basic_message.replace("<i>", object_to_text(array_to_amounts(basic_items_array), " x", ", ", true));
 
     let text = basic_message;
 
@@ -1291,8 +1299,8 @@ function update_farm_element(items = CURRENTRESULTS[0]) {
     let bonus_items_array = items.bonus;
     if (bonus_items_array.length > 0) {
         bonus_message = bonus_message.replace("<p>", location);
-        bonus_message = bonus_message.replace("<i>", object_to_text(array_to_amounts(bonus_items_array), " x", ", "));
-        text += " " + bonus_message;
+        bonus_message = bonus_message.replace("<i>", object_to_text(array_to_amounts(bonus_items_array), " x", ", ", true));
+        text += "\n" + bonus_message;
     }
 
     text_ele.innerText = text;
