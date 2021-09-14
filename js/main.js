@@ -611,10 +611,10 @@ function finish_requests(error = undefined) {
         // }
     $("#database_container").append(MAIN_DATABASE.element);
     // Add Elements for farming
-    let farm_select = create_select_element("farm", Object.keys(FARMING.items), () => {
+    let farm_select = create_select_element("location", Object.keys(FARMING.items), () => {
         update_farm_element();
     });
-    $("#farm_container").append(farm_select);
+    $("#farm_container .location").append(farm_select);
     let item_select = new SelectMulti("Items", ITEMS, () => {
         if (has_item("One-Night-Stand Scroll")) {
             PONYPARENTS[1].element.addClass("hidden");
@@ -714,7 +714,7 @@ function roll() {
             case "farm":
                 object = roll_farm();
                 update_farm_element(object);
-                element = object_to_html(array_to_amounts(object), " x");
+                element = object_to_html(array_to_amounts(object.regular.concat(object.bonus)), " x");
                 break;
             case "list":
                 object = roll_list();
@@ -1214,14 +1214,52 @@ function random_species(common_species, rare_species) {
 }
 
 function roll_farm() {
-    let items = [];
+    let items = {
+        "regular" : [],
+        "bonus" : []
+    }
     let item_amount = 3;
+    let bonus_item_amount = 0;
+    let oos_item_amount = 0;
+    // 50% chance to add 3 to item amount
     if (chance(50)) {
-        item_amount = 6;
+        item_amount += 3;
     }
+    let location = get_farm_location();
+    // Roll for bonus items
+    let farm_stat = get_farm_stat();
+    let zero_to_two = Math.floor(Math.random() * 3);
+    if (farm_stat > 15) {
+        // Roll a 1-3, add 2, give that many bonus items
+        bonus_item_amount += zero_to_two + 3;
+        if (farm_stat > 20) {
+            // 1 in 4 chance to get a Trader Exchange item
+            if (chance(25)) {
+                oos_item_amount += 1;
+            }
+        }
+    }
+    else if (farm_stat > 10) {
+        // If 50% roll a 1-3 and give that many items
+        if (chance(50)) {
+            bonus_item_amount += zero_to_two + 1;
+        }
+    }
+
+    // Roll for regular items
     for (let i = 0; i < item_amount; i++) {
-        items.push(random_in_array(FARMING.items[get_farm_location()]));
+        items.regular.push(random_in_array(FARMING.items[location]));
     }
+    // Roll for bonus items
+    // Regular bonus items
+    for (let i = 0; i < bonus_item_amount; i++) {
+        items.bonus.push(random_in_array(FARMING.items[location]));
+    }
+    // Roll for out of stock items
+    for (let i = 0; i < oos_item_amount; i++) {
+        items.bonus.push(random_in_array(MISC.list["Trader Exchange"]));
+    }
+
     return items;
 }
 
@@ -1233,27 +1271,39 @@ function roll_list() {
 
 function update_farm_element(items = CURRENTRESULTS[0]) {
     let text_ele = $("#farm_message p")[0];
-    // This code was going to be used to randomize messages, I don't use it right now
-    // let id_ele = $("#farm_message input")[0];
-    // let id = id_ele.value - 1;
-    let id = 0
     let location = get_farm_location();
-    let message = FARMING.messages[location][id];
+    let basic_message = FARMING.messages[location][0];
+    let bonus_message = FARMING.messages[location][1];
     // If the message or the items doesn't exist or if it's the wrong data, clear the text exit the function
-    if (!message || !items || items.Marking) {
+    if (!basic_message || !items || items.Marking) {
         text_ele.innerText = "";
         return;
     }
-    let text = message;
-    // Replace codes with their respective text.
-    text = text.replace("<p>", location);
-    text = text.replace("<i>", object_to_text(array_to_amounts(items), " x", ", "));
+    
+    // Setup basic message
+    let basic_items_array = items.regular;
+    basic_message = basic_message.replace("<p>", location);
+    basic_message = basic_message.replace("<i>", object_to_text(array_to_amounts(basic_items_array), " x", ", "));
+
+    let text = basic_message;
+
+    // If there is bonus items add bonus message
+    let bonus_items_array = items.bonus;
+    if (bonus_items_array.length > 0) {
+        bonus_message = bonus_message.replace("<p>", location);
+        bonus_message = bonus_message.replace("<i>", object_to_text(array_to_amounts(bonus_items_array), " x", ", "));
+        text += " " + bonus_message;
+    }
 
     text_ele.innerText = text;
 }
 
 function get_farm_location() {
-    return $("select.farm").val();
+    return $("#farm_container select").val();
+}
+
+function get_farm_stat() {
+    return $("#farm_container input").val();
 }
 
 function match_array(array1, array2) {
