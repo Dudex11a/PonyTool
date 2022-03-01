@@ -714,7 +714,10 @@ function roll() {
             case "farm":
                 object = roll_farm();
                 update_farm_element(object);
-                element = object_to_html(array_to_amounts(object.regular.concat(object.bonus)), " x");
+                let combined_object = object.regular;
+                combined_object = combined_object.concat(object.bonus);
+                combined_object = combined_object.concat(object.pet);
+                element = object_to_html(array_to_amounts(combined_object), " x");
                 break;
             case "list":
                 object = roll_list();
@@ -1225,10 +1228,12 @@ function roll_farm() {
     // console.log("Roll");
     let items = {
         "regular" : [],
-        "bonus" : []
+        "bonus" : [],
+        "pet" : []
     }
     let item_amount = 6;
     let bonus_item_amount = 0;
+    let pet_item_amount = 0;
     let oos_item_amount = 0;
     // 50% chance to add 3 to item amount
     if (chance(50)) {
@@ -1262,18 +1267,18 @@ function roll_farm() {
         }
     }
     // Pet Bonus
-    // Add bonus items depending on what pet the pony has
+    // Add pet items depending on what pet the pony has
     // 2 for common, 4 for rare, 6 for crafted
     let pet_status = $("#farm_container .pet_status select").val();
     switch (pet_status) {
         case "common_uncommon":
-            item_amount += 2;
+            pet_item_amount += 2;
             break;
         case "rare_seasonal":
-            item_amount += 4;
+            pet_item_amount += 4;
             break;
         case "crafted_mythical":
-            item_amount += 6;
+            pet_item_amount += 6;
             break;
     }
 
@@ -1293,6 +1298,10 @@ function roll_farm() {
     for (let i = 0; i < oos_item_amount; i++) {
         items.bonus.push(random_in_array(MISC.list["Trader Exchange"]));
     }
+    // Roll for pet items
+    for (let i = 0; i < pet_item_amount; i++) {
+        items.pet.push(random_in_array(FARMING.items[location]));
+    }
 
     return items;
 }
@@ -1308,6 +1317,7 @@ function update_farm_element(items = CURRENTRESULTS[0]) {
     let location = get_farm_location();
     let basic_message = FARMING.messages[location][0];
     let bonus_message = FARMING.messages[location][1];
+    let pet_message = FARMING.messages[location][2];
     // If the message or the items doesn't exist or if it's the wrong data, clear the text exit the function
     if (!basic_message || !items || items.Marking) {
         text_ele.innerText = "";
@@ -1321,12 +1331,20 @@ function update_farm_element(items = CURRENTRESULTS[0]) {
 
     let text = basic_message;
 
-    // If there is bonus items add bonus message
+    // If there are bonus items add bonus message
     let bonus_items_array = items.bonus;
     if (bonus_items_array.length > 0) {
         bonus_message = bonus_message.replace("<p>", location);
         bonus_message = bonus_message.replace("<i>", object_to_text(array_to_amounts(bonus_items_array), " x", ", ", true));
         text += "\n" + bonus_message;
+    }
+
+    // If there are pet items add pet message
+    let pet_items_array = items.pet;
+    if (pet_items_array.length > 0) {
+        pet_message = pet_message.replace("<p>", location);
+        pet_message = pet_message.replace("<i>", object_to_text(array_to_amounts(pet_items_array), " x", ", ", true));
+        text += "\n" + pet_message;
     }
 
     text_ele.innerText = text;
