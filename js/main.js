@@ -1222,37 +1222,63 @@ function random_species(common_species, rare_species) {
 }
 
 function roll_farm() {
+    // console.log("Roll");
     let items = {
         "regular" : [],
         "bonus" : []
     }
-    let item_amount = 3;
+    let item_amount = 6;
     let bonus_item_amount = 0;
     let oos_item_amount = 0;
     // 50% chance to add 3 to item amount
     if (chance(50)) {
-        item_amount += 3;
+        item_amount += 6;
+        // console.log("50% Bonus");
     }
     let location = get_farm_location();
     // Roll for bonus items
+    // Pony Stat Bonus
+    let zero_to_four = Math.floor(Math.random() * 5);
     let farm_stat = get_farm_stat();
-    let zero_to_two = Math.floor(Math.random() * 3);
     if (farm_stat > 15) {
-        // Roll a 1-3, add 2, give that many bonus items
-        bonus_item_amount += zero_to_two + 3;
+        // Roll a 2-6, add 4, give that many bonus items
+        let bonus_15 = zero_to_four + 6;
+        // console.log("Stat > 15 bonus: " + bonus_15);
+        bonus_item_amount += bonus_15;
         if (farm_stat > 20) {
-            // 1 in 4 chance to get a Trader Exchange item
+            // 1 in 4 chance to get 2 Trader Exchange items
             if (chance(25)) {
-                oos_item_amount += 1;
+                // console.log("Stat > 20 bonus");
+                oos_item_amount += 2;
             }
         }
     }
     else if (farm_stat > 10) {
-        // If 50% roll a 1-3 and give that many items
+        // If 50% roll a 2-6 and give that many items
         if (chance(50)) {
-            bonus_item_amount += zero_to_two + 1;
+            let bonus_10 = zero_to_four + 2
+            bonus_item_amount += bonus_10;
+            // console.log("Stat > 10 bonus: " + bonus_10);
         }
     }
+    // Pet Bonus
+    // Add bonus items depending on what pet the pony has
+    // 2 for common, 4 for rare, 6 for crafted
+    let pet_status = $("#farm_container .pet_status select").val();
+    switch (pet_status) {
+        case "common_uncommon":
+            item_amount += 2;
+            break;
+        case "rare_seasonal":
+            item_amount += 4;
+            break;
+        case "crafted_mythical":
+            item_amount += 6;
+            break;
+    }
+
+    // console.log("Item amount: " + item_amount);
+    // console.log("Bonus item amount: " + bonus_item_amount);
 
     // Roll for regular items
     for (let i = 0; i < item_amount; i++) {
