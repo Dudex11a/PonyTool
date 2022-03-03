@@ -18,6 +18,8 @@ var SHEETS_COMPLETE = 0;
 var DB_CONNECTED = false;
 var MAIN_DATABASE;
 
+var FARMMESSAGE = "";
+
 function set_connected(value = DB_CONNECTED) {
     DB_CONNECTED = value;
     if (value) $(".db_hidden").removeClass("hidden");
@@ -1348,6 +1350,7 @@ function update_farm_element(items = CURRENTRESULTS[0]) {
     }
 
     text_ele.innerText = text;
+    FARMMESSAGE = text;
 }
 
 function get_farm_location() {
