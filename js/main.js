@@ -576,7 +576,7 @@ function finish_requests(error = undefined) {
     // Add select multi for adopt tab
     let species_values = Object.keys(PONYPARAMS.Species);
     let species_select = new SelectMulti("Select Species", species_values);
-    $("#adopt_container .modes .species").append(species_select.element);
+    $("#adopt_container .modes .species").prepend(species_select.element);
     species_select.create_select(species_values[0]);
     // Add Pony Input Elements for parents
     PONYPARENTS = [
@@ -901,6 +901,11 @@ function roll_adopt(rarities = [
     let pony = {}
     let available_species = [];
     let all_species = Object.keys(PONYPARAMS.Species);
+    let options = {};
+
+    if ($('#make_hybrid').is(":checked")) {
+        options.force_hybrid = true;
+    }
 
     // If adopt is rarity based or species based
     switch (ADOPT_MODE) {
@@ -941,7 +946,11 @@ function roll_adopt(rarities = [
     }
 
     let species = special_random(available_species, [], false);
-    pony = roll_pony(species);
+    // Make sure all the species are selected instead of one random one if forcing hybrid.
+    if (options.force_hybrid == true) {
+        species = available_species;
+    }
+    pony = roll_pony(species, null, options);
     return pony;
 }
 
@@ -1008,26 +1017,31 @@ function roll_pony(species, params = null, options = {}) {
 
     // If there is no Rainbow Feather when there are multiple species (like "Earth Pony, Alicorn")
     // just use the common species.
-    if (multiple_species && !has_item("Rainbow Feather")) {
+    if (multiple_species && !has_item("Rainbow Feather") && !options.force_hybrid) {
         species = [...common_species];
     }
 
     let species_params;
-    if (multiple_species || options.multi) {
+    if (multiple_species || options.multi || options.force_hybrid) {
         // If it will be a hybrid and the species given is an array
-        if (chance(hybrid_chance)) {
+        if (chance(hybrid_chance) || options.force_hybrid) {
             let species_limit = 2;
             // If there are more than the species limit in species given
             if (species.length > species_limit) {
                 let hybrid_species = [];
                 // Push a random species in until the species limit is hit
                 for (let i = 0; i < species_limit; i++) {
-                    if (has_item("Rainbow Feather") && rare_species.length > 0) {
-                        hybrid_species.push(special_random(rare_species, hybrid_species, false));
-                        // Filter out the species just added from the rare_species
-                        rare_species = rare_species.filter(value => value != hybrid_species[i]);
+                    if (options.force_hybrid) {
+                        // If being forced for hybrid choose random species from all species
+                        hybrid_species.push(special_random(species, hybrid_species, false));
                     } else {
-                        hybrid_species.push(special_random(common_species, hybrid_species, false));
+                        if (has_item("Rainbow Feather") && rare_species.length > 0) {
+                            hybrid_species.push(special_random(rare_species, hybrid_species, false));
+                            // Filter out the species just added from the rare_species
+                            rare_species = rare_species.filter(value => value != hybrid_species[i]);
+                        } else {
+                            hybrid_species.push(special_random(common_species, hybrid_species, false));
+                        }
                     }
                 }
                 species = hybrid_species;
@@ -1083,15 +1097,20 @@ function roll_pony(species, params = null, options = {}) {
             const specific_part_palettes = [...species_params[part_w_detail]];
             const og_part = og_params[part_name] ? og_params[part_name] : [];
             const specific_part_palettes_that_match = match_array(og_part, specific_part_palettes);
-            if (species.length > 1) {
-                params[part_name] = params[part_name].concat(specific_part_palettes_that_match);
-            } else {
-                if (params.hasOwnProperty(part_name)) {
-                    params[part_name] = specific_part_palettes_that_match;
+            if (params.hasOwnProperty(part_name)) {
+                if (species.length > 1) {
+                    params[part_name] = params[part_name].concat(specific_part_palettes_that_match);
+                    // params[part_w_detail] = params[part_w_detail].concat(specific_part_palettes_that_match);
                 } else {
-                    // If species has no params of part, set the params of the part to the specific_part_palettes.
-                    // This is usually adopts.
-                    params[part_name] = specific_part_palettes;
+                    params[part_name] = specific_part_palettes_that_match;
+                }
+            } else {
+                // If species has no params of part, set the params of the part to the specific_part_palettes.
+                // This is usually adopts.
+                params[part_name] = specific_part_palettes;
+                // If hybrid 50% change to change part's palettes with the general palettes
+                if (species.length > 1 && chance(50)) {
+                    params[part_name] = params.Palette;
                 }
             }
         }
