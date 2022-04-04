@@ -1275,7 +1275,13 @@ function roll_farm() {
             // 1 in 4 chance to get 2 Trader Exchange items
             if (chance(25)) {
                 // console.log("Stat > 20 bonus");
-                oos_item_amount += 2;
+                oos_item_amount += 1;
+                if (chance(25)) {
+                    oos_item_amount += 1;
+                    if (chance(1)) {
+                        oos_item_amount += 1;
+                    }
+                }
             }
         }
     }
