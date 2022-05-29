@@ -519,6 +519,11 @@ function make_changelog_ele(commits) {
             let msg_ele = document.createElement("div");
             message = message.replaceAll("- ", "<br>- ");
             msg_ele.innerHTML = message;
+            // Add date at end
+            let date_string = "<br>" + commit.commit.author.date
+            date_string = date_string.replaceAll("T", "   ");
+            date_string = date_string.replaceAll("Z", "");
+            msg_ele.innerHTML += date_string;
             ele.append(msg_ele);
         }
     }
@@ -1214,6 +1219,22 @@ function roll_pony(species, params = null, options = {}) {
         // Input a random for the pony
         pony[part_name] = [special_random(params[part])];
     }
+
+    // Randomize species order as the order matters in some cases within the group
+    let new_species_array = [];
+    while (pony.Species.length > 0) {
+        let species_amount = pony.Species.length;
+        // Get random species index
+        let species_index = Math.floor(Math.min(Math.random(), 0.999) * species_amount);
+        // Get species
+        let species = pony.Species[species_index];
+        // Remove species from old species array
+        pony.Species.splice(species_index, species_index + 1)
+        // Add species to new spieces array
+        new_species_array.push(species);
+    }
+    // Set species to the new species array
+    pony.Species = new_species_array;
 
     return pony;
 }
