@@ -1319,13 +1319,13 @@ function roll_farm() {
     // 2 for common, 4 for rare, 6 for crafted
     let pet_status = $("#farm_container .pet_status select").val();
     switch (pet_status) {
-        case "common_uncommon":
+        case "common_crafted":
             pet_item_amount += 4;
             break;
-        case "rare_seasonal":
+        case "uncommon_seasonal":
             pet_item_amount += 8;
             break;
-        case "crafted_mythical":
+        case "rare_mythical":
             pet_item_amount += 12;
             break;
     }
