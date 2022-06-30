@@ -1090,7 +1090,7 @@ function roll_pony(species, params = null, options = {}) {
         "Species": species
     }
 
-    pony.Sex = special_random(PONYPARAMS.Sex, [], false);
+    // pony.Sex = special_random(PONYPARAMS.Sex, [], false);
     
     // Change Palettes if they're any specific part palettes
     for (let specie of species) {
@@ -1896,23 +1896,23 @@ class PonyInput {
             details_elements.push(input_ele);
         }
         // Sex select
-        let sex_id = "Sex";
-        let sex_cont = $("<div>").addClass(sex_id);
-        sex_cont.append($("<p>").text(sex_id));
-        let sex_select = $("<select>");
-        for (let gender of PONYPARAMS[sex_id]) {
-            sex_select.append($("<option>").text(gender));
-        }
-        sex_cont.append(sex_select);
-        details_elements.push(sex_cont);
+        // let sex_id = "Sex";
+        // let sex_cont = $("<div>").addClass(sex_id);
+        // sex_cont.append($("<p>").text(sex_id));
+        // let sex_select = $("<select>");
+        // for (let sex of PONYPARAMS[sex_id]) {
+        //     sex_select.append($("<option>").text(sex));
+        // }
+        // sex_cont.append(sex_select);
+        // details_elements.push(sex_cont);
 
-        details_elements = details_elements.concat([
-            $("<h4>").text("Stat Modifiers"),
-            stat_input
-        ]);
-        for (let ele of details_elements) {
-            this.param2_container.append(ele);
-        }
+        // details_elements = details_elements.concat([
+        //     $("<h4>").text("Stat Modifiers"),
+        //     stat_input
+        // ]);
+        // for (let ele of details_elements) {
+        //     this.param2_container.append(ele);
+        // }
         
         // Move details button (toggles visibility of the more details container)
         let details_button = $("<button>").text("Show More");
@@ -2005,7 +2005,7 @@ class PonyInput {
         pony["Stat Mod"] = {}
         // for each param
         let details_params = STATS.concat(EXTRA_INPUTS);
-        details_params.push("Sex");
+        // details_params.push("Sex");
         for (let d_param of details_params) {
             // Get the select or input of the id
             let jqry_base = "." + idify(d_param) + " ";
@@ -2058,7 +2058,7 @@ class PonyInput {
             }
         }
         // Params 2
-        let param_names = EXTRA_INPUTS.concat(STATS.concat(["Sex"]));
+        let param_names = EXTRA_INPUTS.concat(STATS);
         for (let param_name of param_names) {
             // If the param exists
             let param = filtered_pony[param_name];
